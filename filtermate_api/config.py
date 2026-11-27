@@ -89,16 +89,31 @@ def _qgis_profile_dir() -> str:
 
 
 def _default_export_root() -> Path:
-    """``FilterMate/exports`` in the QGIS profile folder, else ``~/.filtermate/exports``.
+    """User-chosen export folder, otherwise a suggestion in Documents; never in the QGIS profile."""
+    chosen = configured_export_root()
+    if chosen is not None:
+        return chosen
+    return Path.home() / 'Documents' / 'FilterMate' / 'exports'
 
-    Never in the shared temp folder: another account could create the folder
-    (or a link of that name) first and read or redirect the exports. Not in
-    the plugin data folder either: it can be set to a team share.
-    """
-    profile = _qgis_profile_dir()
-    if profile:
-        return Path(profile) / "FilterMate" / "exports"
-    return Path.home() / ".filtermate" / "exports"
+
+EXPORT_FOLDER_KEY = 'FilterMate/agent/export_folder'
+
+
+def configured_export_root():
+    """Only a valid folder explicitly chosen by the user; no implicit directory creation."""
+    try:
+        from qgis.core import QgsSettings
+        from .export_root import assert_export_destination
+        value = QgsSettings().value(EXPORT_FOLDER_KEY, '', type=str)
+        if not isinstance(value, str) or not value.strip():
+            return None
+        root = Path(value).expanduser()
+        if not root.is_absolute() or not root.is_dir():
+            return None
+        assert_export_destination(root)
+        return root
+    except (ImportError, OSError, RuntimeError, ValueError):
+        return None
 
 
 def _has_api_section(path: Path) -> bool:

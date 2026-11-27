@@ -612,6 +612,7 @@ class AgentPanel(QFrame):
     shown = pyqtSignal()  # the panel comes in view: its section opens, or the dock shows it
     new_conversation_requested = pyqtSignal()
     save_project_requested = pyqtSignal()
+    export_folder_requested = pyqtSignal()
     microphone_requested = pyqtSignal()
     microphone_cancel_requested = pyqtSignal()
     microphone_settings_requested = pyqtSignal()
@@ -793,6 +794,8 @@ class AgentPanel(QFrame):
         self.history_action.triggered.connect(self.history_requested)
         self.save_project_action = menu.addAction(_tr("Save project and layers…"))
         self.save_project_action.triggered.connect(self.save_project_requested)
+        self.export_folder_action = menu.addAction(_tr('Default export folder…'))
+        self.export_folder_action.triggered.connect(self.export_folder_requested)
         # Recipes: the changes of a request kept in the project, run again without the model.
         self.recipes_menu = menu.addMenu(_tr("Recipes"))
         self.recipes_menu.setObjectName("menu_agent_recipes")

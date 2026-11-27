@@ -18,6 +18,19 @@ class ExportRootError(RuntimeError):
     """The export root cannot be written safely (link, not a folder, another owner)."""
 
 
+def assert_export_destination(path):
+    """Refuse the active QGIS profile and its sibling profiles, including resolved links."""
+    from .config import _qgis_profile_dir
+    profile = _qgis_profile_dir()
+    if not profile:
+        return
+    profile = Path(profile).expanduser().resolve()
+    profiles = profile.parent if profile.parent.name.lower() == 'profiles' else profile
+    destination = Path(path).expanduser().resolve()
+    if destination == profiles or profiles in destination.parents:
+        raise ExportRootError('Exports cannot be written inside a QGIS profile. Choose another export folder.')
+
+
 def prepare_export_root(root: Path) -> Path:
     """Create ``root`` when missing (mode 0700) and check it is safe to write below.
 
@@ -26,7 +39,8 @@ def prepare_export_root(root: Path) -> Path:
     owned by another user (who could swap its content between the check and
     the write). A root of the user readable by others is made private.
     """
-    root = Path(root).expanduser()
+    root = Path(root() if callable(root) else root).expanduser()
+    assert_export_destination(root)
     try:
         root.mkdir(mode=0o700, parents=True, exist_ok=True)
         info = os.lstat(root)
@@ -39,6 +53,11 @@ def prepare_export_root(root: Path) -> Path:
         if info.st_uid != os.getuid():
             raise ExportRootError("export root belongs to another user")
         if info.st_mode & 0o077:
+            # An explicitly selected existing folder may be a user's shared document folder. Do not chmod it.
+            from .config import configured_export_root
+            chosen = configured_export_root()
+            if chosen is not None and chosen.resolve() == root.resolve():
+                return root
             try:
                 os.chmod(root, 0o700)
             except OSError as exc:
@@ -55,6 +74,7 @@ def resolve_export_folder(root: Path, subfolder: str) -> Path:
     folder = (root / subfolder).resolve()
     if folder != root and root not in folder.parents:
         raise ValueError("invalid subfolder")
+    assert_export_destination(folder)
     return folder
 
 

@@ -48,13 +48,12 @@ class TestDefaultRoot:
     def test_never_in_the_shared_temp_folder(self, plugin_env):
         root = APIConfig().export_root
         assert Path(tempfile.gettempdir()) not in root.parents
-        assert root == Path.home() / ".filtermate" / "exports"
+        assert root == Path.home() / 'Documents' / 'FilterMate' / 'exports'
 
-    def test_in_the_qgis_profile_when_the_plugin_runs(self, plugin_env, tmp_path):
-        # Review 2026-10: the profile folder, not the plugin data folder (it can be a team share).
+    def test_never_in_the_qgis_profile_when_the_plugin_runs(self, plugin_env, tmp_path):
         plugin_env(QGIS_SETTINGS_PATH=str(tmp_path / "profile"),
                    PLUGIN_CONFIG_DIRECTORY=str(tmp_path / "team_share" / "FilterMate"))
-        assert APIConfig().export_root == tmp_path / "profile" / "FilterMate" / "exports"
+        assert APIConfig().export_root == Path.home() / 'Documents' / 'FilterMate' / 'exports'
 
     def test_configured_root_still_wins(self, plugin_env, tmp_path, monkeypatch):
         plugin_env(PLUGIN_CONFIG_DIRECTORY=str(tmp_path / "profile"))
@@ -164,6 +163,39 @@ class TestPrepareRoot:
         monkeypatch.setattr(os, "getuid", lambda: os.stat(tmp_path).st_uid + 1)
         with pytest.raises(ExportRootError, match="another user"):
             self._prepare(tmp_path / "exports")
+
+    @pytest.mark.parametrize('place', ['default/exports', 'another/exports'])
+    def test_exports_cannot_create_any_folder_inside_qgis_profiles(self, plugin_env, tmp_path, place):
+        from filtermate_api.export_root import ExportRootError
+        plugin_env(QGIS_SETTINGS_PATH=str(tmp_path / 'profiles' / 'default'))
+        destination = tmp_path / 'profiles' / place
+        with pytest.raises(ExportRootError, match='QGIS profile'):
+            self._prepare(destination)
+        assert not destination.exists()
+
+    def test_subfolder_cannot_reenter_a_qgis_profile_below_an_allowed_root(self, plugin_env, tmp_path):
+        from filtermate_api.export_root import ExportRootError, resolve_export_folder
+        plugin_env(QGIS_SETTINGS_PATH=str(tmp_path / 'profiles' / 'default'))
+        with pytest.raises(ExportRootError, match='QGIS profile'):
+            resolve_export_folder(tmp_path, 'profiles/default/export')
+
+    @posix_only
+    def test_a_user_selected_existing_folder_keeps_its_permissions(self, tmp_path, monkeypatch):
+        root = tmp_path / 'chosen'
+        root.mkdir(mode=0o755)
+        os.chmod(root, 0o755)
+        monkeypatch.setattr(config_module, 'configured_export_root', lambda: root)
+        self._prepare(root)
+        assert (root.stat().st_mode & 0o777) == 0o755
+
+    def test_a_callable_root_is_resolved_only_when_preparing_an_export(self, tmp_path):
+        calls = []
+        def choose():
+            calls.append(True)
+            return tmp_path / 'chosen'
+        assert not calls
+        assert self._prepare(choose) == tmp_path / 'chosen'
+        assert calls == [True]
 
 
 class _RecordingAccessor(InMemoryAccessor):

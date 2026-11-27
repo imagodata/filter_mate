@@ -3,7 +3,7 @@ name: deliver
 title: Deliver data as files
 description: files of the user's layers: format for whom, CRS, styles, a zip
 metadata:
-  version: 1
+  version: 2
   plugin_min: 5.1.2
   audience: chat, mcp
   tools: export_layers, filter_state, list_layers, describe_layer, preview_filter, apply_filter
@@ -15,6 +15,9 @@ metadata:
 
 export_layers writes layers as they are filtered now into a sub-folder of the export root of the QGIS machine. The
 user is asked before anything is written. This skill says how to choose what it writes.
+In the QGIS chat, the user chooses the default export folder locally at the first export, or from the agent menu.
+Cancelling that choice writes nothing. Exports never go into a QGIS profile; do not propose that location or try
+to bypass a refused destination. The folder choice is separate from the usual permission to run an export.
 
 ## Method
 

@@ -11,7 +11,7 @@ import os
 import re
 from dataclasses import asdict
 from pathlib import Path
-from typing import Any, Callable, Dict, Mapping, Optional, Sequence, Tuple
+from typing import Any, Callable, Dict, Mapping, Optional, Sequence, Tuple, Union
 from urllib.parse import urlsplit
 
 from .accessor import (
@@ -166,7 +166,7 @@ def _one_layer_per_name(accessor: FilterMateAccessor, handler: Handler) -> Handl
     return run
 
 
-def build_handlers(accessor: FilterMateAccessor, export_root: Path, allow_remote_sources: bool = False,
+def build_handlers(accessor: FilterMateAccessor, export_root: Union[Path, Callable[[], Path]], allow_remote_sources: bool = False,
                    platforms: Sequence[str] = (), extra_domains: str = "", share_values: bool = True,
                    platform_aliases: Optional[Mapping[str, str]] = None) -> Dict[str, Handler]:
     """One handler per tool of the chat (see ``core.agent.tool_catalog.chat_tools``).
@@ -174,6 +174,7 @@ def build_handlers(accessor: FilterMateAccessor, export_root: Path, allow_remote
     ``allow_remote_sources`` False: no layer is read over the network. ``platforms``: the only ones that can be
     searched, each as the user enabled it; ``extra_domains`` says where the user's own portals are.
     ``share_values`` False: what an algorithm answers besides its layers (statistics) is not sent.
+    ``export_root`` may choose the folder lazily, only when a tool actually needs to write an export.
     """
     enabled_platforms = {name.lower() for name in platforms}
 

@@ -22,6 +22,7 @@ des propositions encore à réaliser.
 | Propositions de sauvegarde | Implémenté | Masquage jusqu’au redémarrage de QGIS ; sauvegarde manuelle toujours disponible. |
 | Curseurs du plugin | Implémenté | Intentions cohérentes selon le contrôle, attentes locales et restauration sans toucher aux outils de carte. |
 | Éditions de couche par l’agent | Implémenté | Confirmation explicite après la demande avant l’enregistrement dans la source, par couche ou groupe de transaction. |
+| Dossier des exports de l’agent | Implémenté | Choix local mémorisé par l’utilisateur, annulation sans export et destinations dans les profils QGIS refusées. |
 
 ## Vérification du choix du SCR
 
@@ -222,3 +223,27 @@ aucune écriture avant confirmation, refus et annulation, enregistrement par cli
 nouvelle édition et enregistrement simultané d’un groupe de tampons avec éditions manuelles. La résolution des
 groupes automatiques de fournisseurs est couverte unitairement ; aucune transaction sur une base distante n’a été
 effectuée pour cette vérification.
+
+## Exports dans le dossier choisi par l’utilisateur
+
+Le premier export réel ouvre le choix du dossier par défaut. Ce choix est mémorisé dans les préférences QGIS et
+peut être modifié depuis « Dossier d’export par défaut… » dans le menu de l’agent. Construire les outils, lire un
+fichier absolu ou ouvrir la conversation ne déclenche aucun sélecteur. Une annulation ou un changement de projet
+pendant le sélecteur empêche l’export, sans repli automatique. Le choix du dossier reste distinct de la permission
+d’exécuter l’export. Il s’applique aussi aux mises en page, graphiques, infographies et exports de profils de réglages.
+
+La préparation du dossier et la résolution du sous-dossier refusent les emplacements dans le profil QGIS actif,
+ses profils voisins et les liens qui y conduisent. Un ancien choix devenu interdit ou indisponible demande un
+nouveau choix. La sauvegarde du projet avec ses couches refuse également le profil QGIS. Les résultats transmis
+au modèle continuent de donner des noms relatifs ; les chemins complets restent dans l’interface locale.
+
+Les dossiers existants explicitement sélectionnés conservent leurs permissions. Les nouveaux dossiers de sortie
+gardent les protections existantes, ainsi que les refus de liens, de jonctions et de propriétaires étrangers.
+Le serveur REST conserve ses réglages explicites de dossier ; son repli est désormais dans Documents et les
+destinations dans les profils QGIS restent refusées. Les fichiers déjà présents ne sont pas déplacés.
+
+Validation : 20 tests de configuration et de destination des exports, 59 tests ciblés du sélecteur, du menu,
+des graphiques et des sorties locales ; banc hors ligne inchangé à 174 scénarios actifs réussis. Scénario natif
+QGIS 3.44 / Qt 5 et QGIS 4.3 / Qt 6 : export réel puis relecture d’un GeoPackage dans le dossier sélectionné,
+réutilisation du choix, refus du profil et d’un sous-dossier interdit, annulation sans repli et refus de sauvegarder
+le projet avec ses couches dans le profil. La réponse du sélecteur de dossier est simulée dans ce scénario.

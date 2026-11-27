@@ -359,6 +359,8 @@ def persist(project, project_path: str, *, write_project: bool = True) -> str:
     if not project_path.lower().endswith((".qgz", ".qgs")):
         raise ValueError("choose a QGIS project file (.qgz or .qgs)")
     parent = os.path.dirname(project_path)
+    from ...filtermate_api.export_root import assert_export_destination
+    assert_export_destination(parent)
     if not os.path.isdir(parent):
         raise ValueError("the chosen project folder does not exist")
     layers = pending_layers(project)

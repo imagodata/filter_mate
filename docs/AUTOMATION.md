@@ -233,8 +233,12 @@ added its last step. Nothing the API changes is recorded there: neither `POST /f
 operations (cross, geometry, point cloud, clear, favorites); revert those with `POST /filters/clear`.
 
 `POST /export` only writes below the export root of the server (`FILTERMATE_API_EXPORT_ROOT`, or `API.export_root`
-in `config.json`; default: `FilterMate/exports` in the QGIS profile folder, `~/.filtermate/exports` when the API runs
-outside QGIS). Clients give a sub-folder name, never a path. The root is private (created or set to mode 0700); a root
+in `config.json`; default: the user's selected agent export folder, otherwise `~/Documents/FilterMate/exports`).
+The chat asks for a folder on its first actual export and remembers the choice; **Default export folder…** in the
+agent menu changes it. Cancelling writes nothing. Exports into the active QGIS profile or sibling profiles are
+refused, including configured destinations and resolved links. Clients give a sub-folder name, never a path.
+New roots are created private (0700). Explicitly selected existing folders retain their permissions; other roots
+are made private. A root
 that is a symbolic link, a Windows junction, a file or (POSIX) a folder of another user is refused
 (`500 Export root unavailable`, the reason in the log), and no output file that is a symbolic link is written over.
 The API reads the `API` section of the `config.json` the plugin uses (QGIS profile); while that file has none, the

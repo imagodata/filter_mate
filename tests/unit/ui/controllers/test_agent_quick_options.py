@@ -151,7 +151,8 @@ def test_the_menu_is_filled_from_the_settings(host, monkeypatch):
     from core.agent.sources import BUILT_IN
     monkeypatch.setattr(chat_controller, "read_providers", lambda: (ProviderEntry("ollama", "qwen3:8b", "u"),))
     monkeypatch.setattr(chat_controller, "qgis_databases", lambda: [])
-    host.panel = SimpleNamespace(fill_options=MagicMock())
+    host.panel = SimpleNamespace(fill_options=MagicMock(), export_folder_action=MagicMock())
+    host._mcp = SimpleNamespace(busy=False)
     Controller._fill_options(host)
     groups, providers, mcp_on = host.panel.fill_options.call_args.args
     ticked = [source_id for _title, rows in groups for source_id, _name, on in rows if on]

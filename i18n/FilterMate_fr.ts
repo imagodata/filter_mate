@@ -47,6 +47,19 @@
 <context>
     <name>AgentChat</name>
     <message>
+        <source>Wait for the current request to finish before changing the export folder.</source>
+        <translation>Attendez la fin de la demande en cours avant de changer le dossier d’export.</translation>
+    </message>
+    <message>
+        <source>Default export folder: {}</source>
+        <translation>Dossier d’export par défaut : {}</translation>
+    </message>
+    <message>
+        <source>Export cancelled. Choose a default export folder from the agent menu to export.</source>
+        <translation>Export annulé. Choisissez un dossier d’export par défaut dans le menu de l’agent pour exporter.</translation>
+    </message>
+
+    <message>
         <source>A note is kept on this computer, in the Memory tab of the settings of the agent. It goes to the provider you chose with the requests of a project it concerns.</source>
         <translation>Une note est gardée sur cet ordinateur, dans l'onglet Mémoire des paramètres de l'agent. Elle est envoyée au fournisseur choisi avec les demandes des projets qu'elle concerne.</translation>
     </message>
@@ -1836,6 +1849,11 @@ Do you agree to all of them? No runs none of them.</source>
 </context>
 <context>
     <name>AgentPanel</name>
+    <message>
+        <source>Default export folder…</source>
+        <translation>Dossier d’export par défaut…</translation>
+    </message>
+
     <message>
         <source>Automatic</source>
         <translation>Automatique</translation>
@@ -15470,6 +15488,21 @@ Si vous choisissez Non, ces données resteront en mémoire et seront perdues à 
     <message>
         <source>The layer edits were not fully saved. Review their state in QGIS.</source>
         <translation>Les modifications de couche n’ont pas toutes été enregistrées. Vérifiez leur état dans QGIS.</translation>
+    </message>
+</context>
+<context>
+    <name>AgentExports</name>
+    <message>
+        <source>Choose the default agent export folder</source>
+        <translation>Choisir le dossier d’export par défaut de l’agent</translation>
+    </message>
+    <message>
+        <source>Choose an existing folder outside the QGIS profiles.</source>
+        <translation>Choisissez un dossier existant en dehors des profils QGIS.</translation>
+    </message>
+    <message>
+        <source>Export folder</source>
+        <translation>Dossier d’export</translation>
     </message>
 </context>
 </TS>

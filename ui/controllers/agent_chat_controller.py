@@ -370,6 +370,7 @@ class AgentChatController(QObject):
         from .agent_data import AgentDataController
         self._data = AgentDataController(self)
         self.panel.save_project_requested.connect(self._data.save)
+        self.panel.export_folder_requested.connect(self._choose_export_folder)
 
     # --- the requests of the welcome follow the project ---------------------------
 
@@ -1439,8 +1440,34 @@ class AgentChatController(QObject):
         return remember(providers, current) if values.model and not any(entry.same(current) for entry in providers) \
             else providers, current
 
+    def _choose_export_folder(self) -> None:
+        if self.chat_busy() or self._mcp.busy:
+            self.panel.set_status(_tr('Wait for the current request to finish before changing the export folder.'))
+            return
+        from .agent_exports import choose_export_folder
+        with self.panel.hold_queued():
+            path = choose_export_folder(self.panel)
+        if path is not None:
+            self.panel.set_status(_tr('Default export folder: {}').format(path))
+
+    def _agent_export_root(self):
+        """Choose lazily at the first actual export; constructing handlers must never open a dialog."""
+        from ...filtermate_api.config import configured_export_root
+        path = configured_export_root()
+        if path is not None:
+            return path
+        from .agent_exports import choose_export_folder
+        generation = self._memory_generation
+        with self.panel.hold_queued(), self._activity('waiting'):
+            path = choose_export_folder(self.panel)
+        if path is None or generation != self._memory_generation or self._abandoned:
+            raise ToolFailure(_tr('Export cancelled. Choose a default export folder from the agent menu to export.'))
+        return path
+
     def _fill_options(self) -> None:
         """The menu "⋯" opens: the sources by group, the providers set up, the MCP server, as the settings hold them."""
+        self.panel.export_folder_action.setEnabled(not self.chat_busy() and not self._mcp.busy)
+        self.panel.export_folder_action.setToolTip(str(_default_export_root()))
         from ...core.agent.sources import source_group
         values = load_settings()
         sources = list(all_sources(custom_from_json(values.custom_sources))) + list(qgis_databases())
@@ -1686,7 +1713,7 @@ class AgentChatController(QObject):
         # ticked does.
         opens_web = (any(source.kind not in NO_FILE_KINDS for source in data_sources)
                      or any(kind not in NO_FILE_KINDS for kind in configured_kinds.values()))
-        handlers = build_handlers(accessor, _default_export_root(), share_values=values.send_values,
+        handlers = build_handlers(accessor, self._agent_export_root, share_values=values.send_values,
                                   allow_remote_sources=opens_web,
                                   # By the names a model knows them by, only: the address of a service the user
                                   # added would come back in the words of a refusal ("Enabled: ...").
@@ -1694,6 +1721,12 @@ class AgentChatController(QObject):
                                   platform_aliases=platform_aliases(data_sources),
                                   extra_domains=",".join(item for item in (platform_domains(active), configured) if item))
         handlers.update(settings_handlers(offered, self._approve_skill))
+        profile_export = handlers.get('export_settings_profile')
+        if profile_export is not None:
+            def export_profile(arguments):
+                self._agent_export_root()
+                return profile_export(arguments)
+            handlers['export_settings_profile'] = export_profile
         handlers[UNDO_AGENT_STEP] = self._undo_tool
         handlers[RUN_PYTHON] = self._python_tool
         handlers[VIEW_MAP] = self._view_map_tool
@@ -1714,11 +1747,11 @@ class AgentChatController(QObject):
         handlers[SHOW_CHART] = lambda arguments: self._charts.show_chart(arguments, share_values=values.send_values)
         handlers[RUN_CHART_CODE] = lambda arguments: self._charts.run_chart_code(arguments,
                                                                                  share_values=values.send_values)
-        handlers[EXPORT_CHART] = lambda arguments: self._charts.export_chart(arguments, _default_export_root())
+        handlers[EXPORT_CHART] = lambda arguments: self._charts.export_chart(arguments, self._agent_export_root)
         handlers[CHART_TO_LAYOUT] = lambda arguments: self._charts.add_to_layout(arguments)
         handlers["show_infographic"] = lambda arguments: self._charts.show_infographic(
             arguments, share_values=values.send_values)
-        handlers["export_infographic"] = lambda arguments: self._charts.export_infographic(arguments, _default_export_root())
+        handlers["export_infographic"] = lambda arguments: self._charts.export_infographic(arguments, self._agent_export_root)
         handlers[SAVE_RECIPE] = self._save_recipe_tool
         handlers[REMOVE_RECIPE] = self._remove_recipe_tool
         handlers[ASK_USER] = self._ask_user_tool
@@ -3987,6 +4020,8 @@ class AgentChatController(QObject):
         if not os.path.splitext(path)[1]:
             path += "." + file_format
         try:
+            from ...filtermate_api.export_root import assert_export_destination
+            assert_export_destination(path)
             self._charts.save_infographic_as(infographic_id, path)
         except Exception as exc:
             logger.warning("Infographic not saved: %s", exc)
@@ -4018,6 +4053,8 @@ class AgentChatController(QObject):
         if not os.path.splitext(path)[1]:
             path += "." + file_format
         try:
+            from ...filtermate_api.export_root import assert_export_destination
+            assert_export_destination(path)
             self._charts.save_as(chart_id, path)
         except Exception as exc:  # a folder that cannot be written, a chart its layer can no longer draw
             logger.warning("Chart not saved: %s", exc)
