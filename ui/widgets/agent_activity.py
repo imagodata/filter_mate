@@ -31,6 +31,7 @@ class AgentActivityIcon(QWidget):
         self._phase = 'idle'
         self._interaction = ''
         self._dark = False
+        self._hovered = False
         self._document_state = None
         try:
             from qgis.PyQt.QtSvg import QSvgRenderer
@@ -77,15 +78,26 @@ class AgentActivityIcon(QWidget):
             return
         phase = self.display_phase
         active = self._working or self._interaction in ('listening', 'transcribing')
-        state = (self._dark, active and self.isVisible() and phase not in STATIC_AGENT_PHASES, phase)
+        state = (self._dark, active and self.isVisible() and phase not in STATIC_AGENT_PHASES, phase, self._hovered)
         if state == self._document_state:
             return
         self._document_state = state
         label = QCoreApplication.translate('AgentActivity', PHASE_LABELS[phase])
         self.setToolTip(label)
         self.setAccessibleName(label)
-        self._renderer.load(QByteArray(agent_activity_svg(tokens(self._dark)['fm_icon'], state[1], phase).encode('utf-8')))
+        self._renderer.load(QByteArray(agent_activity_svg(tokens(self._dark)['fm_icon'], state[1], phase,
+                                                        hovered=self._hovered).encode('utf-8')))
         self.update()
+
+    def enterEvent(self, event):  # noqa: N802 - Qt virtual
+        super().enterEvent(event)
+        self._hovered = True
+        self._sync_animation()
+
+    def leaveEvent(self, event):  # noqa: N802 - Qt virtual
+        super().leaveEvent(event)
+        self._hovered = False
+        self._sync_animation()
 
     def showEvent(self, event):  # noqa: N802 - Qt virtual
         super().showEvent(event)
@@ -93,6 +105,7 @@ class AgentActivityIcon(QWidget):
 
     def hideEvent(self, event):  # noqa: N802 - Qt virtual
         super().hideEvent(event)
+        self._hovered = False
         self._sync_animation()
 
     def paintEvent(self, event):  # noqa: N802 - Qt virtual

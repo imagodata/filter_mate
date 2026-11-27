@@ -411,11 +411,12 @@ _AGENT_PHASE_MARKS = {
 }
 
 
-def agent_activity_svg(color: str, animated: bool = False, phase: str = 'thinking') -> str:
+def agent_activity_svg(color: str, animated: bool = False, phase: str = 'thinking', hovered: bool = False) -> str:
     """Network mark with Qt 5/6 compatible pulse and orbit animations.
 
     The supplied artwork uses animate/animateMotion, which QtSvg ignores. animateTransform works in both
     supported Qt versions. Keep this renderer out of the QIcon cache: it belongs to one visible activity widget.
+    Hover enlarges the central disk and its phase mark together, around their shared center.
     """
     phase = phase if phase in AGENT_ACTIVITY_STYLES else 'thinking'
     animated = animated and phase not in STATIC_AGENT_PHASES
@@ -425,6 +426,10 @@ def agent_activity_svg(color: str, animated: bool = False, phase: str = 'thinkin
     if mark:
         document = document.replace(f'cx="12" cy="12" r="3.1" fill="{color}"',
                                     f'cx="12" cy="12" r="3.1" fill="{accent}"')
+    center_transform = ' transform="translate(12 12) scale(1.5 1.5) translate(-12 -12)"' if hovered else ''
+    if hovered:
+        center = f'<circle cx="12" cy="12" r="3.1" fill="{accent}" stroke="none"/>'
+        document = document.replace(center, f'<g{center_transform}>{center}</g>')
     pulse = ''
     if animated:
         pulse = (
@@ -449,7 +454,7 @@ def agent_activity_svg(color: str, animated: bool = False, phase: str = 'thinkin
         pulse += '</g>'
     if mark:
         ink = '#202020' if accent == '#ba7b1e' else '#ffffff'
-        pulse += f'<g stroke="{ink}" stroke-width=".7" fill="none">{mark}</g>'
+        pulse += f'<g{center_transform} stroke="{ink}" stroke-width=".7" fill="none">{mark}</g>'
     return document.replace('</svg>', pulse + '</svg>')
 
 
