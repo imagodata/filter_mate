@@ -514,9 +514,8 @@ CHAT_ONLY = (
     # turned on once the user says yes, at every level.
     ToolSpec(
         AGENT_OPTIONS,
-        "The options of the agent: the provider and model in use and those the user set up, each source and MCP "
-        "connector with its group and whether it is ticked, the MCP server of the plugin. Returns provider, providers, "
-        "sources [{id, title, group, on}] and mcp_server.",
+        "Read sources, including disabled ones: id, title, group, kind, origin, description, on. Bundled descriptions "
+        "explain coverage and use. Reads no source; enables nothing. Also returns provider, providers, mcp_server.",
         {"type": "object", "properties": {}, "additionalProperties": False},
         title="Read the options of the agent", read_only=True, chat_only=True),
     ToolSpec(

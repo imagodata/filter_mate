@@ -221,7 +221,10 @@ Rules worth keeping:
 - **Editing data** (`adapters/public_api/feature_edits.py`): `update_features` (values, or formulas computed on
   each feature), `delete_features` (the user confirms) and `add_features` (WKT, 100 at most) put the layer in
   editing mode and add one named command to its undo stack: nothing is written to the data source, the user saves
-  the layer edits or discards them. Features are chosen by a QGIS expression and/or the selection (all of them
+  the layer edits or discards them. After the request, the chat offers a separate **Save layer edits** confirmation.
+  It names the layers, including transaction companions, and includes any manual edits still pending there.
+  Declining keeps the buffer; saving makes those data edits no longer undoable from the chat. The option to hide
+  project-save suggestions never suppresses this confirmation. Features are chosen by a QGIS expression and/or the selection (all of them
   only with the expression `true`), 100 000 at most. A value is converted to the type of its field first (QGIS
   would take "abc" in an integer field and fail at saving); keys, joined and virtual fields are not written.
   The turn keeps the index of the undo stack before its first edit of a layer; undoing the turn steps back over its
@@ -312,6 +315,11 @@ Rules worth keeping:
   change, and a local model has none.
 - **A source that is not ticked**: the notes of the prompt tell the model to say so and to call `show_settings_link`
   with `sources`, a button to the tab, instead of answering that it cannot.
+  The `datasets` skill stays available with all external sources off, when source inspection and settings links
+  are allowed. `agent_options` includes the kind, origin and bundled public description of each source; reading
+  that catalogue queries and enables no source. The agent can recommend suitable disabled sources, distinguish
+  analysis datasets from basemaps and search authorized sources without loading layers. Enabling a source requires
+  an explicit request and its normal confirmation, effective after the current request.
 - **At most 16 model turns per request** (`max_model_turns`, `core/agent/session.py`). Two turns before the limit the
   model is told so, and a request that reaches it stops with a sentence that says why; what was done stays and can be
   undone.

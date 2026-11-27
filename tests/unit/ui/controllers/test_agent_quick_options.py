@@ -197,7 +197,9 @@ def test_the_options_read(host, monkeypatch):
     _tools_host(host, monkeypatch)
     view = Controller._agent_options_tool(host, {})
     assert view["provider"] == "anthropic · m" and "ollama · qwen3:8b" in view["providers"]
-    assert {"id": "datagouv", "title": "data.gouv.fr", "group": "open_data", "on": True} in view["sources"]
+    row = next(source for source in view['sources'] if source['id'] == 'datagouv')
+    assert row['title'] == 'data.gouv.fr' and row['group'] == 'open_data' and row['on'] is True
+    assert row['origin'] == 'official' and 'France' in row['description']
 
 
 # --- 2026-11-16, review of #505 -------------------------------------------------------------------------------------

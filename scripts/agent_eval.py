@@ -670,9 +670,11 @@ class SimulatedProject:
             return {"changed": changes, "saved": True}
 
         def agent_options(_):
-            return {"provider": "anthropic · scripted", "providers": ["anthropic · scripted"], "mcp_server": False,
-                    "sources": [{"id": "datagouv", "title": "data.gouv.fr", "group": "open_data", "on": True},
-                                {"id": "osm_mcp", "title": "OpenStreetMap (MCP)", "group": "connectors", "on": False}]}
+            from agent.agent_options import ProviderEntry, options_view
+            from agent.sources import all_sources
+            sources = [source for source in all_sources(()) if source.id in ('datagouv', 'osm_mcp')]
+            provider = ProviderEntry('anthropic', 'scripted', '')
+            return options_view(sources, ('datagouv',), (provider,), provider, False)
 
         def turn_off_agent_options(args):
             return {"turned_off": list(args.get("sources") or []), "already": [], "applies": "after this request"}

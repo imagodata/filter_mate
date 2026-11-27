@@ -35,8 +35,28 @@ def test_remember_puts_the_latest_first_and_keeps_eight():
 def test_options_view():
     view = options_view(SOURCES, ("datagouv",), (CLAUDE, QWEN), CLAUDE, False)
     assert view["provider"] == CLAUDE.label and view["providers"] == [CLAUDE.label, QWEN.label]
-    assert view["sources"][0] == {"id": "datagouv", "title": "data.gouv.fr", "group": "open_data", "on": True}
+    assert view["sources"][0] == {"id": "datagouv", "title": "data.gouv.fr", "group": "open_data", "on": True,
+                                  'kind': KIND_DATAGOUV, 'origin': 'user', 'description': ''}
     assert view["mcp_server"] is False
+
+
+def test_disabled_bundled_sources_explain_coverage_without_exposing_endpoints_or_enabling_them():
+    from core.agent.sources import all_sources
+    sources = all_sources(())
+    view = options_view(sources, (), (CLAUDE,), CLAUDE, False)
+    rows = {row['id']: row for row in view['sources']}
+    assert rows['ign_wfs']['on'] is False and rows['ign_wfs']['kind'] == KIND_WFS
+    assert 'France' in rows['ign_wfs']['description'] and rows['ign_wfs']['origin'] == 'official'
+    assert all('address' not in row for row in rows.values())
+    assert not any(row['on'] for row in rows.values())
+
+
+def test_custom_source_notes_and_database_connection_details_remain_local():
+    source = Source('private', 'Company data', KIND_DATABASE, 'postgres://user:secret@host/db',
+                    note='private note with a credential')
+    view = options_view([source], (), (CLAUDE,), CLAUDE, False)
+    assert view['sources'][0]['description'] == ''
+    assert 'secret' not in str(view) and 'private note' not in str(view)
 
 
 def test_off_lists_what_was_on():

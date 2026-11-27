@@ -12,7 +12,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional, Sequence, Tuple
 
-from .sources import Source, source_group
+from .sources import Source, all_sources, source_group
 
 MAX_PROVIDERS = 8
 
@@ -90,8 +90,12 @@ def options_view(sources: Sequence[Source], enabled_ids: Sequence[str], provider
                  current: ProviderEntry, mcp_on: bool) -> Dict[str, Any]:
     """What agent_options answers."""
     on = set(enabled_ids)
+    known = {source.id: source for source in all_sources(())}
     return {"provider": current.label, "providers": [entry.label for entry in providers],
-            "sources": [{"id": source.id, "title": source.title, "group": source_group(source), "on": source.id in on}
+            "sources": [{"id": source.id, "title": source.title, "group": source_group(source), "on": source.id in on,
+                         'kind': source.kind, 'origin': source.origin,
+                         # Only bundled public metadata: custom notes and database connection details stay local.
+                         'description': source.note if source == known.get(source.id) else ''}
                         for source in sources],
             "mcp_server": mcp_on}
 

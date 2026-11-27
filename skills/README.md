@@ -17,6 +17,11 @@ skills/
 
 The folder is the name of the skill.
 
+`datasets` handles source suggestions and dataset discovery in the chat. It requires only `agent_options` and
+`show_settings_link`, so it remains available with all external sources disabled. `open-data` handles retrieval
+from authorized sources. The source catalogue is local metadata; actual searches still require an enabled source
+and its tools, and adding a result requires an explicit user request.
+
 ## SKILL.md
 
 ```

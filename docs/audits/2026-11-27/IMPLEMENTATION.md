@@ -24,6 +24,7 @@ des propositions encore à réaliser.
 | Éditions de couche par l’agent | Implémenté | Confirmation explicite après la demande avant l’enregistrement dans la source, par couche ou groupe de transaction. |
 | Dossier des exports de l’agent | Implémenté | Choix local mémorisé par l’utilisateur, annulation sans export et destinations dans les profils QGIS refusées. |
 | Réseau SVG au repos et variantes | Implémenté | Icône persistante, repos statique et 22 états liés aux tâches et interactions. |
+| Recherche de datasets et sources désactivées | Implémenté | Skill disponible sans source externe active, catalogue local enrichi et propositions d’activation explicites. |
 
 ## Vérification du choix du SCR
 
@@ -266,3 +267,27 @@ figée dans Qt 6 tout en étant déclarée animée. Les contrôles natifs vérif
 orbites et de la pulsation, ainsi que l’immobilité de l’état terminé et l’arrêt lorsque le panneau est masqué.
 Validation : 160 tests ciblés des widgets et du contrôleur, 46 SVG générés vérifiés ; comparaison de 22 dessins
 distincts dans chaque thème et contrôle des images animées dans QGIS 3.44 / Qt 5 et QGIS 4.3 / Qt 6.
+
+## Datasets et propositions de sources
+
+Le skill `datasets` reste disponible dans le chat lorsque les outils de recherche externe sont absents, dès lors
+que la lecture des options et le lien vers les réglages sont autorisés. Il guide le choix du territoire, du thème,
+de la période et de l’usage, propose au maximum trois sources adaptées, puis distingue les données d’analyse des
+fonds de carte et des simples notices.
+
+`agent_options` expose désormais le type, l’origine et la description publique des sources intégrées, avec leur
+état activé ou désactivé. Cette lecture consulte le catalogue local : elle ne contacte aucune source et n’en active
+aucune. Les adresses, notes personnelles et détails de connexion des sources personnalisées ou bases restent
+hors de ces nouvelles métadonnées.
+
+Pour une source pertinente mais désactivée, le skill propose son activation et un bouton vers les Sources.
+`turn_on_agent_options` n’est appelé qu’après une demande explicite, avec sa confirmation habituelle ; son effet
+arrive après la demande en cours. Une recherche ou une recommandation ne charge aucune couche. La comparaison
+des jeux de données ne présente comme vérifiés que les résultats réellement retournés, avec leurs métadonnées
+disponibles et la page source ; les informations absentes sont signalées. Une source activée ne contourne pas
+un outil désactivé dans les réglages.
+
+Le dépôt compte 23 skills, dont 22 pour le chat et 16 pour MCP. Ce nouveau skill dépend de l’interface du chat ;
+les exports de skills MCP restent cohérents. Le banc hors ligne couvre 178 scénarios actifs, dont quatre nouveaux
+sur l’inspection locale, la proposition sans activation, la recherche sans chargement et l’activation différée.
+Ces scénarios sont scriptés : ils ne constituent pas un benchmark de qualité d’un modèle distant.
