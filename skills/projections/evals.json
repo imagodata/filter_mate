@@ -22,6 +22,20 @@
       "forbid": ["export_layers", "run_pyqgis"]
     },
     {
+      "id": "projection_advice_changes_nothing",
+      "trap": true,
+      "prompt": "Quel SCR me conseilles-tu pour comparer les surfaces de mes communes ? Ne modifie rien.",
+      "expect": [[{"tool": "suggest_crs", "args": {"purpose": "areas"}, "call_args": {"purpose": "areas", "layers": ["communes"]}}]],
+      "forbid": ["set_project_crs", "export_layers", "run_algorithm", "run_pyqgis"]
+    },
+    {
+      "id": "projection_processing_input_is_separate",
+      "trap": true,
+      "prompt": "Mon projet est en Lambert-93 mais mes routes sont en EPSG:4326. Quel SCR utiliser avant un tampon plan de 50 mètres ? Conseille seulement.",
+      "expect": [[{"tool": "suggest_crs", "args": {"purpose": "distances"}, "call_args": {"purpose": "distances", "layers": ["routes"]}}]],
+      "forbid": ["set_project_crs", "export_layers", "run_algorithm", "run_pyqgis"]
+    },
+    {
       "id": "projection_no_reprojected_files",
       "trap": true,
       "prompt": "Passe toutes mes couches en Lambert-93.",

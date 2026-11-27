@@ -2431,7 +2431,7 @@
   {
    "name": "suggest_crs",
    "title": "Suggest projections",
-   "description": "Projections suited to where the data lie and what the map is for, best first: the official system of the country, the local zone (UTM, Lambert CC), continental or world ones, and projections made for the data (PROJ: strings). Each says what it keeps. Returns bounds_wgs84, scale, current and suggestions [{crs, name, keeps, why, units}], each crs usable by set_project_crs. It changes nothing.",
+   "description": "Recommend a CRS from data extent and intended use. Returns bounds_wgs84, scale, current, current_assessment, recommendation {crs, name, why, action: keep/change} (null if none fits), analysis_note and suggestions [{crs, name, keeps, why, units, area_of_use, is_current}]. Approximate areas of use are checked against the whole extent. Excludes basemaps when data layers are visible. Each crs is usable by set_project_crs, which changes display only, not Processing input coordinates. This tool changes nothing.",
    "read_only": true,
    "destructive": false,
    "idempotent": false,

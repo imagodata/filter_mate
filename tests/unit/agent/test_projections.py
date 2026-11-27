@@ -88,6 +88,24 @@ def test_utm_zones_north_south_and_in_europe():
     assert projections.utm(151.2, -33.9)[0] == "EPSG:32756"
 
 
+@pytest.mark.parametrize("bounds", [[10, -83, 11, -81], [10, 83, 11, 85], [10, -1, 11, 1]])
+def test_no_utm_zone_for_an_extent_outside_one_hemisphere_or_the_utm_latitudes(bounds):
+    assert not any("UTM zone" in row['name'] for row in suggest(bounds)['suggestions'])
+
+
+@pytest.mark.parametrize("area, bounds, covered", [
+    ((0, 0, 6, 84), (1, 40, 5, 50), True),
+    ((0, 0, 6, 84), (5, 40, 7, 50), False),
+    ((0, 0, 6, 84), (1, -1, 5, 1), False),
+    ((-180, -90, 180, 90), (177, -20, -177, -15), True),
+    ((170, -30, -170, -10), (177, -20, -177, -15), True),
+    ((170, -30, -170, -10), (-175, -20, -169, -15), False),
+    ((0, -90, 180, 90), (177, -20, -177, -15), False),
+])
+def test_area_of_use_must_cover_the_whole_extent_including_the_date_line(area, bounds, covered):
+    assert projections.covers_bounds(area, bounds) is covered
+
+
 @pytest.mark.parametrize("bounds", [[0, 0, 1], [0, 50, 1, 40], [0, 0, 1, 95], [float("nan"), 0, 1, 1],
                                     [0, 0, "a", 1]])
 def test_an_extent_that_cannot_be_read_is_refused(bounds):

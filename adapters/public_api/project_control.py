@@ -253,6 +253,8 @@ def _bounds_in_degrees(layers: Optional[List[str]] = None) -> Tuple[List[float],
         layer = resolve_layer(reference)
         if layer is None:
             raise ValueError(f"layer {reference!r} not found")
+        if not layer.crs().isValid():
+            raise ValueError(f"'{layer.name()}' has no known source CRS; identify it before choosing a projection")
         chosen.append(layer)
     origin = 'layers'
     if not chosen:
@@ -317,6 +319,18 @@ def _bounds_in_degrees(layers: Optional[List[str]] = None) -> Tuple[List[float],
     return ([round(west, 4), round(max(-90.0, south), 4), round(east, 4), round(min(90.0, north), 4)], origin)
 
 
+def _crs_area(crs, bounds) -> Optional[Dict[str, Any]]:
+    """Approximate geographic domain supplied by the local QGIS/PROJ database, if known."""
+    from ...core.agent.projections import covers_bounds
+    box = crs.bounds()
+    if box.isNull() or box.isEmpty():
+        return None
+    area = [box.xMinimum(), box.yMinimum(), box.xMaximum(), box.yMaximum()]
+    if not all(math.isfinite(value) for value in area):
+        return None
+    return {'bounds_wgs84': area, 'covers_extent': covers_bounds(area, bounds)}
+
+
 def suggest_crs(layers: Optional[List[str]] = None, purpose: str = 'general') -> Dict[str, Any]:
     """Projections for the data of ``layers`` (default: the layers shown, then the view) and a purpose (general,
     areas, distances, shapes, world, web), best first; each one usable as it is by set_project_crs."""
@@ -331,15 +345,48 @@ def suggest_crs(layers: Optional[List[str]] = None, purpose: str = 'general') ->
         result = suggest(bounds, purpose)
     except ProjectionError as exc:
         raise ValueError(str(exc)) from None
+    current = QgsProject.instance().crs()
     rows = []
     for row in result['suggestions']:
         crs = QgsCoordinateReferenceSystem(row['crs'])
         if not crs.isValid():  # a code this PROJ does not know: left out
             continue
-        rows.append(dict(row, units=QgsUnitTypes.toString(crs.mapUnits())))
-    current = QgsProject.instance().crs()
+        rows.append(dict(row, units=QgsUnitTypes.toString(crs.mapUnits()),
+                         area_of_use=_crs_area(crs, bounds), is_current=crs == current))
+    # Preserve the purpose ranking, but do not recommend a national/UTM code
+    # whose official domain excludes part of these data.
+    def outside(row):
+        return row['area_of_use'] is not None and not row['area_of_use']['covers_extent']
+    rows.sort(key=outside)
+    current_area = _crs_area(current, bounds) if current.isValid() else None
+    issues = []
+    if not current.isValid():
+        issues.append('unknown_crs')
+    elif current_area is not None and not current_area['covers_extent']:
+        issues.append('outside_area_of_use')
+    if current.isValid() and purpose in ('areas', 'distances'):
+        if current.isGeographic():
+            issues.append('geographic_units_for_planar_analysis')
+        if current.authid() == 'EPSG:3857':
+            issues.append('web_mercator_distortion')
+    wanted = {'areas': 'equal-area', 'distances': 'equidistant', 'shapes': 'conformal'}.get(purpose)
+    eligible = [row for row in rows if not outside(row) and (wanted is None or row['keeps'] == wanted)]
+    if purpose == 'web':
+        eligible = [row for row in eligible if row['crs'] == 'EPSG:3857']
+    existing = next((row for row in eligible if row['is_current']), None)
+    best = existing if existing is not None and not issues else next(iter(eligible), None)
+    recommendation = None if best is None else {
+        'crs': best['crs'], 'name': best['name'], 'why': best['why'],
+        'action': 'keep' if best['is_current'] and not issues else 'change',
+    }
+    status = 'unsuitable' if issues else 'suitable' if existing is not None else 'not_ranked'
     return {'bounds_wgs84': bounds, 'from': origin, 'purpose': purpose, 'scale': result['scale'],
             'current': current.authid() or current.description() if current.isValid() else '',
+            'current_assessment': {'status': status, 'issues': issues, 'area_of_use': current_area},
+            'recommendation': recommendation,
+            'analysis_note': 'Project CRS controls display. It does not reproject source data or change the input '
+                             'CRS used by planar Processing algorithms. Use an appropriate analysis CRS for those '
+                             'inputs; ellipsoidal measurements also depend on the project ellipsoid settings.',
             'suggestions': rows}
 
 

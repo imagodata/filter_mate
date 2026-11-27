@@ -21,10 +21,13 @@ the CRS of the project; the layers are reprojected on the fly and their data nev
    - a local map, a survey, angles, navigation: purpose shapes (conformal);
    - the whole world: purpose world; a map over web basemaps only: purpose web;
    - nothing said: purpose general (the official system of the country first).
-2. suggest_crs with that purpose (layers when the map is about some of them only). It reads where the data lie and
-   answers candidates, best first, each with what it keeps and why.
-3. Take the first one unless the user said otherwise, set_project_crs with its crs exactly as given (a PROJ: string
-   included), and tell the user in one sentence what it keeps and what it alters.
+2. suggest_crs with that purpose (layers when the map is about some of them only). Read recommendation,
+   current_assessment and each candidate's area_of_use. The domains are approximate geographic rectangles,
+   not country boundaries or a guarantee of metric accuracy. Do not choose a code flagged outside its domain.
+3. If the user asks which CRS to use, explain the recommendation without changing the project. If they ask
+   to apply it, use recommendation.crs exactly as given, including a PROJ: string. A keep recommendation needs
+   no set_project_crs call. If there is no recommendation, explain the limitation rather than applying the first
+   candidate. State what the choice preserves and what it distorts.
 4. A projection made for the data (PROJ: +proj=aea, lcc, laea, aeqd, tmerc, stere) is right for a region no official
    system covers well: several countries, a sea, a range of mountains. Say it is made for this extent.
 
@@ -35,10 +38,19 @@ the CRS of the project; the layers are reprojected on the fly and their data nev
 - Europe: LAEA (EPSG:3035) for statistics and areas, LCC (EPSG:3034) for shapes.
 - The world: Equal Earth (EPSG:8857) for thematic maps, Robinson (ESRI:54030) for a general one. Web Mercator
   (EPSG:3857) only under web basemaps: its areas swell towards the poles.
-- Degrees (EPSG:4326) are no projection: never for measuring nor for a printed map.
+- EPSG:4326 stores longitude and latitude in degrees. Planar lengths and areas in these coordinates are not
+  metres or square metres. Geographic coordinates can still be used for a map or ellipsoidal measurements;
+  QGIS measurement results also depend on the project's ellipsoid and measurement settings.
+- A distance-preserving azimuthal projection preserves distances from its centre, not all pairwise distances
+  along roads throughout a region. For engineering lengths or buffers, check the local metric CRS, its area of
+  use and the algorithm's input CRS instead of promising exact distances everywhere.
 - A file in another CRS is written only when the user asks for files: export_layers with crs.
 
 ## What never to do
 
 - Never reproject the data of a layer to change how the map looks: set_project_crs is enough.
+- Changing the project CRS does not change the source coordinates used by a planar Processing algorithm.
+  For buffers or planar measurements, describe_layer reveals the input CRS; reproject an intermediate input
+  when needed using the available processing tools. Export files only when files are requested.
+- Never assign a guessed source CRS to a layer with an unknown CRS. Ask for its original reference system.
 - Never choose Web Mercator for areas or distances, nor an equal-area projection for a navigation map.

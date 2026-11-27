@@ -70,6 +70,30 @@ def main():
           crs[:3] == ["EPSG:2154", "EPSG:3943", "EPSG:25831"], crs)
     check("local: every suggestion is a CRS QGIS knows, with its units",
           all(QgsCoordinateReferenceSystem(row["crs"]).isValid() and row["units"] for row in local["suggestions"]))
+    check("geographic project: planar measurement warning and an explained recommendation",
+          "geographic_units_for_planar_analysis" in project_control.suggest_crs(purpose="distances")[
+              "current_assessment"]["issues"] and local["recommendation"]["action"] == "change")
+    project.setCrs(QgsCoordinateReferenceSystem('EPSG:2154'))
+    kept = project_control.suggest_crs()
+    check("already suitable: keep the existing CRS", kept["recommendation"]["action"] == "keep" and
+          kept["recommendation"]["crs"] == "EPSG:2154" and kept["current_assessment"]["status"] == "suitable")
+    project.setCrs(QgsCoordinateReferenceSystem('EPSG:3857'))
+    measured = project_control.suggest_crs(purpose='areas')
+    check("Web Mercator: warn against planar area distortion",
+          'web_mercator_distortion' in measured['current_assessment']['issues'] and
+          measured['recommendation']['crs'] != 'EPSG:3857')
+    project.setCrs(QgsCoordinateReferenceSystem('EPSG:32756'))
+    wrong = project_control.suggest_crs()
+    check("wrong hemisphere and country: current CRS is outside its area of use",
+          'outside_area_of_use' in wrong['current_assessment']['issues'])
+    project.setCrs(QgsCoordinateReferenceSystem('EPSG:4326'))
+    memory_layer('zone_boundary', 'EPSG:4326', ['POLYGON((5 48, 7 48, 7 49, 5 49, 5 48))'])
+    project.layerTreeRoot().findLayer(project.mapLayersByName('zone_boundary')[0].id()).setItemVisibilityChecked(False)
+    crossing = project_control.suggest_crs(['zone_boundary'])
+    utm_rows = [row for row in crossing['suggestions'] if row['crs'] == 'EPSG:25832']
+    check("cross-zone data: do not recommend a UTM zone that covers only part of the extent",
+          utm_rows and not utm_rows[0]['area_of_use']['covers_extent'] and
+          crossing['recommendation']['crs'] != 'EPSG:25832', crossing)
     areas = project_control.suggest_crs(["communes"], purpose="areas")
     check("areas: an equal-area projection first", areas["suggestions"][0]["keeps"] == "equal-area",
           areas["suggestions"][0])

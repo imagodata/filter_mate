@@ -96,6 +96,23 @@ def _centre_lon(west: float, east: float) -> float:
     return centre - 360.0 if centre > 180.0 else centre
 
 
+def covers_bounds(area: Sequence[float], bounds: Sequence[float], tolerance: float = 1e-5) -> bool:
+    """Whether a WGS84 area of use covers the whole data extent, including across the date line.
+
+    These are approximate rectangles, not administrative boundaries or a distortion guarantee.
+    """
+    west, south, east, north = bounds
+    a_west, a_south, a_east, a_north = area
+    if south < a_south - tolerance or north > a_north + tolerance:
+        return False
+
+    def intervals(w, e):
+        return [(w, e)] if w <= e else [(w, 180.0), (-180.0, e)]
+
+    return all(any(left >= a - tolerance and right <= b + tolerance
+                   for a, b in intervals(a_west, a_east)) for left, right in intervals(west, east))
+
+
 def check_bounds(bounds: Sequence[float]) -> Tuple[float, float, float, float]:
     if len(bounds) != 4 or not all(isinstance(value, (int, float)) and math.isfinite(value) for value in bounds):
         raise ProjectionError("the extent is west, south, east, north in degrees")
@@ -241,9 +258,9 @@ def suggest(bounds: Sequence[float], purpose: str = "general") -> Dict[str, obje
         zone = min(50, max(42, int(math.floor(lat + 0.25))))  # CC43 from 42.25° to 43.75°, as the IGN cuts them
         add(f"EPSG:{3900 + zone}", f"RGF93 / CC{zone}", CONFORMAL,
             "the Lambert zone of France at this latitude: less alteration of lengths than Lambert-93 locally")
-    if width <= 6.5 and abs(lat) < 84.0:
+    if width <= 6.0 and south >= -80.0 and north <= 84.0 and south * north >= 0:
         crs, name = utm(lon, lat)
-        add(crs, name, CONFORMAL, "the UTM zone of the data: lengths within 0.1 % over 6° of longitude")
+        add(crs, name, CONFORMAL, "a local conformal UTM zone; check its area of use against the entire extent")
     for territory in national[1:2]:  # across the border: after the zones of the country that holds the data
         add(territory.crs, territory.name, territory.keeps,
             f"the official system for {territory.name.split(' (')[0]} too (across the border)")
