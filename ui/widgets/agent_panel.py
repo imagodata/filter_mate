@@ -10,6 +10,7 @@ from __future__ import annotations
 import html
 import re
 import time
+from contextlib import contextmanager
 from typing import Callable, List, Optional, Sequence, Tuple
 
 from qgis.PyQt.QtCore import (
@@ -727,6 +728,7 @@ class AgentPanel(QFrame):
         # A request sent while the agent works waits here, in view, and goes when the request under way ends
         # (2026-11-24: Enter did nothing then, and the text stayed in the line).
         self._queue = []
+        self._queue_holds = 0
         self._queue_paused = False
         self.queue_row = QFrame(self)
         self.queue_row.setObjectName("frame_agent_queued")
@@ -2245,13 +2247,24 @@ class AgentPanel(QFrame):
         """The request under way ended: the first one waiting goes, from the line (the controller empties it once
         sent; refused, it stays there). What was typed meanwhile waits behind the pile, not in the bin (audit of
         2026-11-24: the waiting request overwrote the draft, and after a provider error the returned request too)."""
-        if getattr(self, "_queue_paused", False):
+        if getattr(self, "_queue_paused", False) or self._queue_holds:
             return  # stopped: they wait for the user
         if not self._queue or self._working:
             return
         text, posture = self._queue.pop(0)
         self._refresh_queue_row()
         self.queued_send_requested.emit(text, posture)
+
+    @contextmanager
+    def hold_queued(self):
+        """Temporarily hold automatic follow-ups during a native modal interface handoff."""
+        self._queue_holds += 1
+        try:
+            yield
+        finally:
+            self._queue_holds -= 1
+            if not self._queue_holds:
+                QTimer.singleShot(0, self._send_queued)
 
     def _push_queued(self) -> None:
         """Promote the first waiting message without replacing the draft typed meanwhile."""

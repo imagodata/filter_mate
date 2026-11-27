@@ -1,0 +1,14 @@
+{
+  "cases": [
+    {"id": "qgis_interface_open_table", "prompt": "Ouvre la table attributaire de mes communes sans changer leur filtre.",
+     "expect": [[{"tool": "control_qgis", "args": {"action": "attributes", "layer": "communes"}, "call_args": {"action": "attributes", "layer": "communes"}}]],
+     "forbid": ["apply_filter", "select_features", "run_pyqgis"]},
+    {"id": "qgis_interface_panel", "prompt": "Affiche le panneau Processing disponible dans ma session.",
+     "expect": [[{"tool": "qgis_capabilities", "args": {}, "call_args": {}},
+                 {"tool": "control_qgis", "args": {"action": "show_panel"}, "call_args": {"action": "show_panel", "panel": "ProcessingToolbox"}}]],
+     "forbid": ["run_algorithm", "run_pyqgis"]},
+    {"id": "qgis_interface_inspect_only", "trap": true, "prompt": "Quels panneaux de plugins peux-tu afficher ? Ne lance aucun traitement et ne change rien.",
+     "expect": [[{"tool": "qgis_capabilities", "args": {}, "call_args": {}}]],
+     "forbid": ["control_qgis", "run_algorithm", "run_pyqgis", "change_settings"]}
+  ]
+}

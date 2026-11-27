@@ -11,7 +11,7 @@ from core.agent.skills import names as skill_names
 
 pytestmark = pytest.mark.unit
 
-NAMES = ("open_layout", "flash_features", "set_active_layer", "show_message", "preview_atlas", "open_model")
+NAMES = ("open_layout", "flash_features", "set_active_layer", "show_message", "preview_atlas", "open_model", 'control_qgis')
 
 
 def test_visible_tools_only_show_and_are_asked_like_a_view():
@@ -28,6 +28,7 @@ def test_visible_tools_only_show_and_are_asked_like_a_view():
 def test_skills_bring_the_visible_tools():
     assert {"open_layout", "preview_atlas"} <= set(SKILLS["layouts"].tools)
     assert {"flash_features", "set_active_layer", "show_message"} <= set(SKILLS["cartography"].tools)
+    assert {'qgis_capabilities', 'control_qgis'} <= set(SKILLS['qgis-interface'].tools)
 
 
 def test_gui_tools_are_unlocked_by_their_skills_and_never_exported():

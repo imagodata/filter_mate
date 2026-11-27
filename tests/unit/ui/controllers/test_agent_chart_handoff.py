@@ -33,9 +33,12 @@ def test_standard_charts_remain_available_without_webengine(ctrl_module, control
     names = {tool.name for tool in tools}
     assert {"show_chart", "export_chart", "add_chart_to_layout"} <= names
     assert set(gui_names) <= names
+    assert {'qgis_capabilities', 'control_qgis'} <= names
+    assert {'qgis_capabilities', 'control_qgis'} <= handlers.keys()
     assert all(handlers[name] is gui_handlers[name] for name in gui_names)
     assert ("run_chart_code" in names) == (webengine and expert)
     assert {"show_infographic", "export_infographic"} <= handlers.keys()
+    assert handlers['control_qgis']({'action': 'properties', 'layer': 'communes'}) == {'requested': True}
 
 
 @pytest.mark.parametrize("kind", ["chart", "infographic"])

@@ -34,7 +34,7 @@ from ...core.agent.chat_setup import (
     SERVICE_TOOL, VALUES_TOOLS, chat_instructions, stable_order,
 )
 from ...core.agent.families import CORE
-from ...core.agent.chat_engine import OUTCOME_CANCELLED, OUTCOME_FAILED, OUTCOME_STOPPED, ChatEngine, ChatOutcome
+from ...core.agent.chat_engine import OUTCOME_CANCELLED, OUTCOME_DONE, OUTCOME_FAILED, OUTCOME_STOPPED, ChatEngine, ChatOutcome
 from ...core.agent.connectors import PREFIX as CONNECTOR_PREFIX, ConnectorLoader, connector_entries, shown_title
 from ...core.agent.mcp_client import McpError
 from ...core.agent.mcp_server import EXTERNAL_MARK, one_line
@@ -268,6 +268,7 @@ class AgentChatController(QObject):
         self._seen = None  # project_state when the last answer ended
         # Changes of the sources, the MCP server or the provider the agent made during a request: applied when it ends.
         self._pending_options = []
+        self._interface_handoffs = []
         # Token diet, lot 3: what the requests of this conversation sent already (core/agent/request_context.py).
         self._context_memory = ContextMemory()
         self._transcript_key = ""
@@ -1700,6 +1701,10 @@ class AgentChatController(QObject):
                for tool in tools):
             from ...adapters.public_api.gui_control import chat_handlers as gui_handlers
             handlers.update(gui_handlers())
+        if any(tool.name in ('qgis_capabilities', 'control_qgis') for tool in tools):
+            from ...adapters.public_api.qgis_interface import chat_handlers as interface_handlers
+            controls = interface_handlers(self._schedule_interface_handoff)
+            handlers.update(controls)
         handlers[ADD_NOTE] = self._add_note_tool
         handlers[REMOVE_NOTE] = self._remove_note_tool
         handlers[CREATE_WIDGET] = lambda arguments: self._create_widget_tool(arguments,
@@ -3247,6 +3252,7 @@ class AgentChatController(QObject):
             return False
         self._leave_memory_cards()
         self._memory_generation += 1
+        self._interface_handoffs = []
         self._restart_engine()
         session_store.save(self._transcript_key, "")  # a reset must not resurrect the conversation just saved
         store = getattr(self, '_conversations', None)
@@ -3698,6 +3704,8 @@ class AgentChatController(QObject):
             "identify_at": lambda: _tr("Reading the map at a point"),
             VIEW_MAP: lambda: _tr("Looking at the map"),
             "open_layout": lambda: _tr("Layout {}").format(args.get("name", "")),
+            'qgis_capabilities': lambda: _tr('Available QGIS interfaces'),
+            'control_qgis': lambda: _tr('QGIS interface: {}').format(args.get('action', '')),
             "preview_atlas": lambda: _tr("Atlas of {}").format(args.get("layout", "")),
             "flash_features": lambda: _tr("Flash features of {}").format(layer),
             "set_active_layer": lambda: _tr("Active layer: {}").format(layer),
@@ -4664,6 +4672,15 @@ class AgentChatController(QObject):
             listed, one_line(str(reason), 300))
 
     def on_finished(self, outcome: ChatOutcome) -> None:
+        if outcome.status != OUTCOME_DONE or self._abandoned:
+            self._interface_handoffs = []
+        if self._interface_handoffs:
+            with self.panel.hold_queued():
+                self._finish_turn_view(outcome)
+        else:
+            self._finish_turn_view(outcome)
+
+    def _finish_turn_view(self, outcome: ChatOutcome) -> None:
         # What the request carried is known to the model, unless it failed before reaching it or was taken out of
         # the conversation with its context (lot 3).
         dropped = self._request_dropped(outcome)
@@ -4762,6 +4779,26 @@ class AgentChatController(QObject):
             self.panel.show_error(*self._stop_words(outcome.reason, kept))
             return
         self._say(self._usage_words())  # the cards of the turn say what changed (mockup)
+        self._run_interface_handoffs()
+
+    def _schedule_interface_handoff(self, callback) -> None:
+        self._interface_handoffs.append((self._memory_generation, callback))
+
+    def _run_interface_handoffs(self) -> None:
+        callbacks, self._interface_handoffs = self._interface_handoffs, []
+        if not callbacks:
+            return
+        # The engine committed its checkpoint before on_finished. Manual edits in the native modal
+        # dialog must not be attributed to that turn, and queued requests must wait until it closes.
+        with self.panel.hold_queued():
+            for generation, callback in callbacks:
+                if generation != self._memory_generation or self.chat_busy():
+                    break
+                try:
+                    with self._activity('waiting'):
+                        callback()
+                except (ToolFailure, ValueError, RuntimeError) as exc:
+                    self._say(_tr('The QGIS interface could not be opened: {}').format(exc), error=True)
 
     def _offer_to_carry_out(self) -> None:
         """A plan was written (the Plan mode): one click carries it out, in Act, with the plan in the conversation.

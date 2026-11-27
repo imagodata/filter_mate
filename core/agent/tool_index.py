@@ -14,8 +14,8 @@ MAX_SUMMARY = 60
 # 2026-11-26 the five visible-automation tools (open_layout, preview_atlas, flash_features, set_active_layer and
 # show_message) bring it near 5,300.
 MAX_INDEX = 5500
-INDEX_TITLE = ("\n\nTools you can add with use_tools. Before saying a thing cannot be done, look here; add in one call "
-               "every tool the request needs:")
+INDEX_TITLE = ("\n\nTools you can add with use_tools. Check before declaring a capability unavailable; "
+               "add needed tools in one call:")
 
 SUMMARIES = {
     # reading the project
@@ -28,6 +28,8 @@ SUMMARIES = {
     "sample_features": "A few features with their attributes",
     "identify_at": "What lies at a point: features, raster values",
     "map_context": "Extent, scale, CRS, active layer, selections",
+    'qgis_capabilities': 'QGIS actions and live plugin panels',
+    'control_qgis': 'QGIS tables, properties, panels, tools, views',
     "view_map": "See the map as an image",
     # filtering
     "preview_filter": "Count what an expression keeps, changing nothing",
@@ -53,17 +55,17 @@ SUMMARIES = {
     # styles and layouts
     "set_layer_style": "Style a layer: colors, classes, heatmap, sizes, relief",
     "set_labels": "Label features, or remove labels",
-    "list_style_presets": "IGN/OSM styles fitting a layer",
-    "apply_style_preset": "Draw a layer in an IGN/OSM style",
+    "list_style_presets": "IGN/OSM layer styles",
+    "apply_style_preset": "Apply an IGN/OSM style",
     "create_layout": "A print layout",
     "export_layout": "A print layout to PDF or PNG",
     # data and analysis
-    "find_algorithms": "Find a Processing algorithm by words",
+    "find_algorithms": "Find Processing algorithms",
     "open_model": "Processing model editor",
-    "describe_algorithm": "Parameters of a Processing algorithm",
-    "run_algorithm": "Run a Processing algorithm (buffer, clip...)",
+    "describe_algorithm": "Processing parameters",
+    "run_algorithm": "Run Processing (buffer, clip...)",
     "add_field": "Add a field filled by an expression",
-    "join_layers": "Join fields of a layer by a common field",
+    "join_layers": "Join layer fields by key",
     "set_form": "Attribute form of a layer",
     "relations": "Parent/child relations",
     "update_features": "Change attribute values (edit buffer)",
@@ -76,14 +78,14 @@ SUMMARIES = {
     # layers from elsewhere
     "add_layer": "Add a local file or a public https URL",
     "remove_layers": "Remove layers",
-    "search_open_data": "Search an open data platform",
+    "search_open_data": "Open data search",
     "add_service_layer": "Add a WFS, WMS or WMTS layer",
     "search_imagery": "Satellite scenes over an area",
     "add_basemap": "Add a web basemap",
     "add_elevation": "Elevation of an area, as a raster",
     "add_population": "Population of an area, as a raster",
-    "add_osm_features": "OpenStreetMap features of given tags in an area",
-    "local_copy": "Copy a WFS / WMS layer to a local file, or back",
+    "add_osm_features": "OSM features by tags and area",
+    "local_copy": "WFS/WMS local copy or original source",
     "list_database_tables": "Tables of a PostgreSQL connection",
     "add_database_table": "Add a PostgreSQL table as a layer",
     # FilterMate itself
@@ -110,7 +112,7 @@ SUMMARIES = {
     "remove_project_note": "Forget a note of this project",
     "save_recipe": "Keep a request's changes as a recipe",
     "remove_recipe": "Forget a recipe",
-    "create_widget": "A control in the AGENT panel to explore a layer",
+    "create_widget": "AGENT control to explore a layer",
     "remove_widget": "Remove a widget",
     "show_chart": "A Python chart in the chat",
     "export_chart": "A chart as PNG, JPG, SVG or PDF",

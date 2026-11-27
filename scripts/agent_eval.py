@@ -680,7 +680,26 @@ class SimulatedProject:
         def turn_on_agent_options(args):
             return {"turned_on": list(args.get("sources") or []), "already": [], "applies": "after this request"}
 
+        def qgis_capabilities(_):
+            return {'available': True, 'qgis_version': 'scripted bench', 'actions': [],
+                    'panels': [{'id': 'ProcessingToolbox', 'title': 'Processing', 'available': True,
+                                'visible': False, 'enabled': True, 'owner': 'QGIS'}]}
+
+        def control_qgis(args):
+            action = args['action']
+            if action in ('attributes', 'properties'):
+                name, layer = self._layer(args['layer'])
+                if action == 'attributes' and layer['kind'] != 'vector':
+                    raise ToolFailure('an attribute table needs a vector layer')
+                return {'action': action, 'layer': name, 'requested': True}
+            if action in ('show_panel', 'hide_panel'):
+                if args.get('panel') != 'ProcessingToolbox':
+                    raise ToolFailure('unknown panel id')
+                return {'action': action, 'panel': args['panel'], 'visible': action == 'show_panel'}
+            return {'action': action, 'requested': True}
+
         return {
+            'qgis_capabilities': qgis_capabilities, 'control_qgis': control_qgis,
             "ask_user": ask_user,
             "agent_options": agent_options, "turn_off_agent_options": turn_off_agent_options,
             "turn_on_agent_options": turn_on_agent_options,

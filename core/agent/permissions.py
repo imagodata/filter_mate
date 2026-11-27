@@ -85,7 +85,7 @@ _RUNS_ALONE = {ADVISOR: READ, CAREFUL: VIEW, STANDARD: BUFFER, AUTONOMOUS: LOCAL
 # its filter, that of a raster its rendering (the panel refuses them on a protected layer itself).
 VIEW_TOOLS = frozenset({"zoom_to", "select_features", "set_layers_visibility", "group_layers", "map_theme",
                         "bookmark", "open_layout", "preview_atlas", "flash_features", "set_active_layer",
-                        "show_message", "open_model"})
+                        "show_message", "open_model", 'control_qgis'})
 BUFFER_TOOLS = frozenset({"update_features", "add_features", "add_field"})
 # Code written by the model: outside at every level, and asked at every run (each one is new code).
 CODE_TOOLS = frozenset({"run_pyqgis", "run_chart_code"})

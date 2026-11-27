@@ -73,6 +73,8 @@ DISABLED_TOOLS = frozenset({OPEN_MODEL})
 FLASH_FEATURES = "flash_features"
 SET_ACTIVE_LAYER = "set_active_layer"
 SHOW_MESSAGE = "show_message"
+QGIS_CAPABILITIES = 'qgis_capabilities'
+CONTROL_QGIS = 'control_qgis'
 PREVIEW_ATLAS = "preview_atlas"
 RUN_PYTHON = "run_pyqgis"
 CREATE_WIDGET = "create_widget"
@@ -222,6 +224,33 @@ CHAT_ONLY = (
                      "description": "A layout of the project (map_context lists them)"}},
             "required": ["name"], "additionalProperties": False},
         chat_only=True),
+    ToolSpec(
+        name=QGIS_CAPABILITIES, title='Inspect QGIS interface capabilities',
+        description=('List native QGIS window actions, map tools and registered dock panels currently available. '
+                     'Panel ids come from live object names, including panels registered by plugins. Changes nothing. '
+                     'Does not discover or authorize arbitrary plugin execution. Returns available, qgis_version, '
+                     'actions, map_tools and panels [{id, title, visible, enabled, available, owner}].'),
+        input_schema={'type': 'object', 'properties': {}, 'additionalProperties': False},
+        read_only=True, chat_only=True),
+    ToolSpec(
+        name=CONTROL_QGIS, title='Use the QGIS interface',
+        description=('Open a layer attribute table (optional QGIS expression affects this table only), open native '
+                     'layer properties, show/hide an existing registered panel, select a safe map tool, or navigate '
+                     'previous/next map views. Discover live panel ids with qgis_capabilities first. Properties use '
+                     'a native modal dialog, scheduled after this request finishes successfully. Returns scheduled '
+                     'until the handoff; queued follow-ups wait for the dialog to close. Never fills forms, '
+                     'executes arbitrary actions or runs plugin treatments. Opening interfaces is not undone. '
+                     'Returns the action and its observable result; requested means an interface action was invoked.'),
+        input_schema={'type': 'object', 'properties': {
+            'action': {'type': 'string', 'enum': ['attributes', 'properties', 'show_panel', 'hide_panel',
+                                               'map_tool', 'previous_view', 'next_view']},
+            'layer': {'type': 'string', 'maxLength': 1000, 'default': ''},
+            'panel': {'type': 'string', 'maxLength': 300, 'default': '', 'description': 'Exact live panel id'},
+            'tool': {'type': 'string', 'enum': ['', 'pan', 'zoom_in', 'zoom_out', 'identify'], 'default': ''},
+            'page': {'type': 'string', 'enum': ['information', 'source', 'style', 'metadata'], 'default': 'information'},
+            'expression': {'type': 'string', 'maxLength': 2000, 'default': ''}},
+            'required': ['action'], 'additionalProperties': False},
+        manages_history=True, chat_only=True),
     ToolSpec(
         name=FLASH_FEATURES, title="Flash features on the map",
         description=("Flash the features of a vector layer matching a QGIS expression (not SQL) on the map, a few "
@@ -726,7 +755,7 @@ FAMILY_TITLES = {
 _FAMILY_OF = {}
 for _name in ("list_layers", "filter_state", "list_favorites", "describe_layer", "field_values", "layer_statistics",
               "sample_features", "identify_at", "map_context", "find_algorithms", "describe_algorithm",
-              "layer_options", "export_options", "describe_layout", "suggest_crs", "list_style_presets",
+              "layer_options", "export_options", "describe_layout", "suggest_crs", "list_style_presets", 'qgis_capabilities',
               "list_palettes", "list_database_tables", "filter_status", "view_map"):
     _FAMILY_OF[_name] = FAMILY_READ
 for _name in ("preview_filter", "apply_filter", "undo_filter", "redo_filter", "cross_filter", "geometry_filter",
@@ -743,7 +772,7 @@ for _name in ("update_features", "delete_features", "add_features", "add_field",
               "add_service_layer", "add_basemap", "add_elevation", "add_population", "add_osm_features",
               "add_database_table", "export_layers", "add_project_note", "remove_project_note", "save_recipe",
               "remove_recipe", "bookmark", "map_theme", "set_project_crs", "flash_features", "set_active_layer",
-              "show_message", "set_export_options"):
+              "show_message", "set_export_options", 'control_qgis'):
     _FAMILY_OF[_name] = FAMILY_DATA
 for _name in ("create_layout", "export_layout", "edit_layout", "set_atlas", "open_layout", "preview_atlas",
               "add_chart_to_layout", "show_chart", "export_chart", "show_infographic", "export_infographic"):

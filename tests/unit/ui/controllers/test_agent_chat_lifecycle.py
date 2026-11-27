@@ -188,6 +188,10 @@ def ctrl_module(monkeypatch):
     _module(monkeypatch, ".adapters.agent.settings", load_settings=lambda: SETTINGS,
             KeyStoreError=type("KeyStoreError", (Exception,), {}))
     _module(monkeypatch, '.adapters.agent.conversation_store', open_store=lambda: None)
+    _module(monkeypatch, '.adapters.public_api.qgis_interface', chat_handlers=lambda schedule=None: {
+        'qgis_capabilities': lambda arguments: {'available': False},
+        'control_qgis': lambda arguments: {'requested': True},
+    })
     store = _module(monkeypatch, ".adapters.agent.transcript_store", project_key=lambda: "key", load=lambda key: [])
     store.saved = []
     store.save = lambda key, transcript: store.saved.append((key, list(transcript)))
@@ -326,6 +330,33 @@ def _end_turn(ctrl_module):
     messages = sys.modules[f"{_PKG}.core.agent.messages"]
     return messages.TurnComplete(messages.Message(messages.ROLE_ASSISTANT, (messages.TextPart("done"),)),
                                  messages.STOP_END)
+
+
+@pytest.mark.parametrize('finish', ['done', 'stop', 'project'])
+def test_interface_handoffs_wait_for_commit_and_disappear_on_stop_or_project_change(
+        ctrl_module, controller, activity_state, finish):
+    seen = []
+    def handoff():
+        assert not controller._checkpoint.open
+        assert controller._checkpoint.committed
+        assert activity_state['phase'] == 'waiting'
+        seen.append('opened')
+    def tool(arguments):
+        controller._schedule_interface_handoff(handoff)
+        return {'scheduled': True}
+    engine, transport = _engine(ctrl_module, controller, tool)
+    controller._on_send('open properties after the work')
+    transport.starts[-1](_tool_turn(ctrl_module))
+    assert seen == []
+    if finish == 'done':
+        transport.starts[-1](_end_turn(ctrl_module))
+        assert seen == ['opened']
+    elif finish == 'stop':
+        controller._on_stop()
+        assert not seen and not controller._interface_handoffs
+    else:
+        FakeQgsProject.project.cleared.emit()
+        assert not seen and not controller._interface_handoffs
 
 
 def test_push_steers_the_same_engine_and_keeps_its_permissions(ctrl_module, controller):

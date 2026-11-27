@@ -70,6 +70,27 @@ def _ready_panel():
     return panel
 
 
+@pytest.mark.parametrize('paused', [False, True])
+def test_native_interface_handoff_holds_automatic_followups_until_the_dialog_closes(paused):
+    panel = _ready_panel()
+    sent = []
+    panel.queued_send_requested.connect(lambda text, posture: sent.append((text, posture)))
+    panel.set_working(True)
+    panel.queue_message('next request', 'respond')
+    if paused:
+        panel.pause_queued()
+    with panel.hold_queued():
+        panel.set_working(False)
+        _APP.processEvents()
+        with panel.hold_queued():
+            panel._send_queued()
+            assert not sent
+        _APP.processEvents()
+        assert not sent and panel.queued == 'next request'
+    _APP.processEvents()
+    assert sent == ([] if paused else [('next request', 'respond')])
+
+
 def test_the_steps_fold_into_one_line_that_opens_them():
     panel = _ready_panel()
     panel.add_user("garde les communes")

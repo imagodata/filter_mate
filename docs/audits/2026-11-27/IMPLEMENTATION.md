@@ -18,7 +18,7 @@ des propositions encore à réaliser.
 | F01 — conversations dans l’historique | Implémenté | Onglet Conversations, reprise dans le projet d’origine, consultation des autres projets, migration des anciens échanges. |
 | A01 — lectures de sélection et flash | Implémenté | Lectures sur snapshots en arrière-plan, attente annulable et résultat invalidé par une sélection manuelle. |
 | Transitions de zoom | Implémenté | Transition commune de 220 ms pour l’agent, le filtrage et le chemin principal d’exploration ; annulation par navigation manuelle. |
-| Pilotage étendu des fenêtres QGIS et plugins | Propositions | À traiter via capacités typées, après les corrections des régressions. |
+| Pilotage des fenêtres QGIS et panneaux de plugins | Implémenté dans le chat | Capacités disponibles, tables, propriétés natives, panneaux enregistrés, outils cartographiques et historique de vue. |
 
 ## Vérification du choix du SCR
 
@@ -131,3 +131,31 @@ sur les images intermédiaires, l’interruption, le remplacement, la désactiva
 
 Les scénarios natifs utilisent QGIS 3.44 et QGIS 4.3 avec Qt 5 et Qt 6 hors écran. Ils ne constituent pas une
 validation complète de l’installation du plugin dans une session de bureau Windows.
+
+## Interface QGIS et panneaux de plugins
+
+Le chat dispose de `qgis_capabilities` pour lire les actions et panneaux actuellement disponibles, puis de
+`control_qgis` pour une action typée. Les tables attributaires acceptent une expression propre à la table, sans
+modifier le filtre ou la sélection de la couche. Les propriétés sont planifiées après la fin réussie de la réponse
+et l’enregistrement de ses changements : les modifications manuelles ne sont ainsi pas capturées par son checkpoint.
+Le résultat `scheduled` annonce cette attente, sans prétendre qu’un réglage a été appliqué. Stop ou un changement
+de projet suppriment les ouvertures en attente. Pendant la boîte native modale, les messages en file sont retenus
+et le loader passe en attente ; ils retrouvent ensuite leur état antérieur, y compris une pause demandée par l’utilisateur.
+
+Les panneaux QGIS et plugins déjà présents dans la fenêtre principale sont découverts par leur identifiant Qt.
+Un identifiant dupliqué ou désactivé est refusé. La découverte est refaite à chaque action pour éviter de conserver
+un objet C++ détruit après déchargement d’un plugin. Les outils cartographiques admis sont déplacer, zoom avant,
+zoom arrière et identifier ; les vues précédente et suivante utilisent l’historique natif.
+
+Cette première intégration est propre au chat, comme les outils de fenêtre existants. Elle n’exécute aucune action
+arbitraire, ne remplit pas les formulaires et ne lance pas le traitement d’un plugin en affichant son panneau.
+Les traitements des plugins passent par les algorithmes Processing découverts et leurs contrôles habituels ; un
+plugin sans panneau existant ou API prise en charge demande encore un adaptateur dédié.
+
+Le skill `qgis-interface` apporte ces consignes uniquement lorsque les outils sont disponibles. Le dépôt compte
+désormais 22 skills, dont 21 pour le chat et 16 pour MCP. L’index des outils reste sous 5 500 caractères grâce à des
+résumés plus courts. Le banc hors ligne couvre 174 scénarios actifs, avec trois nouveaux cas d’interface.
+
+Validation native : QGIS 3.44 / Qt 5 et QGIS 4.3 / Qt 6, avec de vrais panneaux Qt, un outil cartographique et
+l’historique de carte. Les entrées de dialogue de `iface` y sont simulées ; leur parcours complet dans QGIS de
+bureau reste à vérifier. Les tests couvrent aussi les panneaux disparus, imbriqués, désactivés ou ambigus.

@@ -2,6 +2,9 @@
 
 Audit du 27 novembre 2026, sur FilterMate 5.1.3, à partir du commit `cf6190cdb`. Le périmètre couvre le filtrage, la persistance, les conversations, les skills, la navigation et le pilotage de QGIS. Les demandes complémentaires portent sur la reprise des conversations et sur une identité animée pour l’agent.
 
+Ce document conserve les constats initiaux. Les corrections et fonctionnalités livrées depuis sont décrites dans le
+[suivi d’implémentation](IMPLEMENTATION.md).
+
 La priorité est de rendre les opérations prévisibles et récupérables. Sept défauts distincts ont été reproduits dans QGIS 3.44 : décalage entre posture affichée et permissions d’un message Push, dépassement du budget mémoire par Processing, deux défauts de zoom sur un point, déplacement manuel écrasé par un auto-zoom tardif, union de zoom incomplète et budget toujours occupé après sauvegarde. La réouverture d’une conversation depuis l’historique constitue une fonctionnalité à développer.
 
 L’icône de réseau pulsé et son indicateur animé ont été intégrés à l’agent, à la demande de l’utilisateur. Les corrections fonctionnelles identifiées ci-dessous restent des propositions priorisées. La nouvelle icône du plugin reste une proposition graphique.
