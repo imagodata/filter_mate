@@ -84,27 +84,33 @@ def pin_label(clock: str, automatic: bool = False) -> str:
 
 
 def compare_icon(size: int = 32, colour: QColor = QColor(90, 90, 90), pinned: bool = False) -> QIcon:
-    """Half a frame filled, a line between the halves: the map before, the line, the map after; ``pinned``: a dot
-    in the top right corner, a state is pinned."""
+    """Two views and opposing arrows around the swipe divider; ``pinned`` adds the orange state marker."""
     pixmap = QPixmap(size, size)
     pixmap.fill(Qt.GlobalColor.transparent)
     painter = QPainter(pixmap)
     painter.setRenderHint(QPainter.RenderHint.Antialiasing)
-    margin = size * 0.16
-    frame = QRectF(margin, margin, size - 2 * margin, size - 2 * margin)
+    painter.scale(size / 32.0, size / 32.0)
+    pen = QPen(colour, 1.9, Qt.PenStyle.SolidLine, Qt.PenCapStyle.RoundCap, Qt.PenJoinStyle.RoundJoin)
+    painter.setPen(pen)
+    frame = QRectF(3.5, 6.5, 25.0, 19.0)
     fill = QColor(colour)
-    fill.setAlpha(110)
-    painter.fillRect(QRectF(frame.left(), frame.top(), frame.width() / 2, frame.height()), fill)
-    painter.setPen(QPen(colour, max(1.0, size / 16)))
-    painter.drawRect(frame)
-    painter.setPen(QPen(colour, max(1.5, size / 11)))
-    middle = frame.center().x()
-    painter.drawLine(QPointF(middle, margin * 0.4), QPointF(middle, size - margin * 0.4))
+    fill.setAlpha(35)
+    painter.fillRect(QRectF(4.5, 7.5, 10.5, 17.0), fill)
+    painter.drawRoundedRect(frame, 2.0, 2.0)
+    painter.setPen(QPen(colour, 2.4, Qt.PenStyle.SolidLine, Qt.PenCapStyle.RoundCap))
+    painter.drawLine(QPointF(16.0, 3.0), QPointF(16.0, 29.0))
+    painter.setPen(pen)
+    # Arrowheads still read at the 22 px size used by the compact action bar.
+    for direction in (-1, 1):
+        tip = QPointF(16.0 + direction * 9.5, 16.0)
+        painter.drawLine(QPointF(16.0 + direction * 4.0, 16.0), tip)
+        painter.drawLine(tip, QPointF(16.0 + direction * 6.5, 13.0))
+        painter.drawLine(tip, QPointF(16.0 + direction * 6.5, 19.0))
     if pinned:
-        radius = size * 0.17
-        painter.setPen(QPen(QColor(255, 255, 255), max(1.0, size / 22)))
+        radius = 4.6
+        painter.setPen(QPen(QColor(255, 255, 255), 1.5))
         painter.setBrush(PIN_COLOUR)
-        painter.drawEllipse(QPointF(size - radius - 1.0, radius + 1.0), radius, radius)
+        painter.drawEllipse(QPointF(26.0, 6.0), radius, radius)
     painter.end()
     return QIcon(pixmap)
 
