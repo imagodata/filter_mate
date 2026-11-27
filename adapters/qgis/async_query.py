@@ -330,6 +330,8 @@ def queue_union_zoom(layers, canvas, expected_token=None, grow_by=0):
     """Compute a filtered union in canvas CRS without GUI-thread provider reads."""
     from qgis.core import QgsCoordinateTransform, QgsFeatureRequest, QgsProject, QgsRectangle
     from ..auto_zoom import current_subset_change_token
+    from .navigation import navigate_extent, stop_navigation
+    stop_navigation(canvas)
     layers = list(layers)
     view_before = navigation_stamp(canvas)
     context = QgsProject.instance().transformContext()
@@ -395,7 +397,7 @@ def queue_union_zoom(layers, canvas, expected_token=None, grow_by=0):
                 # synchronous path, else no zoom at all (audit of 2026-11-24).
                 from ..auto_zoom import _grow_degenerate
                 extent = _grow_degenerate(extent, canvas)
-            canvas.zoomToFeatureExtent(extent)
+            navigate_extent(canvas, extent, feature_margin=True)
         canvas.refresh()
 
     from qgis.PyQt.QtCore import QCoreApplication

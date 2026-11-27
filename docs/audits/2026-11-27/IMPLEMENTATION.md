@@ -17,7 +17,8 @@ des propositions encore à réaliser.
 | R08 — message trompeur après sauvegarde | Corrigé | Le message indique que l’annulation retient les données et que sauvegarder seul ne les libère pas. |
 | F01 — conversations dans l’historique | Implémenté | Onglet Conversations, reprise dans le projet d’origine, consultation des autres projets, migration des anciens échanges. |
 | A01 — lectures de sélection et flash | Implémenté | Lectures sur snapshots en arrière-plan, attente annulable et résultat invalidé par une sélection manuelle. |
-| Transitions animées et pilotage étendu de QGIS | À réaliser | Les correctifs de zoom ne constituent pas encore une animation commune. |
+| Transitions de zoom | Implémenté | Transition commune de 220 ms pour l’agent, le filtrage et le chemin principal d’exploration ; annulation par navigation manuelle. |
+| Pilotage étendu des fenêtres QGIS et plugins | Propositions | À traiter via capacités typées, après les corrections des régressions. |
 
 ## Vérification du choix du SCR
 
@@ -94,3 +95,19 @@ coopération du fournisseur ; son résultat tardif ne modifie pas la sélection.
 Validation : 452 tests de l’API et des tâches de lecture ; scénario natif QGIS 3.44 / Qt 5 et QGIS 4.3 / Qt 6
 avec une lecture volontairement ralentie, un compteur d’événements d’interface, une sélection manuelle et un délai
 court. La lecture directe de la couche est remplacée par un refus dans ce scénario pour vérifier l’usage du snapshot.
+
+## Transitions de zoom
+
+Le zoom de l’agent, l’union du filtrage et le chemin principal de zoom EXPLORING partagent une interpolation
+de centre et d’échelle, avec accélération et ralentissement sur 220 ms et environ 30 images par seconde.
+`APP.OPTIONS.EXPLORATION.zoom_transition_ms` règle la durée entre 0 et 600 ms ; 0 supprime l’animation.
+Les vues masquées, une échelle verrouillée et les traversées de l’antiméridien gardent le comportement immédiat.
+
+Un clic, une touche, la molette, un déplacement de carte, un changement de SCR ou la fermeture du projet arrêtent
+le mouvement. Une nouvelle demande remplace la précédente. L’API attend la fin de la transition en continuant
+de traiter les événements et renvoie l’emprise effectivement affichée, avec `interrupted` si elle a été interrompue.
+Les images intermédiaires remplacent leur entrée précédente dans l’historique natif : « Zoom précédent » revient
+à la vue avant la transition en un clic, y compris lorsque cet historique atteint ses 100 entrées.
+
+Validation : 526 tests API/navigation et 249 tests de configuration/exploration ; scénarios réels Qt 5 et Qt 6
+sur les images intermédiaires, l’interruption, le remplacement, la désactivation et l’historique de navigation saturé.

@@ -807,7 +807,8 @@ class ExploringController(BaseController, LayerSelectionMixin):
         if extent.width() == 0 or extent.height() == 0:
             extent.grow(canvas.mapUnitsPerPixel() * 25)
         extent.scale(scale_factor)
-        canvas.zoomToFeatureExtent(extent)
+        from ...adapters.qgis.navigation import navigate_extent
+        navigate_extent(canvas, extent, feature_margin=True)
         canvas.refresh()
 
     def _queue_remote_zoom(self, request, scale_factor=1.1):

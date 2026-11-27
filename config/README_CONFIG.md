@@ -2,6 +2,9 @@
 
 This folder holds the default configuration and the helpers that load, migrate, validate and read it. The user edits settings in the Configuration tab of the dock; the tab writes `config.json`.
 
+`APP.OPTIONS.EXPLORATION.zoom_transition_ms` controls map motion for the agent, filter zooms and the main
+EXPLORING zoom path. The default is 220 ms; use 0 for immediate movement. Manual map input cancels the transition.
+
 ## Files
 
 | File | Role |

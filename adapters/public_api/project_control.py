@@ -127,9 +127,12 @@ def zoom_to(layer: Optional[str] = None, extent_wkt: Optional[str] = None, crs: 
     if rect.isEmpty():
         from ..auto_zoom import _grow_degenerate
         rect = _grow_degenerate(rect, canvas)
-    canvas.setExtent(rect)
-    canvas.refresh()
-    return {'extent_wkt': canvas.extent().asWktPolygon(), 'scale': canvas.scale()}
+    from ..qgis.navigation import navigate_extent
+    completed = navigate_extent(canvas, rect, wait=True)
+    answer = {'extent_wkt': canvas.extent().asWktPolygon(), 'scale': canvas.scale()}
+    if not completed:
+        answer['interrupted'] = True
+    return answer
 
 
 _GRID_ADDRESS = re.compile(r'(?:://|/vsi[a-z]*[/\\]|\\)', re.IGNORECASE)

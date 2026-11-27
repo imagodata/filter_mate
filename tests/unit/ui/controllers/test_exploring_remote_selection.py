@@ -119,6 +119,8 @@ def _fake_modules(monkeypatch, service=True, key_field=True, limit=500, in_list_
         return receiver
 
     async_query._watcher = watcher
+    navigation = types.ModuleType('filter_mate.adapters.qgis.navigation')
+    navigation.navigate_extent = lambda canvas, extent, **kwargs: canvas.zoomToFeatureExtent(extent)
     probe = types.ModuleType('filter_mate.adapters.qgis.source_capability_probe')
     probe.capability_for_layer = lambda layer: SimpleNamespace(
         is_remote_service=service, key_list_limit=limit if service else None, in_list_max=in_list_max)
@@ -142,7 +144,7 @@ def _fake_modules(monkeypatch, service=True, key_field=True, limit=500, in_list_
     backends.__path__ = []
     source_refusal = types.ModuleType('filter_mate.adapters.backends.source_refusal')
     source_refusal.variable_values = lambda expression, layer: ()
-    for module in (async_query, probe, formatter, utils, stable_key, backends, source_refusal):
+    for module in (async_query, navigation, probe, formatter, utils, stable_key, backends, source_refusal):
         monkeypatch.setitem(sys.modules, module.__name__, module)
     return SimpleNamespace(async_query=async_query, probe=probe)
 

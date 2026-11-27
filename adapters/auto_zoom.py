@@ -299,7 +299,8 @@ def auto_zoom_to_filtered(
         # (grow_by) never enlarged the view: it was applied after this check (audit of 2026-11-24).
         union = _grow_degenerate(union, canvas)
 
-    canvas.zoomToFeatureExtent(union)
+    from .qgis.navigation import navigate_extent
+    navigate_extent(canvas, union, feature_margin=True)
     logger.debug(
         f"Auto-zoom: combined extent of {len(extents)} layer(s) "
         f"(global={global_enabled})"
