@@ -637,6 +637,7 @@ class AgentPanel(QFrame):
         super().__init__(parent)
         self.setObjectName(PANEL_NAME)
         self._working = False
+        self._running_posture = ""
         self._followup_mode = str(QSettings().value(_FOLLOWUP_MODE, "push"))
         self._send_stops = False
         self._speech_state = 'idle'
@@ -1951,6 +1952,7 @@ class AgentPanel(QFrame):
                                         "the steps and shows each change before applying it, Act follows the saved permissions."))
         self._refresh_placeholder()
         if hasattr(self, "thread"):
+            self._refresh_followup_hint()
             self._refresh_look()  # the chip takes the color of its posture
 
     def _refresh_placeholder(self) -> None:
@@ -2009,6 +2011,10 @@ class AgentPanel(QFrame):
 
     def activity_phase(self) -> str:
         return self.activity_icon.phase
+
+    def set_running_posture(self, posture: str) -> None:
+        self._running_posture = posture_or_default(posture)
+        self._refresh_followup_hint()
 
     def set_working(self, working: bool) -> None:
         """While the agent works the next request can be typed, and the button stops it."""
@@ -2084,6 +2090,12 @@ class AgentPanel(QFrame):
         self.followup_button.setAccessibleDescription(tooltip)
 
     def _refresh_followup_hint(self) -> None:
+        running = getattr(self, '_running_posture', '')
+        if self._working and running and running != self._posture:
+            current = self._mode_actions[running][1]
+            chosen = self._mode_actions[self._posture][1]
+            self.thread.set_hint(_tr("Current request: {}. Next message: {}. It will wait for the current request.").format(current, chosen))
+            return
         text = (_tr("Enter guides the running request. Ctrl+Shift+Enter queues a follow-up.")
                 if self._followup_mode == "push" else
                 _tr("Enter queues a follow-up. Ctrl+Shift+Enter guides the running request."))
@@ -2132,6 +2144,14 @@ class AgentPanel(QFrame):
     @property
     def queued(self) -> str:
         return "\n".join(text for text, _posture in self._queue)
+
+    def queue_message(self, text: str, posture: str, first: bool = False) -> None:
+        entry = (text, posture_or_default(posture))
+        if first:
+            self._queue.insert(0, entry)
+        else:
+            self._queue.append(entry)
+        self._refresh_queue_row()
 
     def _refresh_queue_row(self) -> None:
         """The pile waiting, numbered once there are several: the first line of each, in order."""

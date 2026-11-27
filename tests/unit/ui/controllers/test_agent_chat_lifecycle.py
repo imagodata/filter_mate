@@ -331,7 +331,6 @@ def test_push_steers_the_same_engine_and_keeps_its_permissions(ctrl_module, cont
     engine, transport = _engine(ctrl_module, controller, lambda arguments: {})
     controller.panel.input.text.return_value = ""
     controller._on_send("original request")
-    controller._posture = "respond"  # the picker applies to future exchanges
     level = controller._policy.level
     controller.panel.input.text.return_value = "use blue instead"
     assert controller._on_push("use blue instead")
@@ -409,11 +408,36 @@ def test_queued_push_preserves_even_an_identical_draft(ctrl_module, controller):
     engine, transport = _engine(ctrl_module, controller, lambda arguments: {})
     controller.panel.input.text.return_value = "correction"
     controller._on_send("original request")
-    controller._on_queued_push("correction", "respond")
+    controller._on_queued_push("correction", controller._request_posture)
     assert engine.busy and len(transport.starts) == 2
     assert engine.session.messages[-1].text == "correction"
     controller.panel.clear_input.assert_not_called()
     controller.panel.restore_queued.assert_not_called()
+
+
+@pytest.mark.parametrize('posture', ['respond', 'propose'])
+def test_push_in_a_different_posture_is_queued_without_using_the_active_permissions(ctrl_module, controller, posture):
+    engine, transport = _engine(ctrl_module, controller, lambda arguments: {})
+    controller._on_send('original request', 'act')
+    controller._posture = posture
+    controller.panel.input.text.return_value = 'only discuss this'
+    assert controller._on_push('only discuss this')
+    controller.panel.queue_message.assert_called_once_with('only discuss this', posture, first=False)
+    assert len(transport.starts) == 1 and controller._last_request == 'original request'
+    assert controller._request_posture == 'act' and engine.busy
+    assert all(message.text != 'only discuss this' for message in engine.session.messages)
+    controller.panel.clear_input.assert_called_once()
+
+
+def test_promoting_a_queued_message_respects_its_saved_posture(ctrl_module, controller):
+    engine, transport = _engine(ctrl_module, controller, lambda arguments: {})
+    controller._on_send('original request', 'act')
+    controller._posture = 'act'
+    controller.panel.input.text.return_value = 'draft'
+    controller._on_queued_push('question', 'respond')
+    controller.panel.queue_message.assert_called_once_with('question', 'respond', first=True)
+    controller.panel.clear_input.assert_not_called()
+    assert len(transport.starts) == 1 and engine.busy
 
 
 def test_queued_push_while_idle_uses_the_saved_posture(ctrl_module, controller):

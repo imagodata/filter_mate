@@ -3189,18 +3189,25 @@ class AgentChatController(QObject):
 
     def _on_queued_push(self, text: str, posture: str) -> None:
         generation = self._memory_generation
-        sent = (self._on_push(text, queued=True) if self._engine is not None and self._engine.busy
+        sent = (self._on_push(text, queued=True, posture=posture) if self._engine is not None and self._engine.busy
                 else self._on_send(text, posture, queued=True))
         if not sent and generation == self._memory_generation:
             self.panel.restore_queued(text, posture)
 
-    def _on_push(self, text: str, queued: bool = False) -> bool:
+    def _on_push(self, text: str, queued: bool = False, posture: str = "") -> bool:
         """Add instructions to this exchange, keeping its permissions and undo point."""
         if self._abandoned or self._replaying or self._building:
             return False
         engine = self._engine
+        chosen = posture_or_default(posture or self._posture)
         if engine is None or not engine.busy:
-            return self._on_send(text)
+            return self._on_send(text, chosen, queued=queued)
+        if chosen != self._request_posture:
+            self.panel.queue_message(text, chosen, first=queued)
+            if not queued and self.panel.input.text().strip() == text.strip():
+                self.panel.clear_input()
+            self.panel.set_status(_tr("Message queued with the selected mode; the running request keeps its permissions."))
+            return True
         if not engine.push(text):
             return False
         self._flush_answer()
@@ -3261,6 +3268,7 @@ class AgentChatController(QObject):
         self.panel.add_user(text)
         self._record("user", text)
         self.panel.set_status(_tr("Thinking…"))
+        self.panel.set_running_posture(self._request_posture)
         self.panel.set_working(True)
         self.panel.set_can_undo(False)
         self.panel.set_can_redo(False)
