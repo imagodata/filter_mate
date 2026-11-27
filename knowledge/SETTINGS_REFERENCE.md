@@ -331,6 +331,7 @@ Layer exploration and feature identification settings
 |---|---|---|---|
 | `point_buffer_distance_m` | 50 | 1–10000 | Buffer distance in meters applied to point features for zoom-to-feature |
 | `feature_picker_limit` | 1000 | 100–50000 | Maximum number of features loaded in the feature picker list widget |
+| `zoom_transition_ms` | 220 | 0–600 | Map zoom transition duration in milliseconds (agent, exploration and filtering). Set 0 for immediate navigation without animation. Manual navigation always cancels a transition. |
 | `auto_zoom_on_filter` | true |  | Auto-zoom, after a filter or a favorite is applied, to the filtered extent of the source layer (to its targets when the source is left unfiltered, as a favorite can). Per-layer is_tracking still forces zoom on its own layer. |
 
 ## Settings > Performance > POINT_CLOUD

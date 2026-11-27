@@ -29,6 +29,7 @@ def _controls(monkeypatch):
     """The real gui_control under the harness package (its parent and operations there are stand-ins)."""
     from .test_agent_chat_lifecycle import _module as _stub_module
     _stub_module(monkeypatch, ".adapters.public_api.operations")
+    _stub_module(monkeypatch, '.adapters.qgis.feature_ids')
     name = f"{_PKG}.adapters.public_api.gui_control"
     if name not in sys.modules:
         spec = importlib.util.spec_from_file_location(
