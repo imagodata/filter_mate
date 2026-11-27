@@ -85,7 +85,8 @@ et un budget suffisant conserve le fonctionnement normal.
 La sélection et la surbrillance lisent un snapshot de la couche dans une tâche QGIS. L’API reste synchrone, mais
 sa boucle d’attente traite les événements de l’interface. Stop, un délai de 30 secondes, un changement de source
 ou de sélection invalident le résultat ; aucune sélection partielle n’est appliquée. La sélection est limitée à
-200 000 identifiants correspondants, avec refus explicite au-delà plutôt qu’un résultat tronqué.
+100 000 identifiants correspondants et sélectionnés au total, pour rester dans la capacité de capture de
+l’annulation, avec refus explicite au-delà plutôt qu’un résultat tronqué.
 
 La surbrillance transmet des copies de géométries à `flashGeometries` : `flashFeatureIds` effectuerait une seconde
 lecture du fournisseur dans le fil d’interface. L’itérateur du snapshot garde les protections existantes sur les
@@ -95,6 +96,11 @@ coopération du fournisseur ; son résultat tardif ne modifie pas la sélection.
 Validation : 452 tests de l’API et des tâches de lecture ; scénario natif QGIS 3.44 / Qt 5 et QGIS 4.3 / Qt 6
 avec une lecture volontairement ralentie, un compteur d’événements d’interface, une sélection manuelle et un délai
 court. La lecture directe de la couche est remplacée par un refus dans ce scénario pour vérifier l’usage du snapshot.
+
+Une lecture de sélection refusée après une intervention manuelle ne doit pas attribuer cette intervention à l’agent.
+Le checkpoint reçoit désormais le résultat de l’appel et retire cette sélection de ses effets si elle a changé pendant
+un appel refusé. La capture d’une sélection existante dépassant la capacité d’annulation bloque également l’action.
+Ces cas passent sur les deux versions de QGIS ; 222 tests du moteur, des checkpoints et du contrôleur passent.
 
 ## Transitions de zoom
 

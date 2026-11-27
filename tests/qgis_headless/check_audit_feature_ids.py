@@ -18,6 +18,8 @@ package.__path__ = [os.environ.get('FM_REPO', '/src')]
 sys.modules['filter_mate'] = package
 from filter_mate.adapters.qgis import async_query, feature_ids
 from filter_mate.adapters.public_api import gui_control, project_control
+from filter_mate.adapters.agent.turn_effects import EffectsRecorder
+from filter_mate.core.agent.messages import ToolCallPart
 
 layer = QgsVectorLayer('Point?crs=EPSG:2154&field=value:integer', 'points', 'memory')
 features = []
@@ -54,6 +56,9 @@ with patch.object(async_query.SnapshotQueryTask, 'features', slow), patch.object
     print('PASS selection reads a snapshot in a worker while GUI events continue', flush=True)
 
     manual = [features[0].id()]
+    effects = EffectsRecorder()
+    call = ToolCallPart('selection', 'select_features', {'layer': layer.id(), 'expression': '"value" > 0'})
+    effects.before_call(call)
     QTimer.singleShot(10, lambda: layer.selectByIds(manual))
     try:
         project_control.select_features(layer.id(), '"value" > 0')
@@ -62,6 +67,9 @@ with patch.object(async_query.SnapshotQueryTask, 'features', slow), patch.object
     else:
         raise AssertionError('manual selection was overwritten')
     assert set(layer.selectedFeatureIds()) == set(manual)
+    effects.cancel_failed_selection()
+    effects.after_call()
+    assert not any(effect[0] == 'selection' for effect in effects.finish()), 'manual selection is not an agent effect'
     wait()
     assert set(layer.selectedFeatureIds()) == set(manual)
     print('PASS manual selection wins; a late result cannot overwrite it', flush=True)
@@ -82,6 +90,14 @@ with patch.object(async_query.SnapshotQueryTask, 'features', slow), patch.object
     assert set(layer.selectedFeatureIds()) == set(manual)
     print('PASS bounded flash and timeouts leave selection intact', flush=True)
 timer.stop()
+with patch.object(layer, 'selectedFeatureCount', return_value=100001):
+    try:
+        EffectsRecorder().before_call(call)
+    except ValueError as exc:
+        assert 'too large to capture' in str(exc), str(exc)
+    else:
+        raise AssertionError('a selection without Undo coverage must be refused')
+print('PASS failed selections exclude manual changes from Undo; oversized originals require Undo coverage', flush=True)
 QgsProject.instance().clear()
 print(f'PASS QGIS {Qgis.QGIS_VERSION}: all feature ID regression checks', flush=True)
 os._exit(0)

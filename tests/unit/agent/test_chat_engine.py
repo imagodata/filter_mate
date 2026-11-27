@@ -119,6 +119,15 @@ def test_text_only(setup):
     assert checkpoint.begins == 0
 
 
+def test_checkpoint_receives_the_call_result_when_it_supports_it(setup):
+    engine, _session, transport, _listener, checkpoint, _seen = setup
+    ended = []
+    checkpoint.end_call = lambda call, result: ended.append((call.name, result.is_error))
+    engine.send('go')
+    transport.emit(turn(STOP_TOOL_USE, ToolCallPart('one', WRITE.name, {})))
+    assert ended == [(WRITE.name, False)]
+
+
 @pytest.mark.parametrize("text", ["", "   "])
 def test_nothing_to_send(setup, text):
     assert setup[0].send(text) is False

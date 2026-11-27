@@ -146,6 +146,13 @@ class TurnCheckpoint:
                 except Exception:  # noqa: BLE001 - the turn is then compared whole, as before
                     logger.debug("Agent undo: the end of a step not recorded", exc_info=True)
 
+    def end_call(self, call, result) -> None:
+        if getattr(call, 'name', '') == 'select_features' and result.is_error:
+            for recorder in (self._effects, self._step_recorder):
+                if recorder is not None:
+                    recorder.cancel_failed_selection()
+        self.end()
+
     def _close_step(self) -> None:
         """The step under way ends (the next one begins, or the turn ends): what it did beside the filters."""
         if self._step_recorder is not None:

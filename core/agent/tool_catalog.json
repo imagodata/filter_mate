@@ -1201,7 +1201,7 @@
   {
    "name": "select_features",
    "title": "Select features",
-   "description": "Select features matching a QGIS expression. A selection highlights features without filtering the layer; cross_filter uses selected features as its source. Reads a worker snapshot, keeping the interface responsive. At most 200000 matching IDs; narrow larger requests. Stop, timeout or a manual change leaves the selection untouched. Returns layer_name and selected_count. Comparisons, IN, LIKE and safe text, number, date and geometry functions are accepted.",
+   "description": "Select features matching a QGIS expression. A selection highlights features without filtering the layer; cross_filter uses selected features as its source. Reads a worker snapshot, keeping the interface responsive. At most 100000 matching IDs and total selected IDs, within the Undo limit; narrow larger requests. Stop, timeout or a manual change leaves the selection untouched. Returns layer_name and selected_count. Comparisons, IN, LIKE and safe text, number, date and geometry functions are accepted.",
    "read_only": false,
    "destructive": false,
    "idempotent": true,

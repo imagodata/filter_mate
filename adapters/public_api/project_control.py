@@ -420,10 +420,13 @@ def select_features(layer: str, expression: str = '', clear: bool = False, add: 
             raise ValueError(f"unknown field(s): {', '.join(unknown)}")
         behavior = QgsVectorLayer.SelectBehavior.AddToSelection if add else QgsVectorLayer.SelectBehavior.SetSelection
         from ..qgis.feature_ids import read_feature_ids
-        maximum = 200_000
+        from ...core.agent.limits import MAX_SELECTION_IDS
+        maximum = MAX_SELECTION_IDS
         ids = read_feature_ids(found, expression, maximum + 1, protect_selection=True)
         if len(ids) > maximum:
             raise ValueError(f'more than {maximum} matching features: narrow the expression; selection unchanged')
+        if add and len(set(found.selectedFeatureIds()).union(ids)) > maximum:
+            raise ValueError(f'more than {maximum} selected features in total: selection unchanged')
         found.selectByIds(ids, behavior)
     return {'layer_id': found.id(), 'layer_name': found.name(), 'selected_count': found.selectedFeatureCount()}
 

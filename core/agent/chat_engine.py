@@ -402,9 +402,10 @@ class ChatEngine:
         if spent >= SLOW_TOOL_MS:
             logger.info(f"⏱ agent {call.name}: {spent:.0f} ms" + (" (failed)" if result.is_error else ""))
         end = getattr(self._checkpoint, "end", None)  # optional: what the user does next is not the turn's
-        if began and end is not None:
+        end_call = getattr(self._checkpoint, 'end_call', None)
+        if began and (end_call is not None or end is not None):
             try:
-                end()
+                end_call(call, result) if end_call is not None else end()
             except Exception:
                 logger.exception("Agent undo point could not close its step")
         gate = connector_gate(call) if verdict == ASK else None

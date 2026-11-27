@@ -63,10 +63,11 @@ from typing import Any, Dict, FrozenSet, List, Optional, Sequence, Set, Tuple
 
 from qgis.core import QgsLayerDefinition, QgsLayerTree, QgsProject, QgsReadWriteContext, QgsVectorLayer
 from qgis.PyQt.QtXml import QDomDocument
+from ...core.agent.limits import MAX_SELECTION_IDS
 
 logger = logging.getLogger("FilterMate.agent")
 
-MAX_SELECTION = 100_000  # beyond, the selection is not kept: too much to hold for an undo
+MAX_SELECTION = MAX_SELECTION_IDS
 Place = Tuple[Tuple[str, ...], int]
 # The tools that change how a layer is drawn: its style is kept before their first call in a turn.
 STYLE_TOOLS = ("set_layer_style", "set_labels", "design_style", "apply_style_preset")
@@ -406,6 +407,7 @@ class EffectsRecorder:
         self._relations_before: Optional[Dict[str, Tuple[str, str]]] = None
         self._forms: Dict[str, str] = {}  # {layer id: the XML of its form before the turn changed it}
         self._selection: Dict[str, Tuple[int, ...]] = {}
+        self._selection_at_call: Optional[Tuple[str, Tuple[int, ...]]] = None
         self._visibility: Dict[str, bool] = {}
         self._styles: Dict[str, str] = {}
         self._notes: Optional[Tuple[str, ...]] = None
@@ -437,6 +439,7 @@ class EffectsRecorder:
         self._kept_selection: Set[str] = set()
 
     def before_call(self, call: Any, step: int = 0) -> None:
+        self._selection_at_call = None
         project = QgsProject.instance()
         if self._ids_before is None:
             self._ids_before = set(project.mapLayers())
@@ -459,6 +462,10 @@ class EffectsRecorder:
             elif name == "select_features":
                 layer = _resolve(project, arguments.get("layer"))
                 selected = _selection(layer) if layer is not None else None
+                if layer is not None and isinstance(layer, QgsVectorLayer) and selected is None:
+                    raise ValueError('the existing selection is too large to capture for Undo')
+                if selected is not None:
+                    self._selection_at_call = (layer.id(), selected)
                 if selected is not None and layer.id() not in self._selection:
                     self._selection[layer.id()] = selected
             elif name in SETTINGS_TOOLS and self._record_settings:
@@ -596,6 +603,17 @@ class EffectsRecorder:
         except Exception:  # noqa: BLE001 - refuse a layout change whose previous state cannot be restored
             logger.debug("Agent undo: layout %s not kept", layout_name, exc_info=True)
             raise
+
+    def cancel_failed_selection(self) -> None:
+        """A refused selection did not write: a manual change during its wait belongs to the user."""
+        if self._selection_at_call is not None:
+            layer_id, before = self._selection_at_call
+            layer = QgsProject.instance().mapLayer(layer_id)
+            current = _selection(layer) if layer is not None else None
+            if current != before:
+                self._selection.pop(layer_id, None)
+                self._kept_selection.discard(layer_id)
+            self._selection_at_call = None
 
     def after_call(self) -> None:
         """The call under way ended: the layers that came during it are those the turn added."""

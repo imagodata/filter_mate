@@ -2621,6 +2621,9 @@ class AgentChatController(QObject):
                 result = executor.execute(call)
                 if self._abandoned:  # its project closed during the step
                     break
+                end_call = getattr(self._checkpoint, 'end_call', None)
+                if end_call is not None:
+                    end_call(call, result)
                 if not result.is_error:
                     executed = number
                 if not result.is_error and step.get("made"):
