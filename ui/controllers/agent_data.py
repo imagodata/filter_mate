@@ -9,6 +9,21 @@ from ...adapters.agent import data_store
 from ...adapters.agent.save_location import remember_project_folder, suggested_project_path
 
 logger = logging.getLogger("FilterMate.AgentData")
+_SUPPRESS_SAVE_OFFERS = 'filtermate_agent_suppress_save_offers'
+
+
+def save_offers_suppressed():
+    """A preference of this QGIS process, surviving dock recreation without writing settings."""
+    from qgis.core import QgsApplication
+    application = QgsApplication.instance()
+    return application is not None and application.property(_SUPPRESS_SAVE_OFFERS) is True
+
+
+def suppress_save_offers():
+    from qgis.core import QgsApplication
+    application = QgsApplication.instance()
+    if application is not None:
+        application.setProperty(_SUPPRESS_SAVE_OFFERS, True)
 
 
 def _tr(text):
@@ -48,6 +63,8 @@ class AgentDataController:
         self._unsaved = False
 
     def offer(self):
+        if save_offers_suppressed():
+            return
         layers = data_store.pending_layers(self.project)
         new = {(layer.id(), layer.source()) for layer in layers} - self._offered
         if not new:
@@ -57,6 +74,9 @@ class AgentDataController:
                  "yes": _tr("Save project and layers…"), "no": _tr("Continue in memory"),
                  "allowed": _tr("Choose where to save the project and its layers."),
                  "refused": _tr("The data stay in memory until this project is closed."),
+                 'always': _tr('Do not offer again this session'),
+                 'always_tip': _tr('Hide save suggestions until QGIS restarts. You can still save from the agent menu.'),
+                 'allowed_always': _tr('Save suggestions are hidden for this QGIS session. The data stay in memory.'),
                  "layers": [layer.name() for layer in layers[:5]]}
         path = suggested_project_path(self.project, layers)
         description = _tr(
@@ -64,10 +84,32 @@ class AgentDataController:
             "keep them after closing QGIS.")
         description += "\n\n" + _tr("Suggested project: {}").format(path)
         description += "\n" + _tr("Project and layers folder: {}").format(os.path.dirname(path))
-        card = self.host.panel.add_confirm_card(texts, description, False)
+        card = self.host.panel.add_confirm_card(texts, description, True)
         generation = self._generation
-        card.answered.connect(lambda answer: self.save() if answer == "once" and generation == self._generation
-                              else None)
+        def answered(answer):
+            if generation != self._generation:
+                return
+            if answer == 'conversation':  # the card's third choice; this is a session preference, not a permission
+                suppress_save_offers()
+            elif answer == 'once':
+                self.save()
+        card.answered.connect(answered)
+
+    def _ask_to_save(self, path):
+        from qgis.PyQt.QtWidgets import QCheckBox, QMessageBox
+        box = QMessageBox(self.host.panel)
+        box.setWindowTitle(_tr('Save project and layers'))
+        box.setIcon(QMessageBox.Icon.Question)
+        box.setText(_tr('Save the downloaded data and results beside this project?\n{}\n\n'
+                        'If you choose No, these data stay in memory and will be lost when the project closes.').format(path))
+        box.setStandardButtons(QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
+        box.setDefaultButton(QMessageBox.StandardButton.Yes)
+        choice = QCheckBox(_tr('Do not offer again this session'), box)
+        box.setCheckBox(choice)
+        answer = box.exec()
+        if choice.isChecked():
+            suppress_save_offers()
+        return answer
 
     def save(self):
         from qgis.PyQt.QtWidgets import QFileDialog
@@ -117,12 +159,9 @@ class AgentDataController:
         if not path or not path.lower().endswith((".qgz", ".qgs")):
             return
         self._unsaved = True
-        if self._busy():
+        if self._busy() or save_offers_suppressed():
             return  # never rebind providers while a tool is using them
-        answer = QMessageBox.question(self.host.panel, _tr("Save project and layers"), _tr(
-            "Save the downloaded data and results beside this project?\n{}\n\n"
-            "If you choose No, these data stay in memory and will be lost when the project closes.").format(path),
-            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No, QMessageBox.StandardButton.Yes)
+        answer = self._ask_to_save(path)
         if answer != QMessageBox.StandardButton.Yes:
             return
         self._saving = True

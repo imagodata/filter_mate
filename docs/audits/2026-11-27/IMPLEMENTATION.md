@@ -159,3 +159,15 @@ résumés plus courts. Le banc hors ligne couvre 174 scénarios actifs, avec tro
 Validation native : QGIS 3.44 / Qt 5 et QGIS 4.3 / Qt 6, avec de vrais panneaux Qt, un outil cartographique et
 l’historique de carte. Les entrées de dialogue de `iface` y sont simulées ; leur parcours complet dans QGIS de
 bureau reste à vérifier. Les tests couvrent aussi les panneaux disparus, imbriqués, désactivés ou ambigus.
+
+## Masquer les propositions de sauvegarde pour la session
+
+La carte « Enregistrer le projet et les couches » propose « Ne plus proposer pendant cette session ». La question
+du même nom lors d’un enregistrement natif QGIS offre également cette option, sous forme de case à cocher.
+Ce choix masque les deux sortes de propositions jusqu’au prochain démarrage de QGIS, y compris si le panneau
+est fermé puis rouvert ou si l’on change de projet. Il ne vaut pas autorisation de sauvegarder automatiquement.
+
+La préférence est une propriété en mémoire de l’application Qt : aucun réglage permanent n’est écrit. La commande
+manuelle d’enregistrement reste disponible. Les données transitoires conservent leurs protections existantes.
+Validation : contrôles natifs Qt 5 et Qt 6, recréation du contrôleur, sauvegarde manuelle après masquage et tests
+de stockage/persistance QGIS 3.44 inchangés.

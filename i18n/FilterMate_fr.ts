@@ -15070,6 +15070,18 @@ Dossier : {6}</translation>
         <translation>Continuer en mémoire</translation>
     </message>
     <message>
+        <source>Do not offer again this session</source>
+        <translation>Ne plus proposer pendant cette session</translation>
+    </message>
+    <message>
+        <source>Hide save suggestions until QGIS restarts. You can still save from the agent menu.</source>
+        <translation>Masquer les propositions de sauvegarde jusqu’au redémarrage de QGIS. La sauvegarde reste accessible dans le menu de l’agent.</translation>
+    </message>
+    <message>
+        <source>Save suggestions are hidden for this QGIS session. The data stay in memory.</source>
+        <translation>Les propositions de sauvegarde sont masquées pour cette session QGIS. Les données restent en mémoire.</translation>
+    </message>
+    <message>
         <source>Choose where to save the project and its layers.</source>
         <translation>Choisissez où enregistrer le projet et ses couches.</translation>
     </message>

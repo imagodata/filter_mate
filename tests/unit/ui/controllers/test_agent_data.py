@@ -10,6 +10,10 @@ pytestmark = pytest.mark.unit
 
 @pytest.fixture
 def data_ui(ctrl_module, monkeypatch):
+    import sys
+    properties = {}
+    application = SimpleNamespace(property=properties.get, setProperty=lambda key, value: properties.update({key: value}))
+    monkeypatch.setattr(sys.modules['qgis.core'], 'QgsApplication', SimpleNamespace(instance=lambda: application), raising=False)
     store = _module(monkeypatch, ".adapters.agent.data_store", pending_layers=lambda project: [])
     _module(monkeypatch, ".adapters.agent.save_location",
             suggested_project_path=MagicMock(return_value="/chosen/Rivers.qgz"), remember_project_folder=MagicMock())
@@ -110,3 +114,46 @@ def test_unloading_the_panel_leaves_project_data_alive(data_ui):
     ui.close()
     store.close.assert_not_called()
     assert not ui._connections
+
+
+def test_suppressing_save_offers_survives_dock_recreation_and_project_changes(data_ui):
+    module, ui, host, store = data_ui
+    store.pending_layers = lambda project: [SimpleNamespace(id=lambda: 'l1', source=lambda: 'vsi', name=lambda: 'Layer')]
+    ui.offer()
+    texts, _description, third_choice = host.panel.add_confirm_card.call_args.args
+    assert third_choice and texts['always'] == 'Do not offer again this session'
+    host.panel.add_confirm_card.return_value.answered.connect.call_args.args[0]('conversation')
+    assert module.save_offers_suppressed()
+    ui.close()
+    other = module.AgentDataController(host)
+    other._reset()
+    host.panel.add_confirm_card.reset_mock()
+    other.offer()
+    host.panel.add_confirm_card.assert_not_called()
+    store.persist.assert_not_called()
+
+
+def test_suppression_does_not_disable_manual_save_or_persist_to_next_qgis_session(data_ui, monkeypatch):
+    import sys
+    module, ui, host, store = data_ui
+    module.suppress_save_offers()
+    choose = MagicMock(return_value=('', ''))
+    monkeypatch.setattr(sys.modules['qgis.PyQt.QtWidgets'], 'QFileDialog', SimpleNamespace(getSaveFileName=choose))
+    assert ui.save() is False
+    choose.assert_called_once()
+    replacement = SimpleNamespace(property=lambda name: None)
+    monkeypatch.setattr(sys.modules['qgis.core'], 'QgsApplication', SimpleNamespace(instance=lambda: replacement))
+    assert not module.save_offers_suppressed()
+
+
+def test_suppression_skips_native_save_questions_but_keeps_transient_data_marked_unsaved(data_ui, monkeypatch):
+    module, ui, host, store = data_ui
+    store.pending_layers = lambda project: [object()]
+    ui.project.fileName = lambda: '/chosen/project.qgz'
+    module.suppress_save_offers()
+    question = MagicMock()
+    monkeypatch.setattr(ui, '_ask_to_save', question)
+    ui._before_write(object())
+    question.assert_not_called()
+    assert ui._unsaved
+    store.persist.assert_not_called()

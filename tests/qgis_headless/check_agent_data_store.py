@@ -193,7 +193,7 @@ def main():
     project.addMapLayer(clipped_raster)
     operations.cross_filter_by_geometry(QgsGeometry.fromWkt('POLYGON((0 0, 5 0, 5 10, 0 10, 0 0))'),
                                        clipped_raster.crs(), [clipped_raster.id()])
-    with patch.object(QMessageBox, "question", return_value=QMessageBox.StandardButton.Yes):
+    with patch.object(ui, '_ask_to_save', return_value=QMessageBox.StandardButton.Yes):
         check("native QGIS Save offers to keep the downloaded data", project.write(native_project)
               and not data_store.pending_layers(project))
     ui.close()
