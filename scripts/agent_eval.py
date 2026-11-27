@@ -50,7 +50,7 @@ from agent.tool_index import index_block  # noqa: E402
 from agent.chat_setup import stable_order  # noqa: E402
 from agent.skills import SKILLS, load as load_skill  # noqa: E402
 from agent.system_prompt import SYSTEM_PROMPT  # noqa: E402
-from agent.tool_catalog import CHAT_ONLY, FILTERING_NOTE, FILTERING_TOOLS, SETTINGS_TOOLS, USE_TOOLS, chat_tools, load_catalog, with_skill_tool  # noqa: E402
+from agent.tool_catalog import CHAT_ONLY, DISABLED_TOOLS, FILTERING_NOTE, FILTERING_TOOLS, SETTINGS_TOOLS, USE_TOOLS, chat_tools, load_catalog, with_skill_tool  # noqa: E402
 from agent.tool_executor import ToolExecutor, ToolFailure  # noqa: E402
 
 CASES_PATH = Path(__file__).with_name("agent_eval_cases.json")
@@ -1081,7 +1081,7 @@ def run_case(case: Dict[str, Any], provider, transport, filtering: bool = False,
     project = SimulatedProject(case.get("setup"))
     # Off by default (the expert mode: a case says "expert": true to turn it on), or nothing to draw in a simulated
     # project (view_map).
-    left_out = ("view_map",) if case.get("expert") else ("run_pyqgis", "view_map")
+    left_out = set(("view_map",) if case.get("expert") else ("run_pyqgis", "view_map")) | DISABLED_TOOLS
     tools = tuple(stable_order([tool for tool in chat_tools() if tool.name not in left_out
                                 and (not filtering or tool.name in FILTERING_TOOLS)]))  # as the chat (lot 4)
     offered = {tool.name for tool in tools}
@@ -1130,14 +1130,24 @@ def run_case(case: Dict[str, Any], provider, transport, filtering: bool = False,
 SKILLS_PATH = Path(__file__).resolve().parent.parent / "skills"
 
 
-def load_cases(only: Optional[Sequence[str]] = None) -> List[Dict[str, Any]]:
+def load_cases(only: Optional[Sequence[str]] = None, include_unavailable: bool = False) -> List[Dict[str, Any]]:
     """The shared cases, then those of each skill (skills/<name>/evals.json)."""
     with open(CASES_PATH, encoding="utf-8") as stream:
         cases = json.load(stream)["cases"]
     for evals in sorted(SKILLS_PATH.glob("*/evals.json")):
         with open(evals, encoding="utf-8") as stream:
             cases += [dict(case, skill=evals.parent.name) for case in json.load(stream)["cases"]]
-    return [case for case in cases if not only or case["id"] in only]
+    return [case for case in cases if (not only or case["id"] in only)
+            and (include_unavailable or not unavailable_reason(case))]
+
+
+def unavailable_reason(case: Dict[str, Any]) -> str:
+    skill = SKILLS.get(case.get('skill', ''))
+    required = set(skill.requires) if skill is not None else set()
+    alternatives = case.get('expect') or []
+    if alternatives and all(any(step['tool'] in DISABLED_TOOLS for step in steps) for steps in alternatives):
+        return 'an expected tool is disabled in production'
+    return 'the skill requires a disabled tool' if required & DISABLED_TOOLS else ''
 
 
 def expected_script(case: Dict[str, Any]) -> List[Dict[str, Any]]:
@@ -1220,7 +1230,11 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         sys.path.insert(0, str(Path(__file__).resolve().parent))
         from agent_eval_prompts import SKILLS_SYSTEM_PROMPT  # noqa: E402
         legacy_prompt = SKILLS_SYSTEM_PROMPT
-    for case in load_cases(args.case):
+    for case in load_cases(args.case, include_unavailable=True):
+        unavailable = unavailable_reason(case)
+        if unavailable:
+            print(f"SKIP {case['id']}: {unavailable}", flush=True)
+            continue
         if filtering and not fits(case, FILTERING_TOOLS):
             continue
         for attempt in range(1, args.repeat + 1):

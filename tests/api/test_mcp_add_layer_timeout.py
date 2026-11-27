@@ -7,7 +7,9 @@ again. The limits are read in the code, so that one that grows is noticed here.
 """
 import ast
 import pathlib
+import pytest
 
+pytest.importorskip('mcp')
 
 from filtermate_api.mcp import server
 
