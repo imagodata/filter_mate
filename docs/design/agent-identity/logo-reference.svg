@@ -1,0 +1,97 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120">
+  <defs>
+    <filter id="lightShadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="0.5"/>
+      <feOffset dx="0.5" dy="0.5" result="offsetblur"/>
+      <feComponentTransfer>
+        <feFuncA type="linear" slope="0.3"/>
+      </feComponentTransfer>
+      <feMerge>
+        <feMergeNode/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Pulsing waves from center — synced to 2s base rhythm -->
+  <circle cx="60" cy="60" r="8" fill="none" stroke="#E0E0E0" stroke-width="1.5" opacity="0">
+    <animate attributeName="r" values="8;20;8" dur="2s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="0.6;0;0.6" dur="2s" repeatCount="indefinite"/>
+  </circle>
+  <circle cx="60" cy="60" r="8" fill="none" stroke="#BDBDBD" stroke-width="1.2" opacity="0">
+    <animate attributeName="r" values="8;26;8" dur="2s" repeatCount="indefinite" begin="-1.6s"/>
+    <animate attributeName="opacity" values="0.5;0;0.5" dur="2s" repeatCount="indefinite" begin="-1.6s"/>
+  </circle>
+  <circle cx="60" cy="60" r="8" fill="none" stroke="#9E9E9E" stroke-width="1" opacity="0">
+    <animate attributeName="r" values="8;32;8" dur="2s" repeatCount="indefinite" begin="-1.2s"/>
+    <animate attributeName="opacity" values="0.4;0;0.4" dur="2s" repeatCount="indefinite" begin="-1.2s"/>
+  </circle>
+
+  <!-- Center node with pulse -->
+  <circle cx="60" cy="60" r="4" fill="#FFFFFF" filter="url(#lightShadow)">
+    <animate attributeName="r" values="3.5;7;3.5" dur="2s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="0.9;1;0.9" dur="2s" repeatCount="indefinite"/>
+  </circle>
+
+  <!-- Corner nodes — r increased, synced to 4s -->
+  <circle cx="30" cy="30" r="4" fill="#212121" filter="url(#lightShadow)">
+    <animate attributeName="r" values="4;5;4" dur="4s" repeatCount="indefinite"/>
+  </circle>
+  <circle cx="90" cy="30" r="4" fill="#212121" filter="url(#lightShadow)">
+    <animate attributeName="r" values="4;5;4" dur="4s" repeatCount="indefinite" begin="-3s"/>
+  </circle>
+  <circle cx="30" cy="90" r="4" fill="#212121" filter="url(#lightShadow)">
+    <animate attributeName="r" values="4;5;4" dur="4s" repeatCount="indefinite" begin="-2s"/>
+  </circle>
+  <circle cx="90" cy="90" r="4" fill="#212121" filter="url(#lightShadow)">
+    <animate attributeName="r" values="4;5;4" dur="4s" repeatCount="indefinite" begin="-1s"/>
+  </circle>
+
+  <!-- Main connections (center to corners) -->
+  <path d="M60,60 L30,30" stroke="#757575" stroke-width="0.6" opacity="0.4" fill="none"/>
+  <path d="M60,60 L90,30" stroke="#757575" stroke-width="0.6" opacity="0.4" fill="none"/>
+  <path d="M60,60 L30,90" stroke="#757575" stroke-width="0.6" opacity="0.4" fill="none"/>
+  <path d="M60,60 L90,90" stroke="#757575" stroke-width="0.6" opacity="0.4" fill="none"/>
+
+  <!-- Edge connections (dashed) -->
+  <path d="M30,30 L90,30" stroke="#9E9E9E" stroke-width="1" opacity="0.3" fill="none" stroke-dasharray="2,2"/>
+  <path d="M30,90 L90,90" stroke="#9E9E9E" stroke-width="1" opacity="0.3" fill="none" stroke-dasharray="2,2"/>
+  <path d="M30,30 L30,90" stroke="#9E9E9E" stroke-width="1" opacity="0.3" fill="none" stroke-dasharray="2,2"/>
+  <path d="M90,30 L90,90" stroke="#9E9E9E" stroke-width="1" opacity="0.3" fill="none" stroke-dasharray="2,2"/>
+
+  <!-- Orbiting electrons — r increased, synced to 16s base with 4s offset -->
+  <circle r="5" fill="#0D47A1" filter="url(#lightShadow)">
+    <animateMotion path="M60,60 m-35,0 a35,35 0 1,0 70,0 a35,35 0 1,0 -70,0z" dur="16s" repeatCount="indefinite"/>
+  </circle>
+  <circle r="5" fill="#B71C1C" filter="url(#lightShadow)">
+    <animateMotion path="M60,60 m0,-35 a35,35 0 1,0 0,70 a35,35 0 1,0 0,-70z" dur="16s" repeatCount="indefinite" begin="-12s"/>
+  </circle>
+  <circle r="5" fill="#F57F17" filter="url(#lightShadow)">
+    <animateMotion path="M60,60 m-25,-25 a35.36,35.36 0 1,0 50,50 a35.36,35.36 0 1,0 -50,-50z" dur="16s" repeatCount="indefinite" begin="-8s"/>
+  </circle>
+  <circle r="5" fill="#4CAF50" filter="url(#lightShadow)">
+    <animateMotion path="M60,60 m25,-25 a35.36,35.36 0 1,1 -50,50 a35.36,35.36 0 1,1 50,-50z" dur="16s" repeatCount="indefinite" begin="-4s"/>
+  </circle>
+
+  <!-- Mini electrons traveling on edges — synced to 8s base with 2s offsets -->
+  <circle r="1.5" fill="#0D47A1" opacity="0">
+    <animateMotion path="M30,30 L90,30" dur="8s" repeatCount="indefinite" keyPoints="0;1;0" keyTimes="0;0.5;1" calcMode="linear"/>
+    <animate attributeName="opacity" values="0;0.8;0" dur="8s" repeatCount="indefinite"/>
+  </circle>
+  <circle r="1.5" fill="#B71C1C" opacity="0">
+    <animateMotion path="M30,30 L30,90" dur="8s" repeatCount="indefinite" keyPoints="0;1;0" keyTimes="0;0.5;1" calcMode="linear" begin="-2s"/>
+    <animate attributeName="opacity" values="0;0.8;0" dur="8s" repeatCount="indefinite" begin="-2s"/>
+  </circle>
+  <circle r="1.5" fill="#F57F17" opacity="0">
+    <animateMotion path="M30,30 L90,90" dur="8s" repeatCount="indefinite" keyPoints="0;1;0" keyTimes="0;0.5;1" calcMode="linear" begin="-4s"/>
+    <animate attributeName="opacity" values="0;0.8;0" dur="8s" repeatCount="indefinite" begin="-4s"/>
+  </circle>
+  <circle r="1.5" fill="#616161" opacity="0">
+    <animateMotion path="M90,30 L30,90" dur="8s" repeatCount="indefinite" keyPoints="0;1;0" keyTimes="0;0.5;1" calcMode="linear" begin="-2s"/>
+    <animate attributeName="opacity" values="0;0.8;0" dur="8s" repeatCount="indefinite" begin="-2s"/>
+  </circle>
+  <circle r="1.5" fill="#4CAF50" opacity="0">
+    <animateMotion path="M30,90 L90,90" dur="8s" repeatCount="indefinite" keyPoints="0;1;0" keyTimes="0;0.5;1" calcMode="linear" begin="-4s"/>
+    <animate attributeName="opacity" values="0;0.8;0" dur="8s" repeatCount="indefinite" begin="-4s"/>
+  </circle>
+</svg>

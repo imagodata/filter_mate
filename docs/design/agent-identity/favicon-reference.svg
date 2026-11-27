@@ -1,0 +1,75 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120">
+  <!-- GISPulse animated favicon — network topology with pulse effect -->
+
+  <!-- Pulsing waves from center — synced to 2s base rhythm -->
+  <circle cx="60" cy="60" r="8" fill="none" stroke="#E0E0E0" stroke-width="2" opacity="0">
+    <animate attributeName="r" values="8;22;8" dur="2s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="0.5;0;0.5" dur="2s" repeatCount="indefinite"/>
+  </circle>
+  <circle cx="60" cy="60" r="8" fill="none" stroke="#BDBDBD" stroke-width="1.5" opacity="0">
+    <animate attributeName="r" values="8;28;8" dur="2s" repeatCount="indefinite" begin="-1.6s"/>
+    <animate attributeName="opacity" values="0.4;0;0.4" dur="2s" repeatCount="indefinite" begin="-1.6s"/>
+  </circle>
+
+  <!-- Main connections (center to corners) with pulse -->
+  <path d="M60,60 L30,30" stroke="#757575" stroke-width="3" opacity="0.6" fill="none" stroke-linecap="round">
+    <animate attributeName="opacity" values="0.6;0.3;0.6" dur="4s" repeatCount="indefinite"/>
+  </path>
+  <path d="M60,60 L90,30" stroke="#757575" stroke-width="3" opacity="0.6" fill="none" stroke-linecap="round">
+    <animate attributeName="opacity" values="0.6;0.3;0.6" dur="4s" repeatCount="indefinite" begin="-3s"/>
+  </path>
+  <path d="M60,60 L30,90" stroke="#757575" stroke-width="3" opacity="0.6" fill="none" stroke-linecap="round">
+    <animate attributeName="opacity" values="0.6;0.3;0.6" dur="4s" repeatCount="indefinite" begin="-2s"/>
+  </path>
+  <path d="M60,60 L90,90" stroke="#757575" stroke-width="3" opacity="0.6" fill="none" stroke-linecap="round">
+    <animate attributeName="opacity" values="0.6;0.3;0.6" dur="4s" repeatCount="indefinite" begin="-1s"/>
+  </path>
+
+  <!-- Data particles traveling on connections — synced to 8s with 2s offsets -->
+  <circle r="2.5" fill="#0D47A1" opacity="0">
+    <animateMotion path="M60,60 L30,30" dur="2s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="0;0.9;0" dur="2s" repeatCount="indefinite"/>
+  </circle>
+  <circle r="2.5" fill="#B71C1C" opacity="0">
+    <animateMotion path="M60,60 L90,30" dur="2s" repeatCount="indefinite" begin="-1.5s"/>
+    <animate attributeName="opacity" values="0;0.9;0" dur="2s" repeatCount="indefinite" begin="-1.5s"/>
+  </circle>
+  <circle r="2.5" fill="#FF6F00" opacity="0">
+    <animateMotion path="M60,60 L30,90" dur="2s" repeatCount="indefinite" begin="-1s"/>
+    <animate attributeName="opacity" values="0;0.9;0" dur="2s" repeatCount="indefinite" begin="-1s"/>
+  </circle>
+  <circle r="2.5" fill="#4CAF50" opacity="0">
+    <animateMotion path="M60,60 L90,90" dur="2s" repeatCount="indefinite" begin="-0.5s"/>
+    <animate attributeName="opacity" values="0;0.9;0" dur="2s" repeatCount="indefinite" begin="-0.5s"/>
+  </circle>
+
+  <!-- Center node with breathing pulse -->
+  <circle cx="60" cy="60" r="8" fill="#FFFFFF">
+    <animate attributeName="r" values="3.5;7;3.5" dur="2s" repeatCount="indefinite"/>
+  </circle>
+
+  <!-- Corner nodes — synced to 4s with 1s sequential offset -->
+  <circle cx="30" cy="30" r="4" fill="#212121">
+    <animate attributeName="r" values="4;5;4" dur="4s" repeatCount="indefinite"/>
+  </circle>
+  <circle cx="90" cy="30" r="4" fill="#212121">
+    <animate attributeName="r" values="4;5;4" dur="4s" repeatCount="indefinite" begin="-3s"/>
+  </circle>
+  <circle cx="30" cy="90" r="4" fill="#212121">
+    <animate attributeName="r" values="4;5;4" dur="4s" repeatCount="indefinite" begin="-2s"/>
+  </circle>
+  <circle cx="90" cy="90" r="4" fill="#212121">
+    <animate attributeName="r" values="4;5;4" dur="4s" repeatCount="indefinite" begin="-1s"/>
+  </circle>
+
+  <!-- Accent nodes orbiting around center (60,60), radius 25 — synced to 8s -->
+  <circle r="5" fill="#0D47A1">
+    <animateMotion path="M60,60 m-25,0 a25,25 0 1,1 50,0 a25,25 0 1,1 -50,0" dur="8s" repeatCount="indefinite"/>
+  </circle>
+  <circle r="5" fill="#B71C1C">
+    <animateMotion path="M60,60 m-25,0 a25,25 0 1,1 50,0 a25,25 0 1,1 -50,0" dur="8s" repeatCount="indefinite" begin="-5.33s"/>
+  </circle>
+  <circle r="5" fill="#FF6F00">
+    <animateMotion path="M60,60 m-25,0 a25,25 0 1,1 50,0 a25,25 0 1,1 -50,0" dur="8s" repeatCount="indefinite" begin="-2.67s"/>
+  </circle>
+</svg>

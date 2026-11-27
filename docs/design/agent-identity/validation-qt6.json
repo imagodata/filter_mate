@@ -1,0 +1,72 @@
+{
+  "qgis": "4.3.0-Master",
+  "qt": "6.10.2",
+  "svg": {
+    "agent-light.svg": {
+      "valid": true,
+      "animated": false,
+      "sha256": "4b5a6f266316bb9a0f21981c39336d1a6e38e7b9f7e0204b6a460b8bb8d1296f"
+    },
+    "plugin-network-pulse-refined-light.svg": {
+      "valid": true,
+      "animated": false,
+      "sha256": "d35be3d1948d2ea042bcff63fbd964887093737aac230946391d52a0a060e05d"
+    },
+    "favicon-reference.svg": {
+      "valid": true,
+      "animated": false,
+      "sha256": "2c277044f060534e950d706cf8bf48b64ec5bd3fba2e026237dda8f83b600d82"
+    },
+    "agent-loader-dark.svg": {
+      "valid": true,
+      "animated": true,
+      "sha256": "c5e19449a5318a8b0ec0b6f2dd0f114468b337c4eab3bedb0e1fa7d3fb130d9e"
+    },
+    "agent-dark.svg": {
+      "valid": true,
+      "animated": false,
+      "sha256": "73104ade68e437f493f6be3ca304147626a393b2ee4e50abab7c3fa6b9ccc4cf"
+    },
+    "plugin-network-pulse-refined-animated-light.svg": {
+      "valid": true,
+      "animated": true,
+      "sha256": "4b45dd6207b3b1ebbf1d4c8a897afdcbd27e49438995a2468600637ea1292591"
+    },
+    "identity-proposals.svg": {
+      "valid": true,
+      "animated": false,
+      "sha256": "66b5b3f52bae110ec5c6af914ee1b1ef33dafa5cf64099b3be440da6c30285be"
+    },
+    "plugin-network-pulse-refined-animated-dark.svg": {
+      "valid": true,
+      "animated": true,
+      "sha256": "2beb660e04cf94186fada7c62b3facc2d7249658753ce1c507692c64aa6b722c"
+    },
+    "logo-reference.svg": {
+      "valid": true,
+      "animated": false,
+      "sha256": "49ee9e94ce46d8368a0d47b5afe88de980890f18bbce918d808e00c5ee1c776e"
+    },
+    "plugin-network-pulse-refined-dark.svg": {
+      "valid": true,
+      "animated": false,
+      "sha256": "cfd43ac299547e8273d1e57ee811f8bc02ed98da19936fe9e76fc44f1cd9b321"
+    },
+    "agent-loader-light.svg": {
+      "valid": true,
+      "animated": true,
+      "sha256": "bfdc62a1bd02ebe7cc41121de8cf8071d32578f04bb484252f5a73639bde6347"
+    }
+  },
+  "icons": {
+    "False-16": "valid, centre follows theme",
+    "False-24": "valid, centre follows theme",
+    "False-36": "valid, centre follows theme",
+    "False-64": "valid, centre follows theme",
+    "True-16": "valid, centre follows theme",
+    "True-24": "valid, centre follows theme",
+    "True-36": "valid, centre follows theme",
+    "True-64": "valid, centre follows theme"
+  },
+  "activity_lifecycle": "moves while busy, stops when hidden or idle, resumes when shown, follows theme"
+}
