@@ -123,10 +123,8 @@ def test_a_turn_discarded_with_its_project_is_never_recorded(checkpoint_module):
     assert not history.can_undo(checkpoint_module.HISTORY_KEY)
 
 
-def test_a_recorder_that_fails_never_refuses_the_call(monkeypatch, checkpoint_module):
-    """2026-11-24 (audit): a failure of before_call refused the tool ("undo point could not be made"), though the
-    filters were recorded. What a call did beside the filters not recorded never keeps it from running, for the
-    recorder of the turn as for the one of the step (which only serves "undo back to here")."""
+def test_a_required_capture_failure_refuses_the_call_but_a_step_capture_can_degrade(monkeypatch, checkpoint_module):
+    """A required effect must be recoverable; a failed optional per-step capture keeps whole-turn undo."""
     class Failing(Effects):
         def before_call(self, call, step=0):
             raise ValueError("not serialisable")
@@ -140,7 +138,11 @@ def test_a_recorder_that_fails_never_refuses_the_call(monkeypatch, checkpoint_mo
     holder.project = Project([Layer("roads")])
     call = types.SimpleNamespace(name="set_layer_options", arguments={"layers": []})
     monkeypatch.setattr(checkpoint_module, "EffectsRecorder", Failing)
-    checkpoint_module.TurnCheckpoint().begin(call)  # does not raise
+    refused = checkpoint_module.TurnCheckpoint()
+    with pytest.raises(ValueError, match='not serialisable'):
+        refused.begin(call)
+    holder.project.mapLayers()['roads'].subset = 'manual edit'
+    assert refused.commit() == ()
     monkeypatch.setattr(checkpoint_module, "EffectsRecorder", FailingStep)
     checkpoint_module.TurnCheckpoint().begin(call)  # does not raise
 
@@ -158,8 +160,8 @@ def test_an_unrecorded_call_is_warned_where_operators_look(monkeypatch, checkpoi
     monkeypatch.setattr(checkpoint_module, "EffectsRecorder", Failing)
     with caplog.at_level("WARNING", logger="FilterMate.agent"):
         checkpoint_module.TurnCheckpoint().begin(
-            types.SimpleNamespace(name="set_layer_options", arguments={}))
-    assert "set_layer_options" in caplog.text and "undo restores the filters" in caplog.text
+            types.SimpleNamespace(name="apply_filter", arguments={}))
+    assert "apply_filter" in caplog.text and "undo restores the filters" in caplog.text
 
 
 def test_a_turn_kept_open_is_recorded(checkpoint_module):

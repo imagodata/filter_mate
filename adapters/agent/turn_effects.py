@@ -533,12 +533,16 @@ class EffectsRecorder:
             elif name in STYLE_TOOLS:
                 layer = _resolve(project, arguments.get("layer"))
                 style = _style(layer) if layer is not None and layer.id() not in self._styles else None
+                if layer is not None and layer.id() not in self._styles and style is None:
+                    raise ValueError('the layer style could not be captured for undo')
                 if style is not None:
                     self._styles[layer.id()] = style
             elif name in FORM_TOOLS:
                 layer = _resolve(project, arguments.get("layer"))
                 form = _style(layer, _form_categories()) \
                     if isinstance(layer, QgsVectorLayer) and layer.id() not in self._forms else None
+                if isinstance(layer, QgsVectorLayer) and layer.id() not in self._forms and form is None:
+                    raise ValueError('the layer form could not be captured for undo')
                 if form is not None:
                     self._forms[layer.id()] = form
             elif name in RELATION_TOOLS:
@@ -578,8 +582,9 @@ class EffectsRecorder:
                     visible = _visible(project, layer.id()) if layer is not None else None
                     if visible is not None and layer.id() not in self._visibility:
                         self._visibility[layer.id()] = visible
-        except RuntimeError:  # a layer went away meanwhile: nothing to keep for it
-            logger.debug("Agent undo: a layer could not be read before a step", exc_info=True)
+        except RuntimeError:
+            logger.warning("Agent undo: a layer could not be read before a step", exc_info=True)
+            raise
 
     def _keep_layout_state(self, project: QgsProject, layout_name: str) -> None:
         layout = project.layoutManager().layoutByName(layout_name)
@@ -588,8 +593,9 @@ class EffectsRecorder:
         from ..public_api.layouts import layout_xml
         try:
             self._layout_states[layout_name] = layout_xml(layout)
-        except Exception:  # noqa: BLE001 - a report, a layout that cannot be written: the tool refuses it anyway
+        except Exception:  # noqa: BLE001 - refuse a layout change whose previous state cannot be restored
             logger.debug("Agent undo: layout %s not kept", layout_name, exc_info=True)
+            raise
 
     def after_call(self) -> None:
         """The call under way ended: the layers that came during it are those the turn added."""

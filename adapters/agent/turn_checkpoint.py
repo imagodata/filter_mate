@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import logging
 import time
+import copy
 from typing import Any, Callable, Dict, FrozenSet, List, Optional, Sequence, Tuple
 
 from qgis.core import QgsProject
@@ -26,6 +27,8 @@ MAX_LABEL = 4000
 _FILTERED_KINDS = (LayerKind.VECTOR, LayerKind.RASTER, LayerKind.POINT_CLOUD, LayerKind.VECTOR_TILE)
 # The effects whose fifth item names what a turn changed (a layer, a layout), as the list of turns shows it.
 _NAMED_EFFECTS = ("added", "removed", "style", "edits", "layout", "layout_item", "layout_state", "join", "form")
+_FILTER_ONLY = frozenset({'apply_filter', 'cross_filter', 'geometry_filter', 'point_cloud_filter',
+                          'clear_filters', 'apply_favorite'})
 
 
 def _merged(first: List[str], second: List[str]) -> List[str]:
@@ -83,6 +86,8 @@ class TurnCheckpoint:
         The first state of a layer is what the turn restores; the state before each change is what "undo back to
         here" restores, step by step.
         """
+        before_call = dict(self._before)
+        was_open, started_before = self._open, self._started
         self._close_step()
         if not self._open and self.on_open is not None:
             try:  # what is done when a turn opens never keeps its change from being made
@@ -109,13 +114,21 @@ class TurnCheckpoint:
         self._calls.append(call)
         self._step_recorder = EffectsRecorder(settings=False)
         if call is not None:
-            try:  # the filters are recorded above; what a call did beside them never keeps it from running
-                # (audit of 2026-11-24: any failure here refused the tool with "undo point could not be made")
-                self._effects.before_call(call, len(self._steps) - 1)
+            try:
+                # Capture transactionally: a failed capture must not leave baselines which could later
+                # attribute a manual change to a tool that was refused before execution.
+                effects = copy.deepcopy(self._effects)
+                effects.before_call(call, len(self._steps) - 1)
+                self._effects = effects
             except Exception:  # noqa: BLE001
-                # ... but the gap stays visible where operators look: an undo restores the filters recorded
-                # above, not what this call did beside them (2026-11-26: debug only, an incomplete undo
-                # looked complete).
+                if getattr(call, 'name', '') not in _FILTER_ONLY:
+                    self._steps.pop()
+                    self._step_times.pop()
+                    self._calls.pop()
+                    self._step_recorder = None
+                    self._before = before_call
+                    self._open, self._started = was_open, started_before
+                    raise
                 logger.warning("Agent undo: what %s did beside the filters not recorded: undo restores the "
                                "filters, not that", self._label(call), exc_info=True)
             try:  # what a step did is for "undo back to here" only: it never keeps a change from being made
