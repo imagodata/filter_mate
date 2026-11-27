@@ -3,8 +3,10 @@
 from __future__ import annotations
 
 import logging
+import os
 
 from ...adapters.agent import data_store
+from ...adapters.agent.save_location import remember_project_folder, suggested_project_path
 
 logger = logging.getLogger("FilterMate.AgentData")
 
@@ -56,21 +58,25 @@ class AgentDataController:
                  "allowed": _tr("Choose where to save the project and its layers."),
                  "refused": _tr("The data stay in memory until this project is closed."),
                  "layers": [layer.name() for layer in layers[:5]]}
-        card = self.host.panel.add_confirm_card(texts, _tr(
+        path = suggested_project_path(self.project, layers)
+        description = _tr(
             "Downloaded data and results are held in memory. Save the project together with its layers to "
-            "keep them after closing QGIS."), False)
+            "keep them after closing QGIS.")
+        description += "\n\n" + _tr("Suggested project: {}").format(path)
+        description += "\n" + _tr("Project and layers folder: {}").format(os.path.dirname(path))
+        card = self.host.panel.add_confirm_card(texts, description, False)
         generation = self._generation
         card.answered.connect(lambda answer: self.save() if answer == "once" and generation == self._generation
                               else None)
 
     def save(self):
-        from qgis.PyQt.QtCore import QDir
         from qgis.PyQt.QtWidgets import QFileDialog
         if self._busy():
             self.host.panel.set_status(_tr("Wait for the current request to finish before saving its data."))
             return False
         path, _ = QFileDialog.getSaveFileName(
-            self.host.panel, _tr("Save project and layers"), self.project.fileName() or QDir.homePath(),
+            self.host.panel, _tr("Save project and layers"),
+            suggested_project_path(self.project, data_store.pending_layers(self.project)),
             _tr("QGIS project (*.qgz *.qgs)"))
         if not path:
             return False
@@ -86,6 +92,7 @@ class AgentDataController:
             return False
         finally:
             self._saving = False
+        remember_project_folder(path)
         self.host.panel.add_note(_tr("Project and layers saved: {}").format(path))
         outputs = getattr(self.host, '_outputs', None)
         if outputs is not None:
@@ -155,3 +162,5 @@ class AgentDataController:
             from qgis.PyQt.QtCore import QTimer
             generation = self._generation
             QTimer.singleShot(0, lambda: self.project.setDirty(True) if generation == self._generation else None)
+        elif not self._saving:
+            remember_project_folder(self.project.fileName())

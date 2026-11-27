@@ -124,6 +124,46 @@ def test_asset_names_cannot_choose_a_disk_location(storage):
     assert path.startswith(store.root + "/") and path.endswith("/roads.geojson")
 
 
+def test_dataset_and_sidecars_share_the_project_folder_without_overwriting_files(storage, tmp_path):
+    module, _ = storage
+    existing = tmp_path / "roads.dbf"
+    existing.write_bytes(b"user data")
+    names = ["roads.shp", "roads.shx", "roads.dbf", "roads.shp.xml"]
+    reserved = set()
+    first = module._asset_destinations(names, "roads.shp", str(tmp_path), reserved)
+    second = module._asset_destinations(names, "roads.shp", str(tmp_path), reserved)
+    assert {Path(path).parent for path in first.values()} == {tmp_path}
+    assert [Path(first[name]).name for name in names] == ["roads_2.shp", "roads_2.shx", "roads_2.dbf", "roads_2.shp.xml"]
+    assert [Path(second[name]).name for name in names] == ["roads_3.shp", "roads_3.shx", "roads_3.dbf", "roads_3.shp.xml"]
+    assert existing.read_bytes() == b"user data" and list(tmp_path.iterdir()) == [existing]
+
+
+def test_incomplete_copy_removes_only_its_new_file(storage, tmp_path, monkeypatch):
+    module, _ = storage
+    store = module.AgentDataStore()
+    source = store.new_path("roads.geojson")
+    with store.writer(source) as write:
+        write(b"complete data")
+    destination = tmp_path / "roads.geojson"
+    monkeypatch.setattr(module, "size", lambda path: 100)
+    with pytest.raises(ValueError, match="incomplete"):
+        module._copy_file(source, str(destination))
+    assert not destination.exists()
+
+
+def test_exclusive_copy_never_removes_an_existing_user_file(storage, tmp_path):
+    module, _ = storage
+    store = module.AgentDataStore()
+    source = store.new_path("roads.geojson")
+    with store.writer(source) as write:
+        write(b"new data")
+    destination = tmp_path / "roads.geojson"
+    destination.write_bytes(b"user data")
+    with pytest.raises(FileExistsError):
+        module._copy_file(source, str(destination))
+    assert destination.read_bytes() == b"user data"
+
+
 @pytest.mark.parametrize("encoding", ["utf-8", "utf-16", "utf-16-be"])
 @pytest.mark.parametrize("tag", ["SourceDataset", "SourceFilename"])
 def test_vrt_dependencies_and_portable_rewrites_keep_escaped_paths(storage, monkeypatch, tmp_path, encoding, tag):

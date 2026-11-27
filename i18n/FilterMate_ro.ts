@@ -1898,6 +1898,16 @@ Sunteți de acord cu toate? Nu: nu se execută niciuna.</translation>
         <translation>Datele proiectului</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_data.py" line="65"/>
+        <source>Suggested project: {}</source>
+        <translation>Proiect sugerat: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_data.py" line="66"/>
+        <source>Project and layers folder: {}</source>
+        <translation>Dosarul proiectului și al straturilor: {}</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_data.py" line="74"/>
         <source>QGIS project (*.qgz *.qgs)</source>
         <translation>Proiect QGIS (*.qgz *.qgs)</translation>

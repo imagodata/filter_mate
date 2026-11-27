@@ -1898,6 +1898,16 @@ Hi esteu d'acord amb totes? No: no se n'executa cap.</translation>
         <translation>Dades del projecte</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_data.py" line="65"/>
+        <source>Suggested project: {}</source>
+        <translation>Projecte suggerit: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_data.py" line="66"/>
+        <source>Project and layers folder: {}</source>
+        <translation>Carpeta del projecte i les capes: {}</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_data.py" line="74"/>
         <source>QGIS project (*.qgz *.qgs)</source>
         <translation>Projecte QGIS (*.qgz *.qgs)</translation>

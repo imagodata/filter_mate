@@ -130,6 +130,8 @@ def main():
     store = data_store.store_for(project)
     project_path = os.path.join(work, "chosen", "analysis.qgz")
     os.makedirs(os.path.dirname(project_path))
+    existing = Path(project_path).parent / Path(virtual_source).name
+    existing.write_text("User data must stay untouched", encoding="utf-8")
     folder = data_store.persist(project, project_path)
     check("explicit save keeps layer objects, ids, styles, filters and properties", project.mapLayer(layer_id) is layer
           and layer.isValid() and layer.featureCount() == 2 and layer.subsetString() == '"value" > 1'
@@ -139,8 +141,13 @@ def main():
     layer.setSubsetString("")
     check("saving preserves the complete source, not only filtered features", layer.featureCount() == 3)
     layer.setSubsetString('"value" > 1')
-    check("the selected destination is the only disk location used for geodata", Path(folder).is_relative_to(Path(project_path).parent)
-          and all(Path(value).is_relative_to(Path(project_path).parent) for value in store.persisted.values()))
+    check("the project and all saved datasets are directly in the same chosen folder",
+          Path(folder) == Path(project_path).parent
+          and all(Path(value).parent == Path(project_path).parent for value in store.persisted.values())
+          and store.destination == str(Path(project_path).parent))
+    check("a conflicting dataset name gets a suffix without overwriting user data",
+          existing.read_text(encoding="utf-8") == "User data must stay untouched"
+          and Path(layer.source()) != existing and Path(layer.source()).stem.endswith("_2"))
     original_raster = registry().get(raster.id()).pristine_source
     check("saving a spatially filtered raster also keeps its original full dataset", os.path.isfile(original_raster)
           and gdal.Open(original_raster).RasterXSize == 10
@@ -160,6 +167,9 @@ def main():
     restored = project.mapLayer(layer_id)
     check("reopening restores the filter and style", restored.subsetString() == '"value" > 1'
           and restored.featureCount() == 2 and restored.renderer().symbol().color().name() == color)
+
+    from filter_mate.adapters.agent.save_location import suggested_project_path
+    check("a saved project's exact location is proposed again", suggested_project_path(project) == project.fileName())
 
     from filter_mate.ui.controllers.agent_data import AgentDataController
     from qgis.PyQt.QtWidgets import QWidget, QMessageBox
@@ -202,16 +212,47 @@ def main():
         write(data)
     layer = QgsVectorLayer(path, "Keep in memory", "ogr")
     project.addMapLayer(layer)
-    with patch.object(data_store, "_copy_file", side_effect=OSError("disk full")):
+    another_path = data_store.new_path("another.geojson")
+    with data_store.store_for().writer(another_path) as write:
+        write(data)
+    another = QgsVectorLayer(another_path, "Another layer", "ogr")
+    project.addMapLayer(another)
+    before = set(Path(work).rglob("*"))
+    copy_file = data_store._copy_file
+    copied = []
+
+    def fail_second_copy(source, destination):
+        if copied:
+            raise OSError("disk full")
+        copy_file(source, destination)
+        copied.append(destination)
+
+    with patch.object(data_store, "_copy_file", side_effect=fail_second_copy):
         try:
             data_store.persist(project, os.path.join(work, "failure.qgz"))
         except OSError:
             pass
         else:
             raise AssertionError("the failed copy was reported as saved")
-    check("a disk failure leaves the original data readable in memory", layer.source() == path and layer.featureCount() == 3
-          and not os.path.isfile(os.path.join(work, "failure.qgz"))
-          and not list((Path(work) / "failure_data").rglob("*.geojson")))
+    check("a disk failure leaves data in memory and removes only newly copied files",
+          layer.source() == path and layer.featureCount() == 3 and another.source() == another_path
+          and another.featureCount() == 3 and copied and set(Path(work).rglob("*")) == before)
+    with patch.object(project, "write", return_value=False):
+        try:
+            data_store.persist(project, os.path.join(work, "failed-project.qgz"))
+        except ValueError as exc:
+            check("a failed project write is reported", "project could not be saved" in str(exc))
+        else:
+            raise AssertionError("a failed project write was reported as saved")
+    check("a failed project write restores live layer sources and leaves the chosen folder untouched",
+          layer.source() == path and layer.featureCount() == 3 and another.source() == another_path
+          and another.featureCount() == 3 and set(Path(work).rglob("*")) == before)
+    project.clear()
+    project.setPresetHomePath(os.path.dirname(project_path))
+    project.setTitle("Urumea slope")
+    check("a new project proposes its working folder and title without creating anything",
+          suggested_project_path(project) == str(Path(project_path).parent / "Urumea slope.qgz")
+          and not (Path(project_path).parent / "Urumea slope.qgz").exists())
     print("All agent data storage checks passed", flush=True)
 
 

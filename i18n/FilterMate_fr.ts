@@ -15049,6 +15049,16 @@ Si vous choisissez Non, ces données resteront en mémoire et seront perdues à 
         <source>Project data</source>
         <translation>Données du projet</translation>
     </message>
+    <message>
+        <location filename="../ui/controllers/agent_data.py" line="65"/>
+        <source>Suggested project: {}</source>
+        <translation>Projet proposé : {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_data.py" line="66"/>
+        <source>Project and layers folder: {}</source>
+        <translation>Dossier du projet et des couches : {}</translation>
+    </message>
 </context>
 <context>
     <name>AgentSpeech</name>

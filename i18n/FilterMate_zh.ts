@@ -1898,6 +1898,16 @@ Do you agree to all of them? No runs none of them.</source>
         <translation>项目数据</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_data.py" line="65"/>
+        <source>Suggested project: {}</source>
+        <translation>建议的项目：{}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_data.py" line="66"/>
+        <source>Project and layers folder: {}</source>
+        <translation>项目和图层文件夹：{}</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_data.py" line="74"/>
         <source>QGIS project (*.qgz *.qgs)</source>
         <translation>QGIS 项目 (*.qgz *.qgs)</translation>

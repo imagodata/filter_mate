@@ -1898,6 +1898,16 @@ Do you agree to all of them? No runs none of them.</source>
         <translation>Δεδομένα έργου</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_data.py" line="65"/>
+        <source>Suggested project: {}</source>
+        <translation>Προτεινόμενο έργο: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_data.py" line="66"/>
+        <source>Project and layers folder: {}</source>
+        <translation>Φάκελος έργου και επιπέδων: {}</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_data.py" line="74"/>
         <source>QGIS project (*.qgz *.qgs)</source>
         <translation>Έργο QGIS (*.qgz *.qgs)</translation>

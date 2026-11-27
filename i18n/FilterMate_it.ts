@@ -1898,6 +1898,16 @@ Sei d'accordo con tutte? No non ne esegue nessuna.</translation>
         <translation>Dati del progetto</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_data.py" line="65"/>
+        <source>Suggested project: {}</source>
+        <translation>Progetto suggerito: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_data.py" line="66"/>
+        <source>Project and layers folder: {}</source>
+        <translation>Cartella del progetto e dei layer: {}</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_data.py" line="74"/>
         <source>QGIS project (*.qgz *.qgs)</source>
         <translation>Progetto QGIS (*.qgz *.qgs)</translation>

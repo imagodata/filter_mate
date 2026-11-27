@@ -11,7 +11,6 @@ from __future__ import annotations
 import logging
 import os
 import re
-import shutil
 import threading
 import uuid
 import json
@@ -235,24 +234,53 @@ def _copy_file(source: str, destination: str):
     handle = gdal.VSIFOpenL(source, "rb")
     if handle is None:
         raise ValueError("the data in memory could not be read")
+    created = False
     try:
         with open(destination, "xb") as out:
+            created = True
             while True:
                 chunk = gdal.VSIFReadL(1, 1024 * 1024, handle)
                 if not chunk:
                     break
                 out.write(chunk)
+        if os.path.getsize(destination) != size(source):
+            raise ValueError("the saved data are incomplete; the layers stay in memory")
+    except Exception:
+        if created:
+            os.unlink(destination)
+        raise
     finally:
         gdal.VSIFCloseL(handle)
-    if os.path.getsize(destination) != size(source):
-        raise ValueError("the saved data are incomplete; the layers stay in memory")
+
+
+def _asset_destinations(names, primary, folder, reserved):
+    """Keep a dataset and its sidecars together, suffixing the whole group on a name collision."""
+    stem = os.path.splitext(primary)[0]
+    number = 1
+    while True:
+        suffix = "" if number == 1 else f"_{number}"
+        destinations = {}
+        for name in names:
+            if name == stem or name.casefold().startswith((stem.casefold() + ".", stem.casefold() + "-")):
+                renamed = name[:len(stem)] + suffix + name[len(stem):]
+            else:
+                base, extension = os.path.splitext(name)
+                renamed = base + suffix + extension
+            destinations[name] = os.path.join(folder, renamed)
+        keys = {os.path.normcase(path) for path in destinations.values()}
+        if len(keys) != len(destinations):
+            raise ValueError("the dataset has conflicting filenames on this filesystem")
+        if not keys.intersection(reserved) and not any(os.path.lexists(path) for path in destinations.values()):
+            reserved.update(keys)
+            return destinations
+        number += 1
 
 
 def persist(project, project_path: str, *, write_project: bool = True) -> str:
     """Save complete sources (not just filtered features), then rebind the existing layer objects.
 
-    Every save uses a new directory beside the chosen project. A failure restores the sources and removes
-    only that new directory. Memory assets remain available to undo/redo for the lifetime of the project.
+    Datasets and sidecars go directly beside the chosen project. Existing names get a numeric suffix. A failure
+    restores the sources and removes only the new files. Memory assets remain available to undo/redo.
     """
     from qgis.core import QgsDataProvider, QgsReadWriteContext
     from qgis.PyQt.QtXml import QDomDocument
@@ -266,13 +294,12 @@ def persist(project, project_path: str, *, write_project: bool = True) -> str:
     if any(getattr(layer, "isEditable", lambda: False)() for layer in layers):
         raise ValueError("save or discard the layer edits before saving the project and its data")
     store = store_for(project)
-    folder = os.path.join(parent, os.path.splitext(os.path.basename(project_path))[0] + "_data",
-                          uuid.uuid4().hex[:12])
-    snapshots, copied = [], {}
+    snapshots, copied, created, groups = [], {}, [], {}
+    reserved = {os.path.normcase(project_path)}
     old_name, old_dirty = project.fileName(), project.isDirty()
     old_paths = project.filePathStorage()
     try:
-        # Each asset folder also holds its sidecars and the members of multi-file formats.
+        # A virtual asset folder also holds sidecars and the members of multi-file formats.
         pending = [memory_path(source) for layer in layers for source in _layer_sources(layer)]
         while pending:
             path = pending.pop()
@@ -280,14 +307,15 @@ def persist(project, project_path: str, *, write_project: bool = True) -> str:
                 continue
             pending.extend(_dependencies(path))
             source_folder = path.rsplit("/", 1)[0]
-            target_folder = os.path.join(folder, source_folder.rsplit("/", 1)[-1])
-            if not os.path.isdir(target_folder):
-                os.makedirs(target_folder)
-                for name in _gdal().ReadDir(source_folder) or ():
-                    if name in (".", ".."):
-                        continue
-                    _copy_file(source_folder + "/" + name, os.path.join(target_folder, name))
-            copied[path] = os.path.join(target_folder, path.rsplit("/", 1)[-1])
+            primary = path.rsplit("/", 1)[-1]
+            if source_folder not in groups:
+                names = sorted(name for name in (_gdal().ReadDir(source_folder) or ()) if name not in (".", ".."))
+                destinations = _asset_destinations(names, primary, parent, reserved)
+                for name, target in destinations.items():
+                    _copy_file(source_folder + "/" + name, target)
+                    created.append(target)
+                groups[source_folder] = destinations
+            copied[path] = groups[source_folder][primary]
         for path, target in copied.items():
             if path.lower().endswith('.vrt'):
                 _rewrite_vrt(target, copied)
@@ -340,8 +368,8 @@ def persist(project, project_path: str, *, write_project: bool = True) -> str:
                 raise ValueError("the project could not be saved; the layers stay in memory")
         store.persisted.update(copied)
         store.protected.update(copied.values())
-        store.destination = os.path.dirname(folder)
-        return folder if copied else ""
+        store.destination = parent
+        return parent if copied else ""
     except Exception:
         for layer, document, selection, derived in reversed(snapshots):
             layer.readLayerXml(document.documentElement(), QgsReadWriteContext())
@@ -352,6 +380,9 @@ def persist(project, project_path: str, *, write_project: bool = True) -> str:
         project.setFileName(old_name)
         project.setFilePathStorage(old_paths)
         project.setDirty(old_dirty)
-        if os.path.isdir(folder):
-            shutil.rmtree(folder)
+        for path in reversed(created):
+            try:
+                os.unlink(path)
+            except OSError:
+                logger.warning("A newly saved dataset could not be removed: %s", path, exc_info=True)
         raise

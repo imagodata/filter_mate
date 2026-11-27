@@ -11,6 +11,8 @@ pytestmark = pytest.mark.unit
 @pytest.fixture
 def data_ui(ctrl_module, monkeypatch):
     store = _module(monkeypatch, ".adapters.agent.data_store", pending_layers=lambda project: [])
+    _module(monkeypatch, ".adapters.agent.save_location",
+            suggested_project_path=MagicMock(return_value="/chosen/Rivers.qgz"), remember_project_folder=MagicMock())
     module = _load(monkeypatch, "ui.controllers.agent_data", "ui/controllers/agent_data.py")
     host = SimpleNamespace(panel=MagicMock(), chat_busy=lambda: False)
     ui = module.AgentDataController(host)
@@ -46,7 +48,7 @@ def test_an_old_card_cannot_save_a_different_project(data_ui, monkeypatch):
 
 
 def test_cancelled_destination_keeps_everything_in_memory(data_ui, monkeypatch):
-    _, ui, host, store = data_ui
+    module, ui, host, store = data_ui
     ui.project.fileName = lambda: "/chosen/map.qgz"
     import sys
     widgets = sys.modules["qgis.PyQt.QtWidgets"]
@@ -54,7 +56,35 @@ def test_cancelled_destination_keeps_everything_in_memory(data_ui, monkeypatch):
     monkeypatch.setattr(widgets, "QFileDialog", dialog)
     assert ui.save() is False
     dialog.getSaveFileName.assert_called_once()
+    assert dialog.getSaveFileName.call_args.args[2] == "/chosen/Rivers.qgz"
     store.persist.assert_not_called()
+    module.remember_project_folder.assert_not_called()
+
+
+def test_save_offer_shows_the_project_and_shared_layer_folder(data_ui):
+    _, ui, host, store = data_ui
+    store.pending_layers = lambda project: [SimpleNamespace(id=lambda: "r", source=lambda: "vsi", name=lambda: "Rivers")]
+    ui.offer()
+    text = host.panel.add_confirm_card.call_args.args[1]
+    assert "Suggested project: /chosen/Rivers.qgz" in text
+    assert "Project and layers folder: /chosen" in text
+
+
+@pytest.mark.parametrize("failure", [False, True])
+def test_only_a_successful_save_remembers_the_shared_folder(data_ui, monkeypatch, failure):
+    import sys
+    module, ui, host, store = data_ui
+    dialog = SimpleNamespace(getSaveFileName=MagicMock(return_value=("/chosen/Analysis", "")))
+    monkeypatch.setattr(sys.modules["qgis.PyQt.QtWidgets"], "QFileDialog", dialog)
+    store.persist.return_value = "/chosen"
+    if failure:
+        store.persist.side_effect = OSError("disk full")
+    assert ui.save() is not failure
+    store.persist.assert_called_once_with(ui.project, "/chosen/Analysis.qgz")
+    if failure:
+        module.remember_project_folder.assert_not_called()
+    else:
+        module.remember_project_folder.assert_called_once_with("/chosen/Analysis.qgz")
 
 
 def test_saving_while_a_tool_runs_does_not_open_a_dialog_or_change_providers(data_ui):

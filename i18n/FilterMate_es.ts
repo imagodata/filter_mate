@@ -1898,6 +1898,16 @@ Do you agree to all of them? No runs none of them.</source>
         <translation>Datos del proyecto</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_data.py" line="65"/>
+        <source>Suggested project: {}</source>
+        <translation>Proyecto sugerido: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_data.py" line="66"/>
+        <source>Project and layers folder: {}</source>
+        <translation>Carpeta del proyecto y las capas: {}</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_data.py" line="74"/>
         <source>QGIS project (*.qgz *.qgs)</source>
         <translation>Proyecto QGIS (*.qgz *.qgs)</translation>

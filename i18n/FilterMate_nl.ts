@@ -1898,6 +1898,16 @@ Gaat u akkoord met alle? Nee voert er geen uit.</translation>
         <translation>Projectgegevens</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_data.py" line="65"/>
+        <source>Suggested project: {}</source>
+        <translation>Voorgesteld project: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_data.py" line="66"/>
+        <source>Project and layers folder: {}</source>
+        <translation>Map voor project en lagen: {}</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_data.py" line="74"/>
         <source>QGIS project (*.qgz *.qgs)</source>
         <translation>QGIS-project (*.qgz *.qgs)</translation>

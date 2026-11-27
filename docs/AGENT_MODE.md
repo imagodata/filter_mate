@@ -576,13 +576,17 @@ parts and live service layers keep their remote sources. Existing local sources 
 - Downloads share a 1 GiB storage budget; raster allocations check their expected size against it. There is no
   silent disk fallback. A file-only point-cloud output requires a destination chosen through Save project and layers.
 - The panel offers Continue in memory or Save project and layers after a turn creates data, and keeps the save
-  command in its menu. The file chooser belongs to QGIS, not to the model. Autonomy never chooses a disk location.
-- An explicit save writes complete datasets and sidecars beside the selected `.qgz`/`.qgs`, under
-  `<project>_data/<capture>/<asset>/`. The existing formats are preserved, including multilayer GeoPackages and
-  zipped shapefiles. Each save uses a new capture folder and never overwrites an existing dataset.
+  command in its menu. The proposal shows the suggested project filename and the shared folder for project and
+  layers. An existing project keeps its location; a new one uses its working folder, the common folder of its local
+  data, the last successfully chosen folder, or Documents. Temporary/profile sources are ignored. Its title or a
+  created layer supplies the filename. The file chooser belongs to QGIS, not to the model; you can change the
+  proposal before saving. Autonomy never chooses a disk location.
+- An explicit save writes complete datasets and sidecars directly in the same folder as the selected `.qgz`/`.qgs`.
+  The existing formats are preserved, including multilayer GeoPackages and zipped shapefiles. Name collisions add
+  a numeric suffix to the dataset and its sidecars; an existing file is never overwritten by a dataset copy.
 - Layer objects, ids, styles, subsets, selections, metadata and custom properties survive the change of source.
   Data are copied in full, even when a layer is filtered. A failed copy leaves the live sources in memory and
-  removes only its new capture folder. Project paths are relative, so moving the project with its data works.
+  removes only newly copied files. Project paths are relative, so moving the project with its data works.
 - Native QGIS Save also asks whether to make the transient data permanent beside the selected project. Choosing
   No keeps them in memory; the project is marked dirty again because its data are still transient.
 - Memory assets remain available to undo/redo until the project closes; a new conversation or panel unload does

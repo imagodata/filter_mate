@@ -1898,6 +1898,16 @@ Bạn có đồng ý với tất cả không? Không thì không hành động n
         <translation>Dữ liệu dự án</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_data.py" line="65"/>
+        <source>Suggested project: {}</source>
+        <translation>Dự án được đề xuất: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_data.py" line="66"/>
+        <source>Project and layers folder: {}</source>
+        <translation>Thư mục dự án và các lớp: {}</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_data.py" line="74"/>
         <source>QGIS project (*.qgz *.qgs)</source>
         <translation>Dự án QGIS (*.qgz *.qgs)</translation>

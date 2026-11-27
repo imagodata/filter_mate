@@ -1898,6 +1898,16 @@ Godtar du alle? Nei utfører ingen av dem.</translation>
         <translation>Prosjektdata</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_data.py" line="65"/>
+        <source>Suggested project: {}</source>
+        <translation>Foreslått prosjekt: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_data.py" line="66"/>
+        <source>Project and layers folder: {}</source>
+        <translation>Mappe for prosjekt og lag: {}</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_data.py" line="74"/>
         <source>QGIS project (*.qgz *.qgs)</source>
         <translation>QGIS-prosjekt (*.qgz *.qgs)</translation>

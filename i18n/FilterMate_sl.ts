@@ -1898,6 +1898,16 @@ Se strinjate z vsemi? Ne: ne izvede se nobeno.</translation>
         <translation>Podatki projekta</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_data.py" line="65"/>
+        <source>Suggested project: {}</source>
+        <translation>Predlagani projekt: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_data.py" line="66"/>
+        <source>Project and layers folder: {}</source>
+        <translation>Mapa projekta in slojev: {}</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_data.py" line="74"/>
         <source>QGIS project (*.qgz *.qgs)</source>
         <translation>Projekt QGIS (*.qgz *.qgs)</translation>

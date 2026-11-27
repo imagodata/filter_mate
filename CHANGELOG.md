@@ -4,6 +4,10 @@ All notable changes to FilterMate will be documented in this file.
 
 ## [Unreleased]
 
+- Agent save proposals suggest the current project location or a relevant working/data folder, remember successful
+  choices and show the shared destination. Saved agent layers and their sidecars now sit directly beside the
+  project, with numeric suffixes for conflicting filenames and rollback that preserves existing files.
+
 ## [5.1.3] - 2026-11-27
 
 - Agent menus: check and uncheck several sources without reopening the menu, with mouse clicks, Space or Enter. The plugin MCP toggle and live-recipe checkboxes also keep their menus open; recipe refreshes retain the current submenu. Escape, outside clicks and commands keep their usual closing behavior.
