@@ -13,6 +13,7 @@ from typing import Any, Dict, List
 
 from ...core.domain.layer_kind import LayerKind
 from .operations import layer_kind, resolve_layer
+from ..qgis.feature_ids import read_feature_geometries
 
 logger = logging.getLogger('FilterMate.GuiControl')
 
@@ -87,7 +88,6 @@ def flash_features(layer: str, expression: str, limit: int = MAX_FLASH,
     Only plain conditions, as ``select_features`` accepts them: an empty result, an unknown layer or a bad
     expression is refused. At most ``limit`` features flash (more is a selection or a zoom instead).
     """
-    from qgis.core import QgsFeatureRequest
     found = resolve_layer(layer)
     if found is None:
         raise ValueError(f"layer {layer!r} not found")
@@ -101,21 +101,22 @@ def flash_features(layer: str, expression: str, limit: int = MAX_FLASH,
         limit = max(1, min(int(limit), MAX_FLASH))
     except (TypeError, ValueError):
         limit = MAX_FLASH
-    request = QgsFeatureRequest().setFilterExpression(checked).setNoAttributes().setLimit(limit + 1)
     try:
-        found_features = [feature.id() for feature in found.getFeatures(request)]
+        found_features = read_feature_geometries(found, checked, limit + 1)
     except (RuntimeError, AttributeError) as exc:
         raise ValueError(f"'{found.name()}' could not be read ({exc})") from None
     if not found_features:
         raise ValueError(f"no feature of '{found.name()}' matches {expression!r}")
     truncated = len(found_features) > limit
-    shown = found_features[:limit]
+    shown = [geometry for _fid, geometry in found_features[:limit] if geometry is not None]
+    if not shown:
+        raise ValueError(f"the matching features of '{found.name()}' have no geometry to flash")
     canvas = _canvas(_window(iface_obj))
-    flash = getattr(canvas, "flashFeatureIds", None)
+    flash = getattr(canvas, "flashGeometries", None)
     if not callable(flash):
         raise ValueError("this QGIS cannot flash features: select_features shows them instead")
     try:
-        flash(found, shown)
+        flash(shown, found.crs())
     except (RuntimeError, AttributeError, TypeError) as exc:
         raise ValueError(f"'{found.name()}' could not flash ({exc})") from None
     answer: Dict[str, Any] = {"layer": found.name(), "flashed": len(shown)}

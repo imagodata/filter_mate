@@ -1201,7 +1201,7 @@
   {
    "name": "select_features",
    "title": "Select features",
-   "description": "Select the features of a vector layer matching a QGIS expression, as the user would in QGIS. A selection is not a filter: the features stay visible, they are highlighted. Use it to make the source of cross_filter (which uses the selected features), or when the user asks to select. Returns layer_name and selected_count. Comparisons, IN, LIKE and simple text, number, date and geometry functions are accepted; other functions are refused.",
+   "description": "Select features matching a QGIS expression. A selection highlights features without filtering the layer; cross_filter uses selected features as its source. Reads a worker snapshot, keeping the interface responsive. At most 200000 matching IDs; narrow larger requests. Stop, timeout or a manual change leaves the selection untouched. Returns layer_name and selected_count. Comparisons, IN, LIKE and safe text, number, date and geometry functions are accepted.",
    "read_only": false,
    "destructive": false,
    "idempotent": true,

@@ -16,7 +16,7 @@ des propositions encore à réaliser.
 | R02 — budget des sorties Processing | Corrigé pour les fichiers gérés | Précontrôle, surveillance, annulation coopérative et rejet des résultats trop volumineux avant leur ajout. |
 | R08 — message trompeur après sauvegarde | Corrigé | Le message indique que l’annulation retient les données et que sauvegarder seul ne les libère pas. |
 | F01 — conversations dans l’historique | Implémenté | Onglet Conversations, reprise dans le projet d’origine, consultation des autres projets, migration des anciens échanges. |
-| A01 — lectures de sélection et flash | À réaliser | Déplacer les lectures potentiellement lentes hors du fil d’interface. |
+| A01 — lectures de sélection et flash | Implémenté | Lectures sur snapshots en arrière-plan, attente annulable et résultat invalidé par une sélection manuelle. |
 | Transitions animées et pilotage étendu de QGIS | À réaliser | Les correctifs de zoom ne constituent pas encore une animation commune. |
 
 ## Vérification du choix du SCR
@@ -78,3 +78,19 @@ Validation : 78 tests unitaires ; scénarios natifs de dépassement sur QGIS 3.4
 stockage/persistance et modèles Processing sur QGIS 3.44. Le budget d’un octet bloque le lancement,
 un résultat trop grand est refusé sans ajout de couche,
 et un budget suffisant conserve le fonctionnement normal.
+
+## Sélection et surbrillance sans lecture bloquante
+
+La sélection et la surbrillance lisent un snapshot de la couche dans une tâche QGIS. L’API reste synchrone, mais
+sa boucle d’attente traite les événements de l’interface. Stop, un délai de 30 secondes, un changement de source
+ou de sélection invalident le résultat ; aucune sélection partielle n’est appliquée. La sélection est limitée à
+200 000 identifiants correspondants, avec refus explicite au-delà plutôt qu’un résultat tronqué.
+
+La surbrillance transmet des copies de géométries à `flashGeometries` : `flashFeatureIds` effectuerait une seconde
+lecture du fournisseur dans le fil d’interface. L’itérateur du snapshot garde les protections existantes sur les
+expressions et champs virtuels. Comme pour les autres lectures, la fin effective d’un accès réseau dépend de la
+coopération du fournisseur ; son résultat tardif ne modifie pas la sélection.
+
+Validation : 452 tests de l’API et des tâches de lecture ; scénario natif QGIS 3.44 / Qt 5 et QGIS 4.3 / Qt 6
+avec une lecture volontairement ralentie, un compteur d’événements d’interface, une sélection manuelle et un délai
+court. La lecture directe de la couche est remplacée par un refus dans ce scénario pour vérifier l’usage du snapshot.

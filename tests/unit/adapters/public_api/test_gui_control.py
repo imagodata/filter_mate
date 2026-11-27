@@ -79,6 +79,9 @@ class _Layer:
     def id(self):
         return "L1"
 
+    def crs(self):
+        return 'EPSG:2154'
+
     def getFeatures(self, request):
         return [_Feature(fid) for fid in self._fids[:request.limit]]
 
@@ -112,8 +115,8 @@ class _Canvas:
     def __init__(self):
         self.flashed = []
 
-    def flashFeatureIds(self, layer, fids):
-        self.flashed.append((layer, list(fids)))
+    def flashGeometries(self, geometries, crs):
+        self.flashed.append((crs, list(geometries)))
 
 
 class _Bar:
@@ -310,6 +313,8 @@ def layers(monkeypatch):
     monkeypatch.setattr(gui_control, "LayerKind", LayerKind)
     monkeypatch.setattr(gui_control, "resolve_layer", lambda reference: layer if reference == "communes" else None)
     monkeypatch.setattr(gui_control, "layer_kind", lambda found: LayerKind.VECTOR)
+    monkeypatch.setattr(gui_control, 'read_feature_geometries',
+                        lambda found, expression, limit: [(fid, fid) for fid in found._fids[:limit]])
     module = sys.modules[_PKG + ".adapters.public_api.introspection"]
     monkeypatch.setattr(module, "_checked_expression", lambda found, expression: expression)
     return layer

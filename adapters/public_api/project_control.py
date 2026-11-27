@@ -416,7 +416,12 @@ def select_features(layer: str, expression: str = '', clear: bool = False, add: 
         if unknown:  # QGIS evaluates them to nothing: the user's selection would just be emptied
             raise ValueError(f"unknown field(s): {', '.join(unknown)}")
         behavior = QgsVectorLayer.SelectBehavior.AddToSelection if add else QgsVectorLayer.SelectBehavior.SetSelection
-        found.selectByExpression(expression, behavior)
+        from ..qgis.feature_ids import read_feature_ids
+        maximum = 200_000
+        ids = read_feature_ids(found, expression, maximum + 1, protect_selection=True)
+        if len(ids) > maximum:
+            raise ValueError(f'more than {maximum} matching features: narrow the expression; selection unchanged')
+        found.selectByIds(ids, behavior)
     return {'layer_id': found.id(), 'layer_name': found.name(), 'selected_count': found.selectedFeatureCount()}
 
 
