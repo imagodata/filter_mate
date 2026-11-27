@@ -20,7 +20,12 @@
     "agent-loader-dark.svg": {
       "valid": true,
       "animated": true,
-      "sha256": "c5e19449a5318a8b0ec0b6f2dd0f114468b337c4eab3bedb0e1fa7d3fb130d9e"
+      "sha256": "a30fe423433764aea43f29daa01379e02cf821adb351da81185f24f17d4a9d2d"
+    },
+    "agent-tab-light.svg": {
+      "valid": true,
+      "animated": false,
+      "sha256": "b2038c39e9f6ccad622aa83b684b23c987be7d9eed6eec17ba727919260448e3"
     },
     "agent-dark.svg": {
       "valid": true,
@@ -36,6 +41,16 @@
       "valid": true,
       "animated": false,
       "sha256": "66b5b3f52bae110ec5c6af914ee1b1ef33dafa5cf64099b3be440da6c30285be"
+    },
+    "agent-tab-dark.svg": {
+      "valid": true,
+      "animated": false,
+      "sha256": "2bb95c4da4f245a6acbb33949ea58feb2ca64e9828cbc4775f08f48bf2102d7b"
+    },
+    "agent-activity-phases.svg": {
+      "valid": true,
+      "animated": true,
+      "sha256": "afa26751b2233943bf5d2f20fe9a993d53e1ea89a3221ada1c931771c4aefe39"
     },
     "plugin-network-pulse-refined-animated-dark.svg": {
       "valid": true,
@@ -55,7 +70,7 @@
     "agent-loader-light.svg": {
       "valid": true,
       "animated": true,
-      "sha256": "bfdc62a1bd02ebe7cc41121de8cf8071d32578f04bb484252f5a73639bde6347"
+      "sha256": "ec3b2212d3ee0429ab16da3e1fedb48d7b087e9a24e766f0f46c1c49589b23c5"
     }
   },
   "icons": {
@@ -68,5 +83,42 @@
     "True-36": "valid, centre follows theme",
     "True-64": "valid, centre follows theme"
   },
-  "activity_lifecycle": "moves while busy, stops when hidden or idle, resumes when shown, follows theme"
+  "activity_phases": {
+    "thinking": {
+      "valid": true,
+      "animated": true
+    },
+    "reading": {
+      "valid": true,
+      "animated": true
+    },
+    "working": {
+      "valid": true,
+      "animated": true
+    },
+    "fetching": {
+      "valid": true,
+      "animated": true
+    },
+    "responding": {
+      "valid": true,
+      "animated": true
+    },
+    "waiting": {
+      "valid": true,
+      "animated": true
+    },
+    "retry": {
+      "valid": true,
+      "animated": true
+    },
+    "stopping": {
+      "valid": true,
+      "animated": true
+    }
+  },
+  "activity_size": 32,
+  "section_icon": "original chat glyph restored",
+  "activity_lifecycle": "moves while busy, stops when hidden or idle, resumes when shown, follows theme",
+  "implementation_commit": "6dfbc42d9"
 }

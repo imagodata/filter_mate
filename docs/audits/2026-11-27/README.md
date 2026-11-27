@@ -181,7 +181,7 @@ Proposition : un registre de capacités décrit pour chaque action son propriét
 
 ## États de travail et ergonomie de l’agent
 
-La barre actuelle est indéterminée, et les étapes d’outils sont suivies du statut générique Thinking. L’animation ajoutée apporte une identité et un signal d’activité. Elle ne sépare pas encore les phases de travail.
+À la base auditée, la barre est indéterminée et les étapes d’outils sont suivies du statut générique Thinking. La livraison complémentaire ajoute un réseau animé de 32 pixels, avec points mobiles agrandis. Son rythme et son apparence distinguent préparation, lecture, traitement, appel extérieur, réponse progressive, attente de décision, nouvelle tentative et arrêt. L’ancienne icône du titre AGENT est conservée.
 
 | État proposé | Présentation | Action disponible |
 |---|---|---|
@@ -194,11 +194,11 @@ La barre actuelle est indéterminée, et les étapes d’outils sont suivies du 
 | Interrompu après des effets | Étapes conservées et prochaine étape possible | Continuer, annuler les effets disponibles |
 | Terminé | Résultats, avertissements, fichiers et sauvegarde | Explorer, comparer, exporter, continuer |
 
-Créer des événements d’activité structurés dans le moteur pour alimenter ces états. Les phases décrivent des signaux observables ; le texte interne de réflexion du modèle ne constitue pas un indicateur de progression. Un pourcentage est pertinent lorsque le traitement fournit un total, sinon afficher l’étape et le temps écoulé.
+Les callbacks actuels du contrôleur alimentent les états visuels livrés. Des événements d’activité structurés dans le moteur permettraient de compléter les durées et les progrès des sous-traitements. Les phases décrivent des signaux observables ; le texte interne de réflexion du modèle ne constitue pas un indicateur de progression. Un pourcentage est pertinent lorsque le traitement fournit un total, sinon afficher l’étape et le temps écoulé.
 
 Le bouton Stop doit rester identifiable quand la saisie contient du texte : aujourd’hui, ce bouton devient un envoi Push ou Queue et Échap demeure le raccourci d’arrêt. Une action d’arrêt dédiée réduit cette ambiguïté. La file doit montrer le mode de chaque message et permettre sa modification avant départ.
 
-Le loader retenu reprend le réseau pulsé : quatre branches, un centre contrasté, une onde lente et trois particules en orbite. Il est limité à 20 images par seconde et son document animé est remplacé par un document statique lorsque le panneau disparaît ou que la requête se termine.
+Le loader retenu reprend le réseau pulsé : quatre branches, un centre contrasté, une onde et des particules en orbite. Les phases modifient leur nombre, leur taille, leur vitesse et les symboles du centre. Il est limité à 20 images par seconde et son document animé est remplacé par un document statique lorsque le panneau disparaît ou que la requête se termine.
 
 ## Bilan des skills
 
@@ -262,7 +262,7 @@ Le moteur de conversation indépendant de Qt, les adaptateurs, les tâches sur s
 | 5 | Tables, propriétés et panneaux QGIS | Chaque capacité a une entrée stable, une disponibilité et un résultat vérifié |
 | 6 | Adaptateurs de plugins et nouveaux skills | Scénarios réels validés sur les versions des extensions prises en charge |
 
-L’identité animée de l’agent est livrée séparément dans le commit `7dde44e96`. Elle fournit le composant visuel du lot 4 ; les événements de phase et les autres évolutions de ce lot restent à développer.
+L’identité animée de l’agent est livrée séparément à partir du commit `7dde44e96`, puis agrandie et reliée aux phases des actions dans `6dfbc42d9`. Ce second commit restaure aussi l’ancienne icône du titre. Le lot 4 conserve les évolutions de durée, de progression, de file et d’arrêt dédié à développer.
 
 ## Validations et limites
 
@@ -273,6 +273,7 @@ L’identité animée de l’agent est livrée séparément dans le commit `7dde
 | Parcours étendu agent, adaptateurs, contrôleurs et extensions | 5 306 réussis et 11 ignorés avant interruption ; exécution partielle |
 | Contrôleurs et extensions relancés séparément | 1 503 réussis |
 | Interface et identité de l’agent | 76 réussis, dont cycle de vie de l’animation |
+| Phases du loader et contrôleurs après agrandissement | 1 165 réussis, dont attente, interruption, restauration et changement de conversation |
 | Banc hors ligne | 173 sur 173 ; aucun appel à un modèle réel |
 | Export des skills | Vérification de synchronisation réussie |
 | QGIS réel, stockage et Processing | Scénarios existants réussis sur QGIS 3.44.15 |

@@ -1,6 +1,6 @@
 # Identité du réseau pulsé pour FilterMate et son agent
 
-Le réseau pulsé est la direction retenue par l’utilisateur. L’agent reprend ce symbole dans son icône compacte et dans son indicateur d’activité animé. Pour le plugin, la variante proposée renforce le contraste du centre et simplifie les détails aux tailles des barres d’outils.
+Le réseau pulsé est la direction retenue par l’utilisateur pour l’accueil et l’indicateur d’activité de l’agent. Le titre de l’onglet AGENT conserve son ancienne icône de conversation. Pour le plugin, la variante proposée renforce le contraste du centre et simplifie les détails aux tailles des barres d’outils.
 
 ![Icône intégrée et propositions du réseau pulsé](identity-proposals.png)
 
@@ -8,10 +8,27 @@ Le réseau pulsé est la direction retenue par l’utilisateur. L’agent repren
 
 - [Icône claire](agent-light.svg) et [icône sombre](agent-dark.svg), dessinées sur une grille de 24 unités.
 - [Animation claire](agent-loader-light.svg) et [animation sombre](agent-loader-dark.svg).
-- Quatre branches colorées, centre suivant le thème, onde de deux secondes et orbite de huit secondes.
+- Quatre branches colorées, centre suivant le thème et points en orbite agrandis. Le loader occupe 32 pixels.
 - Animation limitée à 20 images par seconde dans le composant Qt, active pendant une requête, arrêtée lorsque le panneau est masqué ou inactif. Elle reprend si le panneau redevient visible pendant le travail.
 
-L’icône de bienvenue et les en-têtes utilisent le rendu partagé de `ui/styles/mockup_design.py`. Le composant `ui/widgets/agent_activity.py` possède son propre moteur SVG ; les animations ne sont pas placées dans le cache global des icônes.
+Le rendu partagé de `ui/styles/mockup_design.py` distingue l’ancienne icône de titre `agent` du réseau `agent_network` utilisé dans l’accueil. Les icônes de titre sont conservées en [clair](agent-tab-light.svg) et [sombre](agent-tab-dark.svg). Le composant `ui/widgets/agent_activity.py` possède son propre moteur SVG ; les animations ne sont pas placées dans le cache global des icônes.
+
+## Animation selon les actions
+
+La vitesse et l’affichage suivent les événements de la conversation et des outils. Les changements de phase viennent des callbacks du contrôleur, sans interpréter les textes traduits. Envoyer plusieurs fragments de texte dans une même phase ne redémarre pas son animation.
+
+| Activité | Affichage | Tour complet |
+|---|---|---|
+| Préparation de réponse | Trois points et pulsation lente | 5,4 s |
+| Lecture par un outil | Deux points plus grands | 3,6 s |
+| Traitement ou modification | Trois grands points et pulsation plus vive | 2,1 s |
+| Appel d’un outil extérieur | Trois points et rythme intermédiaire | 2,8 s |
+| Réponse reçue progressivement | Un point bleu, plus discret | 4,2 s |
+| Attente de décision | Centre ambre avec pause, pulsation calme | Pas d’orbite |
+| Nouvelle tentative | Un point ambre, rotation lente | 6,4 s |
+| Arrêt demandé | Centre ambre avec carré d’arrêt | Pas d’orbite |
+
+[Comparer les animations](agent-activity-phases.svg) et [aperçu des états](agent-activity-phases.png). Une attente de confirmation retrouve ensuite sa phase précédente ; un arrêt ou un changement de conversation conserve son nouvel état. Les recettes utilisent le même indicateur lorsqu’elles exécutent leurs outils.
 
 Les fichiers fournis comme références utilisent `animate` et `animateMotion`. QtSvg les charge comme images mais ne reconnaît pas leurs animations dans les environnements vérifiés. Les variantes utilisent `animateTransform`, pris en charge par Qt5 et Qt6. Cette adaptation conserve la pulsation et les orbites sans ajouter de navigateur embarqué. [Prise en charge SVG par Qt](https://doc.qt.io/qt-6/topics-vectorimageformats.html).
 
@@ -31,4 +48,4 @@ L’icône principale `icon.png` et sa copie `icons/icon.png` restent inchangée
 
 Les rendus et le cycle de vie du composant ont été vérifiés dans QGIS 3.44.15 avec Qt 5.15.18 et QGIS 4.3.0 Master avec Qt 6.10.2. Les contrôles couvrent l’animation réelle des images, l’arrêt lorsque le parent est masqué, la reprise, les thèmes et les tailles de l’icône. Les tests automatisés vérifient aussi que deux indicateurs ne partagent pas leur moteur et que l’absence de QtSvg laisse le panneau utilisable.
 
-Résultats : [Qt5](validation-qt5.json), [Qt6](validation-qt6.json). Les références originales sont conservées dans [favicon-reference.svg](favicon-reference.svg) et [logo-reference.svg](logo-reference.svg).
+Les 1 165 tests ciblés des contrôleurs et de l’interface passent après cette évolution. Résultats des rendus : [Qt5](validation-qt5.json), [Qt6](validation-qt6.json). Les références originales sont conservées dans [favicon-reference.svg](favicon-reference.svg) et [logo-reference.svg](logo-reference.svg).
