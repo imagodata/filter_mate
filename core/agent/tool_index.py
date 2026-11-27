@@ -14,8 +14,8 @@ MAX_SUMMARY = 60
 # 2026-11-26 the five visible-automation tools (open_layout, preview_atlas, flash_features, set_active_layer and
 # show_message) bring it near 5,300.
 MAX_INDEX = 5500
-INDEX_TITLE = ("\n\nTools you can add with use_tools. Check before declaring a capability unavailable; "
-               "add needed tools in one call:")
+INDEX_TITLE = ("\n\nTools you can add with use_tools. Before saying a thing cannot be done, look here; "
+               "add in one call every tool the request needs:")
 
 SUMMARIES = {
     # reading the project

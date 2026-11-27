@@ -696,6 +696,63 @@
   ],
   "type": "object"
  },
+ "control_qgis": {
+  "additionalProperties": false,
+  "properties": {
+   "action": {
+    "enum": [
+     "attributes",
+     "properties",
+     "show_panel",
+     "hide_panel",
+     "map_tool",
+     "previous_view",
+     "next_view"
+    ],
+    "type": "string"
+   },
+   "expression": {
+    "default": "",
+    "maxLength": 2000,
+    "type": "string"
+   },
+   "layer": {
+    "default": "",
+    "maxLength": 1000,
+    "type": "string"
+   },
+   "page": {
+    "default": "information",
+    "enum": [
+     "information",
+     "source",
+     "style",
+     "metadata"
+    ],
+    "type": "string"
+   },
+   "panel": {
+    "default": "",
+    "maxLength": 300,
+    "type": "string"
+   },
+   "tool": {
+    "default": "",
+    "enum": [
+     "",
+     "pan",
+     "zoom_in",
+     "zoom_out",
+     "identify"
+    ],
+    "type": "string"
+   }
+  },
+  "required": [
+   "action"
+  ],
+  "type": "object"
+ },
  "create_layout": {
   "properties": {
    "extent": {
@@ -2547,6 +2604,11 @@
    "layer_name",
    "expression"
   ],
+  "type": "object"
+ },
+ "qgis_capabilities": {
+  "additionalProperties": false,
+  "properties": {},
   "type": "object"
  },
  "relations": {
