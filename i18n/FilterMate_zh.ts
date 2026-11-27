@@ -2881,6 +2881,41 @@ If you choose No, these data stay in memory and will be lost when the project cl
         <translation>此项目包含哪些图层？</translation>
     </message>
     <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1577"/>
+        <source>Other ideas</source>
+        <translation>其他想法</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="214"/>
+        <source>Zoom to this place</source>
+        <translation>缩放到此地点</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="272"/>
+        <source>Use the field {field}.</source>
+        <translation>使用字段{field}。</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="263"/>
+        <source>For {layer}: {request}</source>
+        <translation>对于{layer}：{request}</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="246"/>
+        <source>In the area of {layer}: {request}</source>
+        <translation>在{layer}覆盖的区域：{request}</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="238"/>
+        <source>Around {place}, within {radius} km: {request}</source>
+        <translation>在{place}周围{radius}公里范围内：{request}</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="171"/>
+        <source>Give the minimum, maximum and mean of this field</source>
+        <translation>给出此字段的最小值、最大值和平均值</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/agent_panel.py" line="62"/>
         <source>Keep the buildings taller than 15 m</source>
         <translation>保留高于 15 米的建筑物</translation>

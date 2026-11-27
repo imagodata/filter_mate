@@ -1,0 +1,383 @@
+{
+  "cases": [
+    {
+      "id": "asset_maintenance_inventory",
+      "prompt": "/asset-maintenance Compte les ouvrages par etat après avoir vérifié leur schéma, sans les modifier ni fabriquer un score de priorité.",
+      "setup": {
+        "layers": {
+          "ouvrages": {
+            "id": "ouvrages_1",
+            "kind": "vector",
+            "geometry": "MultiLineString",
+            "count": 20,
+            "fields": {
+              "asset_id": [
+                "A1",
+                "A2"
+              ],
+              "etat": [
+                "Bon",
+                "Mauvais"
+              ],
+              "date_pose": [
+                "2000-01-01",
+                "2020-01-01"
+              ],
+              "derniere_inspection": [
+                "2020-06-01",
+                "2025-06-01"
+              ]
+            }
+          }
+        },
+        "selected": []
+      },
+      "expect": [
+        [
+          {
+            "tool": "load_skill",
+            "args": {
+              "name": "asset-maintenance"
+            },
+            "call_args": {
+              "name": "asset-maintenance"
+            }
+          },
+          {
+            "tool": "describe_layer",
+            "args": {
+              "layer": "ouvrages"
+            },
+            "call_args": {
+              "layer": "ouvrages"
+            }
+          },
+          {
+            "tool": "layer_statistics",
+            "args": {
+              "layer": "ouvrages",
+              "group_by": "etat"
+            },
+            "call_args": {
+              "layer": "ouvrages",
+              "group_by": "etat"
+            }
+          }
+        ]
+      ],
+      "forbid": [
+        "run_algorithm",
+        "run_pyqgis",
+        "apply_filter",
+        "cross_filter",
+        "add_field",
+        "update_features",
+        "duplicate_layer",
+        "export_layers",
+        "remove_layers"
+      ]
+    },
+    {
+      "id": "asset_maintenance_inspection_shortlist",
+      "prompt": "/asset-maintenance Garde seulement les ouvrages dont etat vaut Mauvais pour une liste de visites. Ne transforme pas cet état en probabilité de panne et ne crée pas de nouvelle couche.",
+      "setup": {
+        "layers": {
+          "ouvrages": {
+            "id": "ouvrages_1",
+            "kind": "vector",
+            "geometry": "MultiLineString",
+            "count": 20,
+            "fields": {
+              "asset_id": [
+                "A1",
+                "A2"
+              ],
+              "etat": [
+                "Bon",
+                "Mauvais"
+              ],
+              "date_pose": [
+                "2000-01-01",
+                "2020-01-01"
+              ],
+              "derniere_inspection": [
+                "2020-06-01",
+                "2025-06-01"
+              ]
+            }
+          }
+        },
+        "selected": []
+      },
+      "expect": [
+        [
+          {
+            "tool": "load_skill",
+            "args": {
+              "name": "asset-maintenance"
+            },
+            "call_args": {
+              "name": "asset-maintenance"
+            }
+          },
+          {
+            "tool": "describe_layer",
+            "args": {
+              "layer": "ouvrages"
+            },
+            "call_args": {
+              "layer": "ouvrages"
+            }
+          },
+          {
+            "tool": "apply_filter",
+            "args": {
+              "layer_name": "ouvrages",
+              "expression": "\"etat\" = 'Mauvais'"
+            },
+            "call_args": {
+              "layer_name": "ouvrages",
+              "expression": "\"etat\" = 'Mauvais'"
+            }
+          }
+        ]
+      ],
+      "forbid": [
+        "run_algorithm",
+        "run_pyqgis",
+        "add_field",
+        "export_layers",
+        "remove_layers"
+      ]
+    },
+    {
+      "id": "asset_maintenance_inspection_corridor",
+      "prompt": "/asset-maintenance Crée une nouvelle couche tampon de 5 m autour de ouvrages pour un couloir de visite provisoire, sans modifier la source. Lis son schéma et les paramètres de native:buffer avant de lancer le traitement. Ces données sont en EPSG:2154.",
+      "setup": {
+        "layers": {
+          "ouvrages": {
+            "id": "ouvrages_1",
+            "kind": "vector",
+            "geometry": "MultiLineString",
+            "count": 20,
+            "fields": {
+              "asset_id": [
+                "A1",
+                "A2"
+              ],
+              "etat": [
+                "Bon",
+                "Mauvais"
+              ],
+              "date_pose": [
+                "2000-01-01",
+                "2020-01-01"
+              ],
+              "derniere_inspection": [
+                "2020-06-01",
+                "2025-06-01"
+              ]
+            }
+          }
+        },
+        "selected": []
+      },
+      "expect": [
+        [
+          {
+            "tool": "load_skill",
+            "args": {
+              "name": "asset-maintenance"
+            },
+            "call_args": {
+              "name": "asset-maintenance"
+            }
+          },
+          {
+            "tool": "describe_layer",
+            "args": {
+              "layer": "ouvrages"
+            },
+            "call_args": {
+              "layer": "ouvrages"
+            }
+          },
+          {
+            "tool": "describe_algorithm",
+            "args": {
+              "algorithm_id": "native:buffer"
+            },
+            "call_args": {
+              "algorithm_id": "native:buffer"
+            }
+          },
+          {
+            "tool": "run_algorithm",
+            "args": {
+              "algorithm_id": "native:buffer",
+              "parameters": {
+                "INPUT": "ouvrages",
+                "DISTANCE": 5
+              },
+              "names": {
+                "OUTPUT": "Couloir de visite 5 m"
+              }
+            },
+            "call_args": {
+              "algorithm_id": "native:buffer",
+              "parameters": {
+                "INPUT": "ouvrages",
+                "DISTANCE": 5
+              },
+              "names": {
+                "OUTPUT": "Couloir de visite 5 m"
+              }
+            }
+          }
+        ]
+      ],
+      "forbid": [
+        "run_pyqgis",
+        "add_field",
+        "update_features",
+        "export_layers",
+        "remove_layers"
+      ]
+    },
+    {
+      "id": "asset_maintenance_no_invented_priority",
+      "prompt": "/asset-maintenance Examine le schéma de ouvrages puis propose les critères d’une grille de priorité. Je n’ai défini ni poids, ni seuils ni fréquence réglementaire. Attends mon choix avant tout calcul ou ajout de champ.",
+      "setup": {
+        "layers": {
+          "ouvrages": {
+            "id": "ouvrages_1",
+            "kind": "vector",
+            "geometry": "MultiLineString",
+            "count": 20,
+            "fields": {
+              "asset_id": [
+                "A1",
+                "A2"
+              ],
+              "etat": [
+                "Bon",
+                "Mauvais"
+              ],
+              "date_pose": [
+                "2000-01-01",
+                "2020-01-01"
+              ],
+              "derniere_inspection": [
+                "2020-06-01",
+                "2025-06-01"
+              ]
+            }
+          }
+        },
+        "selected": []
+      },
+      "expect": [
+        [
+          {
+            "tool": "load_skill",
+            "args": {
+              "name": "asset-maintenance"
+            },
+            "call_args": {
+              "name": "asset-maintenance"
+            }
+          },
+          {
+            "tool": "describe_layer",
+            "args": {
+              "layer": "ouvrages"
+            },
+            "call_args": {
+              "layer": "ouvrages"
+            }
+          }
+        ]
+      ],
+      "forbid": [
+        "run_algorithm",
+        "run_pyqgis",
+        "apply_filter",
+        "cross_filter",
+        "add_field",
+        "update_features",
+        "duplicate_layer",
+        "export_layers",
+        "remove_layers"
+      ],
+      "trap": true,
+      "expert": true
+    },
+    {
+      "id": "asset_maintenance_duplicates_are_not_deletions",
+      "prompt": "/asset-maintenance Lis le schéma des ouvrages et propose une méthode pour examiner des géométries superposées : elles peuvent être des circuits parallèles. Ne supprime, ne fusionne, ne filtre et ne répare rien.",
+      "setup": {
+        "layers": {
+          "ouvrages": {
+            "id": "ouvrages_1",
+            "kind": "vector",
+            "geometry": "MultiLineString",
+            "count": 20,
+            "fields": {
+              "asset_id": [
+                "A1",
+                "A2"
+              ],
+              "etat": [
+                "Bon",
+                "Mauvais"
+              ],
+              "date_pose": [
+                "2000-01-01",
+                "2020-01-01"
+              ],
+              "derniere_inspection": [
+                "2020-06-01",
+                "2025-06-01"
+              ]
+            }
+          }
+        },
+        "selected": []
+      },
+      "expect": [
+        [
+          {
+            "tool": "load_skill",
+            "args": {
+              "name": "asset-maintenance"
+            },
+            "call_args": {
+              "name": "asset-maintenance"
+            }
+          },
+          {
+            "tool": "describe_layer",
+            "args": {
+              "layer": "ouvrages"
+            },
+            "call_args": {
+              "layer": "ouvrages"
+            }
+          }
+        ]
+      ],
+      "forbid": [
+        "run_algorithm",
+        "run_pyqgis",
+        "apply_filter",
+        "cross_filter",
+        "add_field",
+        "update_features",
+        "duplicate_layer",
+        "export_layers",
+        "remove_layers"
+      ],
+      "trap": true
+    }
+  ]
+}

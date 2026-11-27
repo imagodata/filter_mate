@@ -99,17 +99,18 @@ class SimulatedProject:
     """
 
     def __init__(self, setup: Optional[Dict[str, Any]] = None) -> None:
-        # A copy of its own: a layer the model adds joins them, a field it adds changes a layer of this case only.
-        self.layers: Dict[str, Dict[str, Any]] = copy.deepcopy(LAYERS)
+        # A case can replace the sample project with its own domain schema. Copies keep changes in one run from
+        # contaminating the next case, including installation/operating-state fields in infrastructure studies.
+        setup = setup or {}
+        self.layers: Dict[str, Dict[str, Any]] = copy.deepcopy(setup.get("layers", LAYERS))
         self.by_ref = {}
         for name, layer in self.layers.items():
             self.by_ref[name] = name
             self.by_ref[layer["id"]] = name
-        setup = setup or {}
         self.enabled_sources = tuple(setup.get('enabled_sources', ('datagouv',)))
         self.drawn: Dict[str, int] = dict(setup.get("drawn", {}))  # objects drawn in the dock, by raster
         self.filters: Dict[str, str] = dict(setup.get("filters", {}))
-        self.selected: List[str] = list(setup.get("selected", ["communes"]))
+        self.selected: List[str] = list(setup.get("selected", ["communes"] if "communes" in self.layers else []))
         self.empty: List[str] = list(setup.get("empty", []))  # layers a relation filter leaves with no feature
         self.settings: Dict[str, Any] = {}  # the configuration of FilterMate: its defaults, then what was changed
         self.offered: set = set()  # the tools of the case (load_skill offers the skills they allow)
@@ -559,9 +560,10 @@ class SimulatedProject:
                               {"title": "Notice", "format": "pdf", "url": "https://static.data.gouv.fr/notice.pdf"}]}]}
 
         def map_context(_):
+            active = "communes" if "communes" in self.layers else next(iter(self.layers), "")
             return {"available": True, "project_crs": "EPSG:2154", "canvas_crs": "EPSG:2154", "extent_wkt": EXTENT_WKT,
                     "extent": [570000.0, 6270000.0, 580000.0, 6280000.0],
-                    "scale": 25000.0, "active_layer_id": "communes_a1", "active_layer_name": "communes",
+                    "scale": 25000.0, "active_layer_id": self.layers[active]["id"] if active else "", "active_layer_name": active,
                     "selections": [{"layer_id": self.layers[name]["id"], "name": name, "selected_count": 1}
                                    for name in self.selected],
                     "drawn_objects": [{"layer_id": self.layers[name]["id"], "name": name, "crs_authid": "EPSG:2154",

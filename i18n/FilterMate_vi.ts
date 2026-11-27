@@ -2881,6 +2881,41 @@ Nếu chọn Không, dữ liệu vẫn ở trong bộ nhớ và sẽ mất khi �
         <translation>Dự án này có những lớp nào?</translation>
     </message>
     <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1577"/>
+        <source>Other ideas</source>
+        <translation>Ý tưởng khác</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="214"/>
+        <source>Zoom to this place</source>
+        <translation>Phóng to địa điểm này</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="272"/>
+        <source>Use the field {field}.</source>
+        <translation>Sử dụng trường {field}.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="263"/>
+        <source>For {layer}: {request}</source>
+        <translation>Với {layer}: {request}</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="246"/>
+        <source>In the area of {layer}: {request}</source>
+        <translation>Trong khu vực của {layer}: {request}</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="238"/>
+        <source>Around {place}, within {radius} km: {request}</source>
+        <translation>Quanh {place}, trong bán kính {radius} km: {request}</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="171"/>
+        <source>Give the minimum, maximum and mean of this field</source>
+        <translation>Cho biết giá trị nhỏ nhất, lớn nhất và trung bình của trường này</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/agent_panel.py" line="62"/>
         <source>Keep the buildings taller than 15 m</source>
         <translation>Giữ lại các tòa nhà cao hơn 15 m</translation>

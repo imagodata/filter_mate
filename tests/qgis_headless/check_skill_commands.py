@@ -54,7 +54,11 @@ panel.stop_requested.connect(lambda: stopped.append(True))
 for prefix, command, key in (('/bra', 'brainstorm', Qt.Key.Key_Return),
                              ('/bra', 'brainstorm', Qt.Key.Key_Tab),
                              ('/find', 'find-skills', Qt.Key.Key_Return),
-                             ('/find', 'find-skills', Qt.Key.Key_Tab)):
+                             ('/find', 'find-skills', Qt.Key.Key_Tab),
+                             ('/telecom', 'telecom-fiber', Qt.Key.Key_Return),
+                             ('/electric', 'electric-networks', Qt.Key.Key_Tab),
+                             ('/water', 'water-networks', Qt.Key.Key_Return),
+                             ('/asset', 'asset-maintenance', Qt.Key.Key_Tab)):
     panel.input.setText('')
     panel.input.setFocus()
     QTest.qWait(30)
@@ -87,6 +91,7 @@ print('PASS slash keyboard Enter/Tab/Escape, editable request, paths and @ layer
 for provider in ('anthropic', 'openai', 'ollama'):
     calls, records, outcomes = [], [], []
     loader = skill_loader(offered)
+
     def load(arguments):
         calls.append(arguments['name'])
         return loader(arguments)
@@ -119,6 +124,14 @@ for provider in ('anthropic', 'openai', 'ollama'):
     assert result['skill'] == 'find-skills' and result['instructions']
     records[-1][1](TurnComplete(Message(ROLE_ASSISTANT, (TextPart('Recommended skills.'),)), STOP_END))
     assert outcomes[-1].status == 'done'
+    for business in ('telecom-fiber', 'electric-networks', 'water-networks', 'asset-maintenance'):
+        records.clear()
+        engine.send(f'/{business} Propose a study using this project; change nothing.')
+        assert calls[-1] == business and len(records) == 1 and policy.posture == 'respond'
+        result = json.loads(session.messages[-1].parts[0].content)
+        assert result['skill'] == business and result['instructions']
+        records[-1][1](TurnComplete(Message(ROLE_ASSISTANT, (TextPart('Study proposal.'),)), STOP_END))
+        assert outcomes[-1].status == 'done'
     records.clear()
     engine.send('/missing-skill')
     assert not records and not engine.busy
@@ -127,6 +140,10 @@ for provider in ('anthropic', 'openai', 'ollama'):
     assert not records and not engine.busy
     print(f'PASS {provider}: actual built-in loader before first request, repeat reuse, unavailable/disabled stop', flush=True)
 
+from filter_mate.ui.controllers.agent_mcp_bridge import skill_prompts
+prompts = {prompt.name for prompt in skill_prompts()}
+assert {f'filtermate_{name}' for name in ('telecom-fiber', 'electric-networks', 'water-networks', 'asset-maintenance')} <= prompts
+print('PASS business skills: slash completion, actual loading, MCP prompts; no expert mode or model calls', flush=True)
 assert not project.isDirty() and len(project.mapLayers()) == 1
 out = os.environ.get('FM_SKILL_COMMAND_OUTPUT', '/audit/fm-skill-commands.json')
 Path(out).write_text(json.dumps({'qgis': Qgis.QGIS_VERSION, 'checks_passed': True,

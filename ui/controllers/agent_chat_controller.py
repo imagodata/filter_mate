@@ -124,7 +124,7 @@ from ..widgets.agent_widgets_strip import number_text
 logger = logging.getLogger("FilterMate.agent")
 # What on a layer changes the requests of the welcome: its selection, its filter, its source (a raster or a point cloud
 # is filtered by a source cut for the purpose).
-FACTS_SIGNALS = ("selectionChanged", "subsetStringChanged", "dataSourceChanged")
+FACTS_SIGNALS = ("selectionChanged", "subsetStringChanged", "dataSourceChanged", "nameChanged", "updatedFields")
 
 LIVE_DELAY_MS = 800  # a burst of saves (several layers, or the edits of a script) runs a live recipe once
 LIVE_MAX_TRIES = 375  # while FilterMate or the chat works, or a target is edited: about five minutes, then the user is told
@@ -383,7 +383,12 @@ class AgentChatController(QObject):
     def _read_welcome_facts(self):
         """The state of QGIS and the project for the requests of the welcome (main thread; counts, no feature read)."""
         from ...adapters.qgis.project_facts import read_facts
-        return read_facts(active=self._active_layer())
+        try:
+            from qgis.utils import iface
+            canvas = iface.mapCanvas() if iface is not None else None
+        except (ImportError, AttributeError, RuntimeError):
+            canvas = None
+        return read_facts(active=self._active_layer(), canvas=canvas)
 
     @staticmethod
     def _layers_in_tree_order():
@@ -447,6 +452,8 @@ class AgentChatController(QObject):
         try:
             from qgis.utils import iface
             iface.currentLayerChanged.connect(self.panel.facts_changed)
+            iface.mapCanvas().extentsChanged.connect(self.panel.facts_changed)
+            iface.mapCanvas().destinationCrsChanged.connect(self.panel.facts_changed)
         except Exception:  # no interface (a script)
             logger.debug("Agent: the active layer is not followed", exc_info=True)
         self._follow_facts_layers(project.mapLayers().values())
@@ -486,6 +493,8 @@ class AgentChatController(QObject):
         try:
             from qgis.utils import iface
             iface.currentLayerChanged.disconnect(self.panel.facts_changed)
+            iface.mapCanvas().extentsChanged.disconnect(self.panel.facts_changed)
+            iface.mapCanvas().destinationCrsChanged.disconnect(self.panel.facts_changed)
         except (ImportError, AttributeError, RuntimeError, TypeError):  # no interface, or not connected
             pass
         for layer in self._facts_layers.values():

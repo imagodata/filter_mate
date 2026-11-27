@@ -2881,6 +2881,41 @@ If you choose No, these data stay in memory and will be lost when the project cl
         <translation>이 프로젝트에는 어떤 레이어가 있나요?</translation>
     </message>
     <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1577"/>
+        <source>Other ideas</source>
+        <translation>다른 아이디어</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="214"/>
+        <source>Zoom to this place</source>
+        <translation>이 장소로 확대</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="272"/>
+        <source>Use the field {field}.</source>
+        <translation>{field} 필드를 사용해 주세요.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="263"/>
+        <source>For {layer}: {request}</source>
+        <translation>{layer}에 대해: {request}</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="246"/>
+        <source>In the area of {layer}: {request}</source>
+        <translation>{layer} 영역에서: {request}</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="238"/>
+        <source>Around {place}, within {radius} km: {request}</source>
+        <translation>{place} 주변 반경 {radius}km 이내에서: {request}</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="171"/>
+        <source>Give the minimum, maximum and mean of this field</source>
+        <translation>이 필드의 최솟값, 최댓값과 평균을 알려 줘</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/agent_panel.py" line="62"/>
         <source>Keep the buildings taller than 15 m</source>
         <translation>15m보다 높은 건물만 남기기</translation>

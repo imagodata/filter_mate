@@ -2881,6 +2881,41 @@ If you choose No, these data stay in memory and will be lost when the project cl
         <translation>Какви слоеве съдържа този проект?</translation>
     </message>
     <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1577"/>
+        <source>Other ideas</source>
+        <translation>Други идеи</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="214"/>
+        <source>Zoom to this place</source>
+        <translation>Приближи до това място</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="272"/>
+        <source>Use the field {field}.</source>
+        <translation>Използвай полето {field}.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="263"/>
+        <source>For {layer}: {request}</source>
+        <translation>За {layer}: {request}</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="246"/>
+        <source>In the area of {layer}: {request}</source>
+        <translation>В района на {layer}: {request}</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="238"/>
+        <source>Around {place}, within {radius} km: {request}</source>
+        <translation>Около {place}, в радиус от {radius} км: {request}</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="171"/>
+        <source>Give the minimum, maximum and mean of this field</source>
+        <translation>Дай минимума, максимума и средната стойност на това поле</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/agent_panel.py" line="62"/>
         <source>Keep the buildings taller than 15 m</source>
         <translation>Запази сградите, по-високи от 15 м</translation>

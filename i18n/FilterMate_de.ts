@@ -2881,6 +2881,41 @@ Bei „Nein“ bleiben diese Daten im Arbeitsspeicher und gehen beim Schließen 
         <translation>Welche Layer enthält dieses Projekt?</translation>
     </message>
     <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1577"/>
+        <source>Other ideas</source>
+        <translation>Weitere Ideen</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="214"/>
+        <source>Zoom to this place</source>
+        <translation>Zu diesem Ort zoomen</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="272"/>
+        <source>Use the field {field}.</source>
+        <translation>Verwende das Feld {field}.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="263"/>
+        <source>For {layer}: {request}</source>
+        <translation>Für {layer}: {request}</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="246"/>
+        <source>In the area of {layer}: {request}</source>
+        <translation>Im Gebiet von {layer}: {request}</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="238"/>
+        <source>Around {place}, within {radius} km: {request}</source>
+        <translation>Um {place}, im Umkreis von {radius} km: {request}</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="171"/>
+        <source>Give the minimum, maximum and mean of this field</source>
+        <translation>Gib Minimum, Maximum und Mittelwert dieses Feldes an</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/agent_panel.py" line="62"/>
         <source>Keep the buildings taller than 15 m</source>
         <translation>Gebäude über 15 m Höhe behalten</translation>

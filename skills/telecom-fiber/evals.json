@@ -1,0 +1,417 @@
+{
+  "cases": [
+    {
+      "id": "telecom_fiber_inventory",
+      "prompt": "/telecom-fiber Donne la longueur cumulée des câbles de cables_ftth par pm_id. Il s’agit d’un inventaire administratif, sans conclure sur la desserte. Ne modifie rien.",
+      "setup": {
+        "layers": {
+          "cables_ftth": {
+            "id": "cables_ftth_1",
+            "kind": "vector",
+            "geometry": "MultiLineString",
+            "count": 12,
+            "fields": {
+              "asset_id": [
+                "C1",
+                "C2"
+              ],
+              "pm_id": [
+                "PM_01",
+                "PM_02"
+              ],
+              "node_from": [
+                "NRO_1",
+                "PM_01"
+              ],
+              "node_to": [
+                "PM_01",
+                "PBO_1"
+              ],
+              "fibres_total": [
+                24,
+                144
+              ],
+              "fibres_used": [
+                4,
+                32
+              ],
+              "etat": [
+                "En service",
+                "Projet"
+              ]
+            }
+          }
+        },
+        "selected": []
+      },
+      "expect": [
+        [
+          {
+            "tool": "load_skill",
+            "args": {
+              "name": "telecom-fiber"
+            },
+            "call_args": {
+              "name": "telecom-fiber"
+            }
+          },
+          {
+            "tool": "describe_layer",
+            "args": {
+              "layer": "cables_ftth"
+            },
+            "call_args": {
+              "layer": "cables_ftth"
+            }
+          },
+          {
+            "tool": "layer_statistics",
+            "args": {
+              "layer": "cables_ftth",
+              "measure": "length",
+              "group_by": "pm_id"
+            },
+            "call_args": {
+              "layer": "cables_ftth",
+              "measure": "length",
+              "group_by": "pm_id"
+            }
+          }
+        ]
+      ],
+      "forbid": [
+        "run_algorithm",
+        "run_pyqgis",
+        "apply_filter",
+        "cross_filter",
+        "add_field",
+        "update_features",
+        "duplicate_layer",
+        "export_layers",
+        "remove_layers"
+      ]
+    },
+    {
+      "id": "telecom_fiber_recorded_parent_filter",
+      "prompt": "/telecom-fiber Le rattachement administratif au point de mutualisation est documenté dans pm_id. Garde uniquement les câbles de cables_ftth dont pm_id vaut PM_01, sans reconstruire le graphe ni créer de couche.",
+      "setup": {
+        "layers": {
+          "cables_ftth": {
+            "id": "cables_ftth_1",
+            "kind": "vector",
+            "geometry": "MultiLineString",
+            "count": 12,
+            "fields": {
+              "asset_id": [
+                "C1",
+                "C2"
+              ],
+              "pm_id": [
+                "PM_01",
+                "PM_02"
+              ],
+              "node_from": [
+                "NRO_1",
+                "PM_01"
+              ],
+              "node_to": [
+                "PM_01",
+                "PBO_1"
+              ],
+              "fibres_total": [
+                24,
+                144
+              ],
+              "fibres_used": [
+                4,
+                32
+              ],
+              "etat": [
+                "En service",
+                "Projet"
+              ]
+            }
+          }
+        },
+        "selected": []
+      },
+      "expect": [
+        [
+          {
+            "tool": "load_skill",
+            "args": {
+              "name": "telecom-fiber"
+            },
+            "call_args": {
+              "name": "telecom-fiber"
+            }
+          },
+          {
+            "tool": "describe_layer",
+            "args": {
+              "layer": "cables_ftth"
+            },
+            "call_args": {
+              "layer": "cables_ftth"
+            }
+          },
+          {
+            "tool": "apply_filter",
+            "args": {
+              "layer_name": "cables_ftth",
+              "expression": "\"pm_id\" = 'PM_01'"
+            },
+            "call_args": {
+              "layer_name": "cables_ftth",
+              "expression": "\"pm_id\" = 'PM_01'"
+            }
+          }
+        ]
+      ],
+      "forbid": [
+        "run_algorithm",
+        "run_pyqgis",
+        "add_field",
+        "export_layers",
+        "remove_layers"
+      ]
+    },
+    {
+      "id": "telecom_fiber_architecture_proposal",
+      "prompt": "/telecom-fiber Compare une arborescence radiale et une boucle pour cables_ftth, en expliquant les données manquantes et les objectifs possibles. Commence par son schéma. Je demande une proposition uniquement, sans calcul ni modification.",
+      "setup": {
+        "layers": {
+          "cables_ftth": {
+            "id": "cables_ftth_1",
+            "kind": "vector",
+            "geometry": "MultiLineString",
+            "count": 12,
+            "fields": {
+              "asset_id": [
+                "C1",
+                "C2"
+              ],
+              "pm_id": [
+                "PM_01",
+                "PM_02"
+              ],
+              "node_from": [
+                "NRO_1",
+                "PM_01"
+              ],
+              "node_to": [
+                "PM_01",
+                "PBO_1"
+              ],
+              "fibres_total": [
+                24,
+                144
+              ],
+              "fibres_used": [
+                4,
+                32
+              ],
+              "etat": [
+                "En service",
+                "Projet"
+              ]
+            }
+          }
+        },
+        "selected": []
+      },
+      "expect": [
+        [
+          {
+            "tool": "load_skill",
+            "args": {
+              "name": "telecom-fiber"
+            },
+            "call_args": {
+              "name": "telecom-fiber"
+            }
+          },
+          {
+            "tool": "describe_layer",
+            "args": {
+              "layer": "cables_ftth"
+            },
+            "call_args": {
+              "layer": "cables_ftth"
+            }
+          }
+        ]
+      ],
+      "forbid": [
+        "run_algorithm",
+        "run_pyqgis",
+        "apply_filter",
+        "cross_filter",
+        "add_field",
+        "update_features",
+        "duplicate_layer",
+        "export_layers",
+        "remove_layers"
+      ]
+    },
+    {
+      "id": "telecom_fiber_missing_graph_provider",
+      "prompt": "/telecom-fiber Vérifie si un algorithme spanningtree est proposé par Processing pour étudier une variante de desserte. Si la recherche est vide, explique la limite et arrête-toi. Aucun calcul, installation ou Python.",
+      "setup": {
+        "layers": {
+          "cables_ftth": {
+            "id": "cables_ftth_1",
+            "kind": "vector",
+            "geometry": "MultiLineString",
+            "count": 12,
+            "fields": {
+              "asset_id": [
+                "C1",
+                "C2"
+              ],
+              "pm_id": [
+                "PM_01",
+                "PM_02"
+              ],
+              "node_from": [
+                "NRO_1",
+                "PM_01"
+              ],
+              "node_to": [
+                "PM_01",
+                "PBO_1"
+              ],
+              "fibres_total": [
+                24,
+                144
+              ],
+              "fibres_used": [
+                4,
+                32
+              ],
+              "etat": [
+                "En service",
+                "Projet"
+              ]
+            }
+          }
+        },
+        "selected": []
+      },
+      "expect": [
+        [
+          {
+            "tool": "load_skill",
+            "args": {
+              "name": "telecom-fiber"
+            },
+            "call_args": {
+              "name": "telecom-fiber"
+            }
+          },
+          {
+            "tool": "find_algorithms",
+            "args": {
+              "query": "spanningtree"
+            },
+            "call_args": {
+              "query": "spanningtree"
+            }
+          }
+        ]
+      ],
+      "forbid": [
+        "run_algorithm",
+        "run_pyqgis",
+        "apply_filter",
+        "cross_filter",
+        "add_field",
+        "update_features",
+        "duplicate_layer",
+        "export_layers",
+        "remove_layers"
+      ],
+      "trap": true,
+      "expert": true
+    },
+    {
+      "id": "telecom_fiber_no_optical_budget",
+      "prompt": "/telecom-fiber Lis le schéma de cables_ftth et explique ce qui manque pour un bilan optique. Nous n’avons ni pertes, ni coupleurs documentés, ni profil des équipements. Ne calcule pas de budget à partir de la longueur et ne crée aucun champ.",
+      "setup": {
+        "layers": {
+          "cables_ftth": {
+            "id": "cables_ftth_1",
+            "kind": "vector",
+            "geometry": "MultiLineString",
+            "count": 12,
+            "fields": {
+              "asset_id": [
+                "C1",
+                "C2"
+              ],
+              "pm_id": [
+                "PM_01",
+                "PM_02"
+              ],
+              "node_from": [
+                "NRO_1",
+                "PM_01"
+              ],
+              "node_to": [
+                "PM_01",
+                "PBO_1"
+              ],
+              "fibres_total": [
+                24,
+                144
+              ],
+              "fibres_used": [
+                4,
+                32
+              ],
+              "etat": [
+                "En service",
+                "Projet"
+              ]
+            }
+          }
+        },
+        "selected": []
+      },
+      "expect": [
+        [
+          {
+            "tool": "load_skill",
+            "args": {
+              "name": "telecom-fiber"
+            },
+            "call_args": {
+              "name": "telecom-fiber"
+            }
+          },
+          {
+            "tool": "describe_layer",
+            "args": {
+              "layer": "cables_ftth"
+            },
+            "call_args": {
+              "layer": "cables_ftth"
+            }
+          }
+        ]
+      ],
+      "forbid": [
+        "run_algorithm",
+        "run_pyqgis",
+        "apply_filter",
+        "cross_filter",
+        "add_field",
+        "update_features",
+        "duplicate_layer",
+        "export_layers",
+        "remove_layers"
+      ],
+      "trap": true
+    }
+  ]
+}

@@ -1,0 +1,396 @@
+{
+  "cases": [
+    {
+      "id": "electric_networks_inventory",
+      "prompt": "/electric-networks Donne la longueur cumulée de lignes_hta par tension_kv. Un inventaire uniquement, sans calcul électrique ni modification.",
+      "setup": {
+        "layers": {
+          "lignes_hta": {
+            "id": "lignes_hta_1",
+            "kind": "vector",
+            "geometry": "MultiLineString",
+            "count": 8,
+            "fields": {
+              "asset_id": [
+                "L1",
+                "L2"
+              ],
+              "poste_id": [
+                "P_01",
+                "P_02"
+              ],
+              "tension_kv": [
+                20.0,
+                20.0
+              ],
+              "circuit_id": [
+                "C1",
+                "C2"
+              ],
+              "etat": [
+                "En service",
+                "Hors service"
+              ]
+            }
+          }
+        },
+        "selected": []
+      },
+      "expect": [
+        [
+          {
+            "tool": "load_skill",
+            "args": {
+              "name": "electric-networks"
+            },
+            "call_args": {
+              "name": "electric-networks"
+            }
+          },
+          {
+            "tool": "describe_layer",
+            "args": {
+              "layer": "lignes_hta"
+            },
+            "call_args": {
+              "layer": "lignes_hta"
+            }
+          },
+          {
+            "tool": "layer_statistics",
+            "args": {
+              "layer": "lignes_hta",
+              "measure": "length",
+              "group_by": "tension_kv"
+            },
+            "call_args": {
+              "layer": "lignes_hta",
+              "measure": "length",
+              "group_by": "tension_kv"
+            }
+          }
+        ]
+      ],
+      "forbid": [
+        "run_algorithm",
+        "run_pyqgis",
+        "apply_filter",
+        "cross_filter",
+        "add_field",
+        "update_features",
+        "duplicate_layer",
+        "export_layers",
+        "remove_layers"
+      ]
+    },
+    {
+      "id": "electric_networks_recorded_feeder_filter",
+      "prompt": "/electric-networks Le champ poste_id est le rattachement administratif documenté. Garde les lignes_hta de P_01, sans affirmer qu’elles sont alimentées et sans analyse de coupure.",
+      "setup": {
+        "layers": {
+          "lignes_hta": {
+            "id": "lignes_hta_1",
+            "kind": "vector",
+            "geometry": "MultiLineString",
+            "count": 8,
+            "fields": {
+              "asset_id": [
+                "L1",
+                "L2"
+              ],
+              "poste_id": [
+                "P_01",
+                "P_02"
+              ],
+              "tension_kv": [
+                20.0,
+                20.0
+              ],
+              "circuit_id": [
+                "C1",
+                "C2"
+              ],
+              "etat": [
+                "En service",
+                "Hors service"
+              ]
+            }
+          }
+        },
+        "selected": []
+      },
+      "expect": [
+        [
+          {
+            "tool": "load_skill",
+            "args": {
+              "name": "electric-networks"
+            },
+            "call_args": {
+              "name": "electric-networks"
+            }
+          },
+          {
+            "tool": "describe_layer",
+            "args": {
+              "layer": "lignes_hta"
+            },
+            "call_args": {
+              "layer": "lignes_hta"
+            }
+          },
+          {
+            "tool": "apply_filter",
+            "args": {
+              "layer_name": "lignes_hta",
+              "expression": "\"poste_id\" = 'P_01'"
+            },
+            "call_args": {
+              "layer_name": "lignes_hta",
+              "expression": "\"poste_id\" = 'P_01'"
+            }
+          }
+        ]
+      ],
+      "forbid": [
+        "run_algorithm",
+        "run_pyqgis",
+        "add_field",
+        "export_layers",
+        "remove_layers"
+      ]
+    },
+    {
+      "id": "electric_networks_architecture_proposal",
+      "prompt": "/electric-networks Examine le schéma de lignes_hta puis propose une méthode pour comparer des dessertes radiale, bouclée et maillée. Je veux les objectifs et informations nécessaires, sans exécuter ni modifier le projet.",
+      "setup": {
+        "layers": {
+          "lignes_hta": {
+            "id": "lignes_hta_1",
+            "kind": "vector",
+            "geometry": "MultiLineString",
+            "count": 8,
+            "fields": {
+              "asset_id": [
+                "L1",
+                "L2"
+              ],
+              "poste_id": [
+                "P_01",
+                "P_02"
+              ],
+              "tension_kv": [
+                20.0,
+                20.0
+              ],
+              "circuit_id": [
+                "C1",
+                "C2"
+              ],
+              "etat": [
+                "En service",
+                "Hors service"
+              ]
+            }
+          }
+        },
+        "selected": []
+      },
+      "expect": [
+        [
+          {
+            "tool": "load_skill",
+            "args": {
+              "name": "electric-networks"
+            },
+            "call_args": {
+              "name": "electric-networks"
+            }
+          },
+          {
+            "tool": "describe_layer",
+            "args": {
+              "layer": "lignes_hta"
+            },
+            "call_args": {
+              "layer": "lignes_hta"
+            }
+          }
+        ]
+      ],
+      "forbid": [
+        "run_algorithm",
+        "run_pyqgis",
+        "apply_filter",
+        "cross_filter",
+        "add_field",
+        "update_features",
+        "duplicate_layer",
+        "export_layers",
+        "remove_layers"
+      ]
+    },
+    {
+      "id": "electric_networks_unknown_switch_states",
+      "prompt": "/electric-networks Les états des interrupteurs sont inconnus. Examine le schéma de interrupteurs et explique pourquoi on ne peut pas encore conclure sur les clients isolés après une coupure. Ne simule aucune fermeture et ne lance pas de parcours.",
+      "setup": {
+        "layers": {
+          "lignes_hta": {
+            "id": "lignes_hta_1",
+            "kind": "vector",
+            "geometry": "MultiLineString",
+            "count": 8,
+            "fields": {
+              "asset_id": [
+                "L1",
+                "L2"
+              ],
+              "poste_id": [
+                "P_01",
+                "P_02"
+              ],
+              "tension_kv": [
+                20.0,
+                20.0
+              ],
+              "circuit_id": [
+                "C1",
+                "C2"
+              ],
+              "etat": [
+                "En service",
+                "Hors service"
+              ]
+            }
+          },
+          "interrupteurs": {
+            "id": "interrupteurs_1",
+            "kind": "vector",
+            "geometry": "Point",
+            "count": 2,
+            "fields": {
+              "asset_id": [
+                "I1",
+                "I2"
+              ],
+              "etat": [
+                "Inconnu"
+              ],
+              "node_id": [
+                "N1",
+                "N2"
+              ]
+            }
+          }
+        },
+        "selected": []
+      },
+      "expect": [
+        [
+          {
+            "tool": "load_skill",
+            "args": {
+              "name": "electric-networks"
+            },
+            "call_args": {
+              "name": "electric-networks"
+            }
+          },
+          {
+            "tool": "describe_layer",
+            "args": {
+              "layer": "interrupteurs"
+            },
+            "call_args": {
+              "layer": "interrupteurs"
+            }
+          }
+        ]
+      ],
+      "forbid": [
+        "run_algorithm",
+        "run_pyqgis",
+        "apply_filter",
+        "cross_filter",
+        "add_field",
+        "update_features",
+        "duplicate_layer",
+        "export_layers",
+        "remove_layers"
+      ],
+      "trap": true,
+      "expert": true
+    },
+    {
+      "id": "electric_networks_no_power_flow",
+      "prompt": "/electric-networks Lis le schéma de lignes_hta et indique les données manquantes pour une chute de tension. Aucun modèle électrique ni solveur n’est fourni. Ne présente pas un plus court chemin comme un calcul électrique.",
+      "setup": {
+        "layers": {
+          "lignes_hta": {
+            "id": "lignes_hta_1",
+            "kind": "vector",
+            "geometry": "MultiLineString",
+            "count": 8,
+            "fields": {
+              "asset_id": [
+                "L1",
+                "L2"
+              ],
+              "poste_id": [
+                "P_01",
+                "P_02"
+              ],
+              "tension_kv": [
+                20.0,
+                20.0
+              ],
+              "circuit_id": [
+                "C1",
+                "C2"
+              ],
+              "etat": [
+                "En service",
+                "Hors service"
+              ]
+            }
+          }
+        },
+        "selected": []
+      },
+      "expect": [
+        [
+          {
+            "tool": "load_skill",
+            "args": {
+              "name": "electric-networks"
+            },
+            "call_args": {
+              "name": "electric-networks"
+            }
+          },
+          {
+            "tool": "describe_layer",
+            "args": {
+              "layer": "lignes_hta"
+            },
+            "call_args": {
+              "layer": "lignes_hta"
+            }
+          }
+        ]
+      ],
+      "forbid": [
+        "run_algorithm",
+        "run_pyqgis",
+        "apply_filter",
+        "cross_filter",
+        "add_field",
+        "update_features",
+        "duplicate_layer",
+        "export_layers",
+        "remove_layers"
+      ],
+      "trap": true
+    }
+  ]
+}

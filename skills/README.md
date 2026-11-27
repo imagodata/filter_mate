@@ -38,6 +38,26 @@ In the chat, users may explicitly select a skill by typing `/` at the start of a
 skill through the normal executor before the first model call. Availability, custom-skill review and connector
 permissions remain enforced. A failed load stops the request. A slash command during an active request is queued.
 
+## Infrastructure business skills
+
+These skills turn an operational question into a study using the project schema and available Processing providers.
+They are offered in the chat, slash-command completion and MCP prompts, with no expert-mode requirement.
+
+| Skill | Scope | Example request |
+|---|---|---|
+| `telecom-fiber` | Fibre inventory, service hierarchy, extension architectures and cable-cut impact | `/telecom-fiber Compare une desserte radiale et une boucle pour ces bâtiments.` |
+| `electric-networks` | Substation/feeder dependencies, supply architectures and outage scenarios | `/electric-networks Quels points de livraison perdraient leur connexion aux sources si ce tronçon était indisponible ?` |
+| `water-networks` | Drinking-water pipe/valve inventory, supply sectors and isolation scenarios | `/water-networks Prépare une étude de fermeture de ces vannes avec les états connus.` |
+| `asset-maintenance` | Asset data quality, inspection/renewal shortlists and grouped interventions | `/asset-maintenance Propose une grille de priorité des inspections avec les informations disponibles.` |
+
+Sources, endpoint/parent relations, device states and measurement units must be established before a connectivity
+conclusion. Spatial proximity and an administrative sector do not prove service. Structural graph studies remain
+distinct from optical budgets, electrical power flow and hydraulic simulation. Optional graph/specialist providers
+are discovered through the installed Processing registry; no provider or physical parameter is assumed.
+
+Their `evals.json` cases use `setup.layers` to supply small domain-specific simulated projects to the evaluation
+bench. Offline replay verifies tool integration and case plumbing, not a model's reasoning or a physical solver.
+
 ## SKILL.md
 
 ```

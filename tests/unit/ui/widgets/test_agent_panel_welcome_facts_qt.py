@@ -120,7 +120,8 @@ def test_an_empty_project_offers_ways_to_bring_data_in():
     panel = _panel(Project(facts()))
     assert len(panel.example_keys) == ex.SHOWN
     assert all(CATALOG[key].group == ex.DATA for key in panel.example_keys)
-    assert all(panel_module.example_text(key) in _shown_texts(panel) for key in panel.example_keys)
+    assert all(panel_module.example_text(key, panel._examples_facts, panel.example_places[key]) in _shown_texts(panel)
+               for key in panel.example_keys)
 
 
 def test_layers_changing_the_project_draw_the_requests_again():
@@ -196,7 +197,7 @@ def test_a_project_opening_does_not_redraw_the_requests_until_it_settles():
     QtTest.QTest.qWait(panel_module.FACTS_SETTLE_MS + 400)
     assert _needs_hold(panel, project.state)
     assert any({"active_vector", "active_local"} & set(CATALOG[key].needs) for key in panel.example_keys)
-    assert sum(1 for key in panel.example_keys if key in empty) >= 2
+    assert sum(CATALOG[key].group == ex.PROJECT for key in panel.example_keys) == 3
 
 
 def test_a_request_no_longer_true_is_hidden_while_the_project_opens():
@@ -290,3 +291,49 @@ def test_the_link_sits_under_the_requests_and_above_the_tour():
     last_request = max(button.geometry().bottom() for button in panel.example_buttons if not button.isHidden())
     assert panel.reconfigure_button.geometry().top() > last_request
     assert panel.reconfigure_button.geometry().bottom() <= panel.tour_button.geometry().top()
+
+
+def test_other_ideas_changes_destinations_and_click_inserts_the_whole_bounded_request():
+    panel = _panel(Project())
+    before = [p.id for p in panel.example_places.values()]
+    texts = _shown_texts(panel)
+    panel.more_examples_button.click()
+    assert _shown_texts(panel) != texts
+    assert not set(before) & {p.id for p in panel.example_places.values()}
+    assert panel.more_examples_button.isVisible()
+    sent = []
+    panel.send_requested.connect(lambda *args: sent.append(args))
+    button = panel.example_buttons[0]
+    button.click()
+    assert panel.input.text() == button.request() and 'km' in panel.input.text()
+    assert not sent
+    place = panel.example_places[panel.example_keys[0]]
+    assert place.label in button._summary and 'WGS 84' not in button._summary
+    # An old timer for the same keys must not mark a changed request as already seen.
+    panel._examples_seen = False
+    panel._examples_still_there(panel.example_keys, tuple(texts))
+    assert not panel._examples_seen
+    panel._examples_still_there(panel.example_keys, tuple(b.request() for b in panel.example_buttons))
+    assert set(QtCore.QSettings().value(panel_module._RECENT_PLACES)) >= {p.id for p in panel.example_places.values()}
+    panel.set_ready(False)
+    assert panel.more_examples_button.isHidden()
+
+
+def test_layer_and_field_names_follow_the_active_layer_even_when_the_type_stays_the_same():
+    project = Project(facts(vectors=2, active='vector', active_id='a', active_name='Buildings',
+                            active_fields=(('usage', 'text'), ('height_m', 'numeric')), vector_names=('Buildings', 'Roads')))
+    panel = _panel(project)
+    panel._set_examples(('color_by', 'numeric_summary', 'labels', 'osm_cycle'), project.state)
+    assert 'Buildings' in panel.example_buttons[0].request() and 'usage' in panel.example_buttons[0].request()
+    assert 'height_m' in panel.example_buttons[1].request()
+    assert 'Buildings' in panel.example_buttons[3].request() and not panel.example_places
+    keys = panel.example_keys
+    project.state = facts(vectors=2, active='vector', active_id='b', active_name='Roads',
+                          active_fields=(('surface', 'text'), ('width_m', 'numeric')), vector_names=('Roads', 'Buildings'))
+    panel.refresh_examples()
+    assert panel.example_keys == keys
+    assert 'Roads' in panel.example_buttons[0].request() and 'surface' in panel.example_buttons[0].request()
+    assert 'width_m' in panel.example_buttons[1].request() and 'height_m' not in panel.example_buttons[1].request()
+    project.state = facts(vectors=2, active='vector', active_id='b', active_name='Roads', active_fields=())
+    panel.refresh_examples()
+    assert not {'numeric_summary', 'labels', 'color_by'} & set(panel.example_keys)

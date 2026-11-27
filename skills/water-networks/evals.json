@@ -1,0 +1,435 @@
+{
+  "cases": [
+    {
+      "id": "water_networks_inventory",
+      "prompt": "/water-networks Donne la longueur cumulée de canalisations par materiau. Inventaire uniquement, sans calcul de pression ni changement du projet.",
+      "setup": {
+        "layers": {
+          "canalisations": {
+            "id": "canalisations_1",
+            "kind": "vector",
+            "geometry": "MultiLineString",
+            "count": 10,
+            "fields": {
+              "asset_id": [
+                "EA1",
+                "EA2"
+              ],
+              "secteur_id": [
+                "S_01",
+                "S_02"
+              ],
+              "materiau": [
+                "Fonte",
+                "PEHD"
+              ],
+              "diametre_mm": [
+                100,
+                200
+              ],
+              "node_from": [
+                "N1",
+                "N2"
+              ],
+              "node_to": [
+                "N2",
+                "N3"
+              ]
+            }
+          }
+        },
+        "selected": []
+      },
+      "expect": [
+        [
+          {
+            "tool": "load_skill",
+            "args": {
+              "name": "water-networks"
+            },
+            "call_args": {
+              "name": "water-networks"
+            }
+          },
+          {
+            "tool": "describe_layer",
+            "args": {
+              "layer": "canalisations"
+            },
+            "call_args": {
+              "layer": "canalisations"
+            }
+          },
+          {
+            "tool": "layer_statistics",
+            "args": {
+              "layer": "canalisations",
+              "measure": "length",
+              "group_by": "materiau"
+            },
+            "call_args": {
+              "layer": "canalisations",
+              "measure": "length",
+              "group_by": "materiau"
+            }
+          }
+        ]
+      ],
+      "forbid": [
+        "run_algorithm",
+        "run_pyqgis",
+        "apply_filter",
+        "cross_filter",
+        "add_field",
+        "update_features",
+        "duplicate_layer",
+        "export_layers",
+        "remove_layers"
+      ]
+    },
+    {
+      "id": "water_networks_recorded_sector_filter",
+      "prompt": "/water-networks secteur_id est un secteur administratif documenté. Garde les canalisations de S_01. Ne déduis pas qu’elles forment un secteur hydrauliquement isolable.",
+      "setup": {
+        "layers": {
+          "canalisations": {
+            "id": "canalisations_1",
+            "kind": "vector",
+            "geometry": "MultiLineString",
+            "count": 10,
+            "fields": {
+              "asset_id": [
+                "EA1",
+                "EA2"
+              ],
+              "secteur_id": [
+                "S_01",
+                "S_02"
+              ],
+              "materiau": [
+                "Fonte",
+                "PEHD"
+              ],
+              "diametre_mm": [
+                100,
+                200
+              ],
+              "node_from": [
+                "N1",
+                "N2"
+              ],
+              "node_to": [
+                "N2",
+                "N3"
+              ]
+            }
+          }
+        },
+        "selected": []
+      },
+      "expect": [
+        [
+          {
+            "tool": "load_skill",
+            "args": {
+              "name": "water-networks"
+            },
+            "call_args": {
+              "name": "water-networks"
+            }
+          },
+          {
+            "tool": "describe_layer",
+            "args": {
+              "layer": "canalisations"
+            },
+            "call_args": {
+              "layer": "canalisations"
+            }
+          },
+          {
+            "tool": "apply_filter",
+            "args": {
+              "layer_name": "canalisations",
+              "expression": "\"secteur_id\" = 'S_01'"
+            },
+            "call_args": {
+              "layer_name": "canalisations",
+              "expression": "\"secteur_id\" = 'S_01'"
+            }
+          }
+        ]
+      ],
+      "forbid": [
+        "run_algorithm",
+        "run_pyqgis",
+        "add_field",
+        "export_layers",
+        "remove_layers"
+      ]
+    },
+    {
+      "id": "water_networks_isolation_proposal",
+      "prompt": "/water-networks Examine le schéma des canalisations puis propose les étapes d’une étude d’isolement avec plusieurs réservoirs et des boucles. Une proposition seulement : aucun parcours calculé et aucune modification des vannes.",
+      "setup": {
+        "layers": {
+          "canalisations": {
+            "id": "canalisations_1",
+            "kind": "vector",
+            "geometry": "MultiLineString",
+            "count": 10,
+            "fields": {
+              "asset_id": [
+                "EA1",
+                "EA2"
+              ],
+              "secteur_id": [
+                "S_01",
+                "S_02"
+              ],
+              "materiau": [
+                "Fonte",
+                "PEHD"
+              ],
+              "diametre_mm": [
+                100,
+                200
+              ],
+              "node_from": [
+                "N1",
+                "N2"
+              ],
+              "node_to": [
+                "N2",
+                "N3"
+              ]
+            }
+          },
+          "vannes": {
+            "id": "vannes_1",
+            "kind": "vector",
+            "geometry": "Point",
+            "count": 3,
+            "fields": {
+              "asset_id": [
+                "V1",
+                "V2"
+              ],
+              "etat": [
+                "Inconnu"
+              ],
+              "node_id": [
+                "N1",
+                "N2"
+              ]
+            }
+          }
+        },
+        "selected": []
+      },
+      "expect": [
+        [
+          {
+            "tool": "load_skill",
+            "args": {
+              "name": "water-networks"
+            },
+            "call_args": {
+              "name": "water-networks"
+            }
+          },
+          {
+            "tool": "describe_layer",
+            "args": {
+              "layer": "canalisations"
+            },
+            "call_args": {
+              "layer": "canalisations"
+            }
+          }
+        ]
+      ],
+      "forbid": [
+        "run_algorithm",
+        "run_pyqgis",
+        "apply_filter",
+        "cross_filter",
+        "add_field",
+        "update_features",
+        "duplicate_layer",
+        "export_layers",
+        "remove_layers"
+      ]
+    },
+    {
+      "id": "water_networks_unknown_valve_states",
+      "prompt": "/water-networks Lis le schéma de vannes. Leurs états sont inconnus : explique les informations nécessaires pour une étude d’isolement. Ne considère pas toutes les vannes ouvertes, ne les ferme pas et ne calcule aucun secteur.",
+      "setup": {
+        "layers": {
+          "canalisations": {
+            "id": "canalisations_1",
+            "kind": "vector",
+            "geometry": "MultiLineString",
+            "count": 10,
+            "fields": {
+              "asset_id": [
+                "EA1",
+                "EA2"
+              ],
+              "secteur_id": [
+                "S_01",
+                "S_02"
+              ],
+              "materiau": [
+                "Fonte",
+                "PEHD"
+              ],
+              "diametre_mm": [
+                100,
+                200
+              ],
+              "node_from": [
+                "N1",
+                "N2"
+              ],
+              "node_to": [
+                "N2",
+                "N3"
+              ]
+            }
+          },
+          "vannes": {
+            "id": "vannes_1",
+            "kind": "vector",
+            "geometry": "Point",
+            "count": 3,
+            "fields": {
+              "asset_id": [
+                "V1",
+                "V2"
+              ],
+              "etat": [
+                "Inconnu"
+              ],
+              "node_id": [
+                "N1",
+                "N2"
+              ]
+            }
+          }
+        },
+        "selected": []
+      },
+      "expect": [
+        [
+          {
+            "tool": "load_skill",
+            "args": {
+              "name": "water-networks"
+            },
+            "call_args": {
+              "name": "water-networks"
+            }
+          },
+          {
+            "tool": "describe_layer",
+            "args": {
+              "layer": "vannes"
+            },
+            "call_args": {
+              "layer": "vannes"
+            }
+          }
+        ]
+      ],
+      "forbid": [
+        "run_algorithm",
+        "run_pyqgis",
+        "apply_filter",
+        "cross_filter",
+        "add_field",
+        "update_features",
+        "duplicate_layer",
+        "export_layers",
+        "remove_layers"
+      ],
+      "trap": true,
+      "expert": true
+    },
+    {
+      "id": "water_networks_no_hydraulic_result",
+      "prompt": "/water-networks Lis le schéma de canalisations et indique ce qui manque pour calculer la pression. Aucun modèle hydraulique ni solveur n’est disponible. Ne donne pas un résultat de pression à partir des géométries et du diamètre.",
+      "setup": {
+        "layers": {
+          "canalisations": {
+            "id": "canalisations_1",
+            "kind": "vector",
+            "geometry": "MultiLineString",
+            "count": 10,
+            "fields": {
+              "asset_id": [
+                "EA1",
+                "EA2"
+              ],
+              "secteur_id": [
+                "S_01",
+                "S_02"
+              ],
+              "materiau": [
+                "Fonte",
+                "PEHD"
+              ],
+              "diametre_mm": [
+                100,
+                200
+              ],
+              "node_from": [
+                "N1",
+                "N2"
+              ],
+              "node_to": [
+                "N2",
+                "N3"
+              ]
+            }
+          }
+        },
+        "selected": []
+      },
+      "expect": [
+        [
+          {
+            "tool": "load_skill",
+            "args": {
+              "name": "water-networks"
+            },
+            "call_args": {
+              "name": "water-networks"
+            }
+          },
+          {
+            "tool": "describe_layer",
+            "args": {
+              "layer": "canalisations"
+            },
+            "call_args": {
+              "layer": "canalisations"
+            }
+          }
+        ]
+      ],
+      "forbid": [
+        "run_algorithm",
+        "run_pyqgis",
+        "apply_filter",
+        "cross_filter",
+        "add_field",
+        "update_features",
+        "duplicate_layer",
+        "export_layers",
+        "remove_layers"
+      ],
+      "trap": true
+    }
+  ]
+}

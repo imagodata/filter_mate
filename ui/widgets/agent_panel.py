@@ -34,8 +34,9 @@ from .agent_thread import DONE_COLOR, AgentThread, ElidedButton, ElidedLabel, pl
 from .agent_activity import AgentActivityIcon
 from .agent_widgets_strip import WidgetsStrip
 from ...core.agent.example_prompts import (
-    CATALOG as EXAMPLE_CATALOG, Facts, SHOWN as EXAMPLES_SHOWN, adjust as adjust_examples, pick as pick_examples,
+    CATALOG as EXAMPLE_CATALOG, DATA, Facts, SHOWN as EXAMPLES_SHOWN, adjust as adjust_examples, pick as pick_examples,
 )
+from ...core.agent.example_places import Place, draw_places
 from ...core.agent.mentions import mention_rows
 from ...core.agent.skill_commands import completion_prefix
 from ...core.agent.modes import ACT, ASK, PLAN
@@ -103,6 +104,7 @@ MAX_RECIPE_STEPS_SHOWN = 12  # steps listed in the menu of a recipe
 FEEDBACK_ENTRIES = (("usage", "Give your opinion"), ("feature", "Suggest a feature"),
                     ("testers", "Test the experimental features"), ("services", "Training and services"))
 _LAST_EXAMPLES = "filter_mate/agent/last_examples"  # the keys of the requests seen last on the welcome
+_RECENT_PLACES = "filter_mate/agent/recent_example_places"
 _FOLLOWUP_MODE = "filter_mate/agent/followup_mode"
 EXAMPLES_SEEN_MS = 1500  # on screen this long, a set of requests counts as seen
 FACTS_SETTLE_MS = 300  # a burst of changes of the project (layers loading) is read once, after it
@@ -160,14 +162,39 @@ def preset_label(name: str) -> str:
     return translated.get(name) or PRESET_LABELS.get(name, name)
 
 
-def example_text(key: str) -> str:
+def _example_context(key: str, facts: Facts) -> Tuple[Tuple[str, ...], str]:
+    """The real layers and schema field used both by a request and its compact card."""
+    if key in ('layers', 'filter_state', 'clear_all', 'export_gpkg', 'export_remote', 'layout', 'zoom_filtered'):
+        return (), ''
+    if key in ('sel_other_layers', 'sel_radius', 'zoom_selection', 'sel_attributes', 'sel_stats', 'people_selected', 'lidar_inside'):
+        names = facts.selected_names
+    elif key == 'cross_near':
+        names = facts.vector_names[:2]
+    elif key.startswith('lidar_'):
+        names = (facts.active_name if facts.active == 'point_cloud' else facts.cloud_name,)
+    elif key == 'slope_filter':
+        names = (facts.elevation_name,) + facts.vector_names[:1]
+    elif key == 'zonal':
+        names = (facts.raster_name,) + facts.vector_names
+    else:
+        names = (facts.active_name,)
+    field = ''
+    if key in ('numeric_summary', 'slider_histogram'):
+        field = facts.field('numeric')
+    elif key in ('stats_active', 'labels'):
+        field = facts.field('text')
+    elif key == 'color_by':
+        field = facts.field('text') or facts.field('numeric')
+    return tuple(name for name in names if name), field
+
+
+def example_text(key: str, facts: Optional[Facts] = None, place: Optional[Place] = None) -> str:
     """A request of the welcome (core/agent/example_prompts.py), in the language of QGIS; "" for an unknown key."""
     texts = {
         "layers": _tr("Which layers are in this project?"),
         "fields": _tr("Describe the fields of the active layer"),
         "lidar_describe": _tr("What does the point cloud contain?"),
-        "tall_buildings": _tr("Keep the buildings taller than 15 m"),
-        "roads_inside": _tr("Filter the roads inside the selected feature"),
+        "numeric_summary": _tr("Give the minimum, maximum and mean of this field"),
         "sel_other_layers": _tr("Filter the other layers by the selection"),
         "sel_radius": _tr("Keep what lies within 500 m of the selection"),
         "cross_near": _tr("Keep what lies within 100 m of another layer"),
@@ -210,7 +237,7 @@ def example_text(key: str) -> str:
         "dark_basemap": _tr("Put a dark basemap under my layers"),
         "add_basemap": _tr("Add a basemap to start the map"),
         "sentinel": _tr("Find a cloud-free Sentinel-2 image here"),
-        "zoom_park": _tr("Zoom to Central Park in New York"),
+        "zoom_place": _tr("Zoom to this place"),
         "ods_toilets": _tr("Search Opendatasoft for public toilets"),
         "eurostat": _tr("Find unemployment by region on Eurostat"),
         "fr_communes": _tr("Add the municipalities from data.gouv.fr"),
@@ -219,7 +246,6 @@ def example_text(key: str) -> str:
         "fr_photos_1950": _tr("Add the 1950s aerial photos of this area"),
         "fr_flood": _tr("Add the flood zones of this area"),
         "fr_clay": _tr("Add the clay shrink-swell hazard map"),
-        "fr_town_hall": _tr("Zoom to the town hall of Toulouse"),
         "gb_flood": _tr("Find flood risk data on data.gov.uk"),
         "ca_parks": _tr("Find park data on open.canada.ca"),
         "au_bushfire": _tr("Find bushfire data on data.gov.au"),
@@ -230,11 +256,31 @@ def example_text(key: str) -> str:
         "br_municipalities": _tr("Add the municipalities of Brazil from IBGE"),
         "pl_municipalities": _tr("Add the municipalities of Poland from PRG"),
     }
-    return texts.get(key, "")
+    text = texts.get(key, "")
+    if not text:
+        return ""
+    if place is not None:
+        # The exact bounded destination is part of the editable request, not just a label on its button.
+        return _tr("Around {place}, within {radius} km: {request}").format(
+            place=place.label,
+            radius=place.radius, request=text)
+    if facts is None or not facts.known:
+        return text
+    example = next((item for item in EXAMPLE_CATALOG if item.key == key), None)
+    if example is not None and example.group == DATA and key != 'people_selected':
+        layer = facts.active_name or next(iter(facts.vector_names), '') or facts.raster_name or facts.cloud_name
+        return _tr("In the area of {layer}: {request}").format(layer=f'“{layer}”', request=text) if layer else text
+    names, field = _example_context(key, facts)
+    layer = ', '.join(f'“{name}”' for name in names if name)
+    if layer:
+        text = _tr("For {layer}: {request}").format(layer=layer, request=text)
+    if field:
+        text += ' ' + _tr("Use the field {field}.").format(field=f'“{field}”')
+    return text
 
 
 def qgis_locale() -> str:
-    """The locale of QGIS (``fr_FR``, ``en_GB``), else of the system: it chooses the requests about a country."""
+    """The language of QGIS, else of the system; the geography comes from the project or the gazetteer."""
     return str(QSettings().value("locale/userLocale", "") or "") or QLocale().name()
 
 
@@ -270,13 +316,15 @@ class ExampleButton(QPushButton):
     def __init__(self, parent=None) -> None:
         super().__init__(parent)
         self._request = ""
+        self._summary = ""
         self.setSizePolicy(QSizePolicy.Policy.Ignored, QSizePolicy.Policy.Fixed)
 
     def request(self) -> str:
         return self._request
 
-    def set_request(self, text: str) -> None:
+    def set_request(self, text: str, summary: str = "") -> None:
         self._request = text
+        self._summary = summary or text
         self.setToolTip(plain_tooltip(text))
         self.setAccessibleName(text)  # the whole request, not the cut one
         self._elide()
@@ -293,7 +341,8 @@ class ExampleButton(QPushButton):
     def _elide(self) -> None:
         room = max(self.width() - self._PADDING, 10)
         # "&" doubled: a button reads it as the mark of a shortcut and hides it.
-        self.setText(self.fontMetrics().elidedText(self._request, Qt.TextElideMode.ElideRight, room).replace("&", "&&"))
+        self.setText('\n'.join(self.fontMetrics().elidedText(line, Qt.TextElideMode.ElideRight, room)
+                               for line in self._summary.splitlines()).replace("&", "&&"))
 
 
 class AgentInput(QPlainTextEdit):
@@ -1523,6 +1572,7 @@ class AgentPanel(QFrame):
         layout.addWidget(self.try_label)
         self.example_buttons = []
         self.example_keys = ()
+        self.example_places = {}
         self._examples_seen = False
         for _index in range(EXAMPLES_SHOWN):
             button = ExampleButton(page)
@@ -1531,6 +1581,11 @@ class AgentPanel(QFrame):
             layout.addWidget(button)
             self.example_buttons.append(button)
         self.shuffle_examples()
+        self.more_examples_button = QPushButton(_tr("Other ideas"), page)
+        self.more_examples_button.setObjectName("pushButton_agent_other_ideas")
+        self.more_examples_button.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.more_examples_button.clicked.connect(lambda: self.shuffle_examples(force=True))
+        layout.addWidget(self.more_examples_button, 0, Qt.AlignmentFlag.AlignLeft)
         layout.addWidget(self.reconfigure_button, 0, Qt.AlignmentFlag.AlignLeft)  # under what the welcome offers
         layout.addWidget(self.tour_button, 0, Qt.AlignmentFlag.AlignLeft)  # under what the welcome offers, either way
         layout.addWidget(self.testers_button, 0, Qt.AlignmentFlag.AlignLeft)
@@ -1642,10 +1697,10 @@ class AgentPanel(QFrame):
             f"QFrame#{PANEL_NAME} QPushButton[fm_agent_action=\"true\"]:focus {{ border-color: {palette['fm_accent']}; }}"
             f"QFrame#{PANEL_NAME} QPushButton[fm_agent_action=\"true\"]:disabled {{ background: transparent; border-color: transparent; }}"
             f"QPushButton#pushButton_agent_tour, QPushButton#pushButton_agent_testers,"
-            f" QPushButton#pushButton_agent_reconfigure {{ padding: 4px 0; font-size: 12px;"
+            f" QPushButton#pushButton_agent_reconfigure, QPushButton#pushButton_agent_other_ideas {{ padding: 4px 0; font-size: 12px;"
             f" font-weight: 500; border: none; background: transparent; color: {palette['fm_accent']}; text-align: left; }}"
             f"QPushButton#pushButton_agent_tour:hover, QPushButton#pushButton_agent_testers:hover,"
-            f" QPushButton#pushButton_agent_reconfigure:hover {{ text-decoration: underline; }}"
+            f" QPushButton#pushButton_agent_reconfigure:hover, QPushButton#pushButton_agent_other_ideas:hover {{ text-decoration: underline; }}"
             f"QLabel#label_agent_welcome_note {{ font-size: 12px; color: {muted}; border: none; border-left: 2px solid"
             f" {palette['fm_group_border']}; padding: 0 0 0 10px; }}"
             f"QLabel#label_agent_welcome_local {{ font-size: 12px; color: {muted}; border: none; border-left: 2px solid"
@@ -1977,9 +2032,20 @@ class AgentPanel(QFrame):
         value = QSettings().value(_LAST_EXAMPLES, "")
         return [str(key) for key in (list(value) if isinstance(value, (list, tuple)) else str(value or "").split(","))]
 
-    def _set_examples(self, keys: Sequence[str], facts: Facts) -> None:
+    def _set_examples(self, keys: Sequence[str], facts: Facts, redraw: bool = False) -> None:
         """Put these requests on the buttons, each in its place; a set that is not the one before counts as unseen."""
         keys = tuple(keys)
+        old_texts = tuple(button.request() for button in self.example_buttons)
+        old_places = self.example_places
+        data = [example for example in EXAMPLE_CATALOG if example.key in keys and example.group == DATA
+                and example.key != 'people_selected']
+        discovery = not facts.known or not (facts.vectors or facts.rasters or facts.point_clouds or facts.focus)
+        if discovery:
+            recent = list(QSettings().value(_RECENT_PLACES, []) or [])
+            self.example_places = draw_places(data, recent + [p.id for p in old_places.values()],
+                                             current={} if redraw else old_places)
+        else:
+            self.example_places = {example.key: facts.focus for example in data} if facts.focus else {}
         if keys != self.example_keys:
             self._examples_seen = False
         self.example_keys = keys
@@ -1987,13 +2053,22 @@ class AgentPanel(QFrame):
         self._examples_signature = facts.signature()
         for index, button in enumerate(self.example_buttons):
             if index < len(keys):
-                text = example_text(keys[index])
+                text = example_text(keys[index], facts, self.example_places.get(keys[index]))
+                place = self.example_places.get(keys[index])
+                if place:
+                    summary = example_text(keys[index]) + '\n' + place.label.split(';', 1)[0]
+                else:
+                    names, field = _example_context(keys[index], facts)
+                    context = ' · '.join(names + ((field,) if field else ()))
+                    summary = example_text(keys[index]) + '\n' + context if context else ''
                 if text != button.request():
-                    button.set_request(text)
+                    button.set_request(text, summary)
             button.setProperty("fm_example_drawn", index < len(keys))
+        if tuple(button.request() for button in self.example_buttons) != old_texts:
+            self._examples_seen = False
         self._show_examples()
 
-    def shuffle_examples(self) -> None:
+    def shuffle_examples(self, force: bool = False) -> None:
         """Other requests on the welcome, true of the project now, none of the set seen last (kept across sessions of
         QGIS).
 
@@ -2007,10 +2082,13 @@ class AgentPanel(QFrame):
         if self._hold:
             self._hide_false_examples(facts)
             return
-        if self.example_keys and not self._examples_seen and facts.signature() == self._examples_signature:
+        if not force and self.example_keys and not self._examples_seen and facts.signature() == self._examples_signature:
             return
         self._examples_seen = False
-        self._set_examples(tuple(key for key, _text in examples(self._seen_examples(), facts)), facts)
+        previous = tuple(dict.fromkeys(self._seen_examples() + list(self.example_keys)))
+        self._set_examples(pick_examples(qgis_locale(), previous, facts=facts), facts, redraw=True)
+        if force:
+            self._examples_on_screen()
 
     def hold_examples(self) -> None:
         """A project is opening or closing: the requests are brought up to date once it has settled (the active layer
@@ -2067,21 +2145,28 @@ class AgentPanel(QFrame):
             self._adjust_examples(facts)
         if not self._examples_seen and self.example_keys:
             keys = self.example_keys
-            QTimer.singleShot(EXAMPLES_SEEN_MS, lambda: self._examples_still_there(keys))
+            texts = tuple(button.request() for button in self.example_buttons)
+            QTimer.singleShot(EXAMPLES_SEEN_MS, lambda: self._examples_still_there(keys, texts))
 
-    def _examples_still_there(self, keys) -> None:
+    def _examples_still_there(self, keys, texts=None) -> None:
         try:
-            there = (keys == self.example_keys and self._ready and self.isVisible()
+            there = (keys == self.example_keys and (texts is None or texts == tuple(button.request() for button in self.example_buttons))
+                     and self._ready and self.isVisible()
                      and self.stack.currentIndex() == _WELCOME_PAGE)
         except RuntimeError:  # the panel is gone with its dock
             return
         if there and not self._examples_seen:
             self._examples_seen = True
             QSettings().setValue(_LAST_EXAMPLES, ",".join(keys))
+            recent = list(QSettings().value(_RECENT_PLACES, []) or [])
+            places = [p.id for p in self.example_places.values() if not p.id.startswith('view:')]
+            QSettings().setValue(_RECENT_PLACES, list(dict.fromkeys(places + recent))[:24])
 
     def _show_examples(self) -> None:
         for button in self.example_buttons:
             button.setVisible(bool(self._ready and button.property("fm_example_drawn")))
+        if hasattr(self, 'more_examples_button'):
+            self.more_examples_button.setVisible(bool(self._ready))
 
     def use_example(self, text: str) -> None:
         self.input.setText(text)

@@ -18,7 +18,8 @@ TOOLS = {tool["name"] for tool in json.loads(
 TOOLS |= {tool.name for tool in CHAT_ONLY}  # the welcome is the chat's: its own tools (create_widget) carry requests too
 NEEDS = {"layers", "no_layers", "data", "no_data", "no_basemap", "several", "vector", "many_vectors", "raster",
          "point_cloud", "polygons", "elevation", "active_vector", "active_raster", "active_point_cloud",
-         "active_elevation", "active_local", "selection", "local_selection", "filter", "remote"}
+         "active_elevation", "active_local", "selection", "local_selection", "filter", "remote",
+         "numeric_field", "text_field", "style_field"}
 
 
 def _by_key():
@@ -29,25 +30,22 @@ def test_keys_are_unique_and_every_one_has_its_words_in_the_panel():
     assert len(set(ex.KEYS)) == len(ex.KEYS)
     words = dict(re.findall(r'^\s+"(\w+)": _tr\("([^"]+)"\),$', PANEL.read_text(encoding="utf-8"), re.MULTILINE))
     assert set(words) == set(ex.KEYS)
-    assert all(len(text) <= 45 for text in words.values()), "a request must fit on one button of the dock"
+    assert all(len(text) <= 70 for text in words.values()), "the recipe stays short; the button elides its context"
 
 
-@pytest.mark.parametrize("locale, expected", [
-    ("fr_FR", {"fr"}), ("fr", {"fr"}), ("fr_CA", {"ca"}), ("en_GB", {"gb"}), ("en_UK", {"gb"}), ("pt_BR", {"br"}),
-    ("pt_PT", set()), ("de_DE", {"de"}), ("de", {"de"}), ("de_AT", set()), ("ja", {"jp"}), ("en", set()),
-    ("en_US", set()), ("", set()), ("en-AU", {"au"}), (None, set()), ("C", set()), ("C.UTF-8", set()),
-    ("fr_FR.UTF-8", {"fr"}), ("fr_FR@euro", {"fr"}), ("hi_Deva_IN", set()), ("ja_Jpan_JP", {"jp"}),
-    ("zh_Hans_CN", set()), ("es_419", set()), ("uk_UA", set()), ("fr_419", set()),
-])
-def test_regions_of_a_locale(locale, expected):
-    assert ex.regions(locale) == expected
+@pytest.mark.parametrize("locale", ['fr_FR', 'fr_CA', 'en_GB', 'pt_BR', 'de', 'ja_Jpan_JP', 'zh_Hans_CN', '', None])
+def test_a_ui_locale_never_restricts_discovery_destinations(locale):
+    assert ex.eligible(locale) == ex.eligible('en_US')
 
 
-def test_a_country_request_is_offered_only_in_its_country():
-    keys = {example.key for example in ex.eligible("en_US")}
-    assert not any(ex.CATALOG[ex.KEYS.index(key)].regions for key in keys)
-    assert "fr_flood" in {example.key for example in ex.eligible("fr_FR")}
-    assert "fr_flood" not in {example.key for example in ex.eligible("de_DE")}
+def test_enrichment_uses_project_geography_instead_of_ui_language():
+    from core.agent.example_places import view_place
+    kyoto = facts(vectors=1, active="vector", focus=view_place((135.76, 35.00, 135.78, 35.02)))
+    assert "jp_shelters" in {example.key for example in ex.eligible("fr_FR", kyoto)}
+    assert "fr_flood" not in {example.key for example in ex.eligible("fr_FR", kyoto)}
+    assert not any(example.regions for example in ex.eligible("fr_FR", facts(vectors=1)))
+    assert ex.eligible("fr_FR", kyoto) == ex.eligible("en_US", kyoto)
+    assert "fr_flood" in {example.key for example in ex.eligible("en_US", facts())}
 
 
 def facts(**given):
@@ -55,6 +53,8 @@ def facts(**given):
     values = dict(known=True, layers=0, tiles=0, vectors=0, rasters=0, point_clouds=0, active="", selected=0,
                   filtered=0, remote=0, elevations=0, polygons=0, active_elevation=False, active_local=True)
     values.update(given)
+    if values["active"] == "vector":
+        values.setdefault("active_fields", (("usage", "text"), ("height", "numeric")))
     values.setdefault("selected_local", values["selected"])
     if values["active"] == "raster" and "active_elevation" not in given and "elevations" not in given:
         values["elevations"], values["active_elevation"] = values["rasters"], True  # a raster is a terrain model here
@@ -118,7 +118,7 @@ def test_a_project_with_only_a_basemap_is_still_a_project_without_data():
 
 
 @pytest.mark.parametrize("locale", ["fr_FR", "en_US", "en_GB", "ja_JP", "pt_BR", "zz"])
-def test_with_layers_one_or_two_requests_about_them_and_data_of_other_kinds(locale):
+def test_with_layers_three_project_requests_and_one_enrichment(locale):
     catalog = _by_key()
     for state in (facts(vectors=1, active="vector"), facts(vectors=2, rasters=1, active="raster"),
                   facts(point_clouds=1, active="point_cloud"), facts(vectors=1, selected=2, active="vector")):
@@ -130,11 +130,8 @@ def test_with_layers_one_or_two_requests_about_them_and_data_of_other_kinds(loca
             counts.add([example.group for example in picked].count(ex.PROJECT))
             kinds = [example.kind for example in picked]
             assert len(set(kinds)) == len(kinds)
-            here = ex.regions(locale)
-            assert all(not example.regions or set(example.regions) & here for example in picked)
-        assert counts <= {1, 2} and counts, counts
-        if state.selected:  # the state moved: a second request about it
-            assert counts == {2}
+            assert not any(example.regions for example in picked)  # unknown project country
+        assert counts == {3}
 
 
 def test_every_request_is_true_of_the_state_whatever_the_state_and_the_seed():
@@ -189,10 +186,10 @@ def test_a_selection_brings_selection_requests():
         assert any({"selection", "local_selection"} & set(catalog[key].needs) and catalog[key].group == ex.PROJECT
                    for key in keys), keys
         shown.update(keys)
-    assert {"zoom_selection", "sel_radius", "sel_other_layers", "roads_inside", "people_selected"} <= shown
+    assert {"zoom_selection", "sel_radius", "sel_other_layers", "people_selected"} <= shown
     no_selection = {key for seed in range(200)
                     for key in ex.pick("en_US", facts=facts(vectors=2, active="vector"), rng=random.Random(seed))}
-    assert not no_selection & {"zoom_selection", "sel_radius", "sel_other_layers", "roads_inside", "people_selected"}
+    assert not no_selection & {"zoom_selection", "sel_radius", "sel_other_layers", "people_selected"}
 
 
 def test_a_filter_brings_filter_requests():
@@ -237,18 +234,12 @@ def test_the_signature_follows_what_the_requests_depend_on_and_nothing_finer():
     assert "data" not in facts(tiles=2).tokens() and "layers" in facts(tiles=2).tokens()
 
 
-@pytest.mark.parametrize("locale", ["fr_FR", "en_GB", "en_CA", "en_AU", "de_DE", "it_IT", "nl_NL", "ja_JP", "pt_BR",
-                                    "pl_PL", "fr_CA"])
-def test_a_country_of_the_catalog_gets_one_of_its_requests_in_every_set(locale):
-    catalog = _by_key()
-    here = ex.regions(locale)
-    rng = random.Random(5)
-    previous = ()
-    for _ in range(200):
-        keys = ex.pick(locale, previous, rng=rng)
-        assert any(set(catalog[key].regions) & here for key in keys)
-        assert len(keys) == ex.SHOWN == len(set(keys))
-        previous = keys
+def test_discoveries_are_worldwide_in_every_ui_language():
+    for seed in range(30):
+        assert ex.pick('fr_FR', facts=facts(), rng=random.Random(seed)) == ex.pick(
+            'ja_JP', facts=facts(), rng=random.Random(seed))
+        picked = [_by_key()[key] for key in ex.pick('fr_FR', facts=facts(), rng=random.Random(seed))]
+        assert sum(bool(example.regions) for example in picked) <= 1
 
 
 @pytest.mark.parametrize("locale", ["fr_FR", "en_US", "en_GB"])
@@ -286,12 +277,16 @@ def test_the_next_set_keeps_clear_of_the_one_before_in_every_state(state):
         previous = keys
 
 
-def test_a_country_keeps_its_place_in_every_state():
-    catalog = _by_key()
-    for state in (facts(), facts(vectors=1, active="vector"), facts(rasters=1, active="raster", vectors=1)):
-        for seed in range(100):
-            keys = ex.pick("fr_FR", facts=state, rng=random.Random(seed))
-            assert any(catalog[key].regions for key in keys)
+def test_field_recipes_require_the_actual_schema():
+    unknown = _drawn(facts(vectors=1, active='vector', active_fields=()))
+    assert not unknown & {'numeric_summary', 'slider_histogram', 'color_by', 'labels', 'stats_active'}
+    numeric = _drawn(facts(vectors=1, active='vector', active_fields=(('area_m2', 'numeric'),)))
+    assert {'numeric_summary', 'slider_histogram', 'color_by'} <= numeric
+    assert not numeric & {'labels', 'stats_active'}
+    text = _drawn(facts(vectors=1, active='vector', active_fields=(('usage', 'text'),)))
+    assert {'color_by', 'labels', 'stats_active'} <= text
+    assert not text & {'numeric_summary', 'slider_histogram'}
+    assert not {'tall_buildings', 'roads_inside'} & set(ex.KEYS)
 
 
 @pytest.mark.parametrize("active, state", [("vector", dict(vectors=2, rasters=1)), ("raster", dict(vectors=2, rasters=1)),
@@ -368,7 +363,8 @@ def test_adjust_never_shows_a_request_that_is_false_and_fills_the_places():
         # A request still true stays where it was, but for the one that makes room for what the change brings.
         moved = [place for place, key in enumerate(current)
                  if set(catalog[key].needs) <= now.tokens() and keys[place] != key]
-        assert len(moved) <= 1, (before, now, current, keys)
+        if ('data' in before.tokens()) == ('data' in now.tokens()):
+            assert len(moved) <= 1, (before, now, current, keys)
 
 
 def test_adjust_without_a_change_changes_nothing():
@@ -399,11 +395,20 @@ def test_a_selection_ended_removes_what_depended_on_it_and_nothing_else():
         assert all(keys[place] == key for place, key in enumerate(current) if place not in gone), (current, keys)
 
 
-def test_the_neutral_requests_stay_when_the_project_becomes_known():
+def test_loading_project_data_prioritizes_work_on_that_project():
     catalog = _by_key()
     unknown, now = ex.Facts.unknown(), facts(vectors=1, active="vector")
     for seed in range(100):
         current = ex.pick("en_US", facts=unknown, rng=random.Random(seed))
         keys = ex.adjust("en_US", current, current, unknown, now, rng=random.Random(seed))
-        assert sum(1 for key in keys if key in current) >= 2
-        assert any(catalog[key].group == ex.PROJECT for key in keys)
+        assert sum(catalog[key].group == ex.PROJECT for key in keys) == 3
+
+
+def test_a_new_active_kind_gets_a_place_even_when_three_generic_project_recipes_stay_valid():
+    before = facts(vectors=2, rasters=1)
+    now = facts(vectors=2, rasters=1, active='raster')
+    current = ('layers', 'layout', 'cross_near', 'osm_trees')
+    for seed in range(20):
+        keys = ex.adjust('fr_FR', current, (), before, now, rng=random.Random(seed))
+        assert any({'active_raster', 'active_elevation'} & set(_by_key()[key].needs) for key in keys)
+        assert sum(a != b for a, b in zip(current, keys)) == 1

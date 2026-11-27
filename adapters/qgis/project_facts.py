@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 """What is true of the project now, for the requests offered on the welcome of AGENT (core/agent/example_prompts.py).
 
-Counts and flags only: never ``featureCount()`` (a request to the server for a web service), never a feature read.
+Counts, names, cached field schema and map extent only: never ``featureCount()`` (a request to the server for a web
+service), never a feature read.
 Runs on the main thread; a layer destroyed meanwhile is left out, and a reading that fails altogether gives unknown
 facts (the neutral requests), never an exception.
 """
@@ -11,6 +12,7 @@ import logging
 from typing import Any, Optional
 
 from ...core.agent.example_prompts import Facts
+from ...core.agent.example_places import view_place
 from ...core.domain.layer_kind import LayerKind
 
 logger = logging.getLogger(__name__)
@@ -60,7 +62,46 @@ def _polygons(layer: Any) -> bool:
         return False
 
 
-def read_facts(project: Any = None, active: Optional[Any] = None) -> Facts:
+def _name(layer: Any) -> str:
+    try:
+        name = layer.name
+        return str(name() if callable(name) else name)
+    except (AttributeError, RuntimeError):
+        return ""
+
+
+def _fields(layer: Any) -> tuple:
+    """The cached schema only: classify fields without fetching a feature, a count or unique values."""
+    found = []
+    try:
+        for field in list(layer.fields())[:64]:
+            name = field.name()
+            if field.isNumeric():
+                if name.lower() not in ('id', 'fid', 'ogc_fid', 'objectid') and not name.lower().endswith('_id'):
+                    found.append((name, 'numeric'))
+            elif any(word in field.typeName().lower() for word in ('string', 'text', 'char')):
+                found.append((name, 'text'))
+    except (AttributeError, RuntimeError, TypeError):
+        pass
+    # A label/name is a better example than an arbitrary code; ordering remains deterministic.
+    preferred = ('name', 'nom', 'label', 'libelle', 'usage', 'type', 'category', 'categorie')
+    return tuple(sorted(found, key=lambda item: (item[0].lower() not in preferred,)))
+
+
+def _focus(project: Any, canvas: Any):
+    if canvas is None:
+        return None
+    try:
+        from qgis.core import QgsCoordinateReferenceSystem, QgsCoordinateTransform
+        transform = QgsCoordinateTransform(canvas.mapSettings().destinationCrs(),
+                                           QgsCoordinateReferenceSystem('EPSG:4326'), project)
+        box = transform.transformBoundingBox(canvas.extent())
+        return view_place((box.xMinimum(), box.yMinimum(), box.xMaximum(), box.yMaximum()))
+    except Exception:  # an invalid CRS/extent or a canvas closing must not suppress the layer facts
+        return None
+
+
+def read_facts(project: Any = None, active: Optional[Any] = None, canvas: Any = None) -> Facts:
     """The ``Facts`` of ``project`` (default: the open one) with ``active`` the active layer of the layer tree.
 
     A layer that is not valid (a file that was moved) is not counted. A basemap is a web map image, a rendered raster
@@ -79,6 +120,7 @@ def read_facts(project: Any = None, active: Optional[Any] = None) -> Facts:
         project = project or QgsProject.instance()
         layers = tiles = vectors = rasters = clouds = selected = selected_local = filtered = remote = 0
         elevations = polygons = 0
+        names = {"vector": [], "raster": [], "elevation": [], "cloud": [], "selected": []}
         found = {}  # layer id -> (kind of the active layer, elevation, local)
         for layer in list(project.mapLayers().values()):
             try:
@@ -99,14 +141,21 @@ def read_facts(project: Any = None, active: Optional[Any] = None) -> Facts:
                     remote += 1 if provider in REMOTE_PROVIDERS else 0
                     polygons += 1 if _polygons(layer) else 0
                     kept = "vector"
+                    names["vector"].append(_name(layer))
+                    if count:
+                        names["selected"].append(_name(layer))
                 elif kind is LayerKind.RASTER:
                     rasters += 1
                     elevation = _is_elevation(layer)
                     elevations += 1 if elevation else 0
                     kept = "raster"
+                    names["raster"].append(_name(layer))
+                    if elevation:
+                        names["elevation"].append(_name(layer))
                 elif kind is LayerKind.POINT_CLOUD:
                     clouds += 1
                     kept = "point_cloud"
+                    names["cloud"].append(_name(layer))
                 if kind in (LayerKind.VECTOR, LayerKind.POINT_CLOUD):
                     subset = getattr(layer, "subsetString", None)
                     filtered += 1 if (callable(subset) and subset()) or _is_derived(layer) else 0
@@ -119,10 +168,17 @@ def read_facts(project: Any = None, active: Optional[Any] = None) -> Facts:
             kept, elevation, local = found.get(active.id() if active is not None else "", ("", False, True))
         except RuntimeError:
             kept, elevation, local = "", False, True
+        active_id = active.id() if kept in ("vector", "raster", "point_cloud") else ""
+        active_name = _name(active) if active_id else ""
+        vectors_first = [active_name] + [name for name in names["vector"] if name != active_name] if kept == "vector" else names["vector"]
         return Facts(known=True, layers=layers, tiles=tiles, vectors=vectors, rasters=rasters, point_clouds=clouds,
                      active=kept, selected=selected, filtered=filtered, remote=remote, elevations=elevations,
                      polygons=polygons, active_elevation=elevation, active_local=local,
-                     selected_local=selected_local)
+                     selected_local=selected_local, active_id=active_id, active_name=active_name,
+                     active_fields=_fields(active) if kept == "vector" else (), vector_names=tuple(vectors_first),
+                     raster_name=next(iter(names["raster"]), ""), elevation_name=next(iter(names["elevation"]), ""),
+                     cloud_name=next(iter(names["cloud"]), ""), selected_names=tuple(names["selected"]),
+                     focus=_focus(project, canvas) if layers else None)
     except Exception:  # nothing may come out of a reading made while a project closes
         logger.debug("Welcome facts: not read", exc_info=True)
         return Facts.unknown()

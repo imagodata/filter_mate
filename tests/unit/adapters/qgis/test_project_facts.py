@@ -222,3 +222,28 @@ def test_a_reading_that_fails_gives_unknown_facts(facts_module):
 
     facts = facts_module.read_facts(project=Broken())
     assert not facts.known and facts.tokens() == frozenset()
+
+
+def test_real_names_and_schema_are_read_without_reading_attribute_values(facts_module):
+    def field(name, numeric=False, kind='String'):
+        return types.SimpleNamespace(name=lambda: name, isNumeric=lambda: numeric, typeName=lambda: kind)
+
+    buildings = vector(name='Buildings', selected=2)
+    buildings.fields = lambda: [field('fid', True), field('height_m', True), field('usage'), field('opened', kind='Date')]
+    roads = vector(name='Roads')
+    facts = read(facts_module, roads, buildings, active=buildings)
+    assert facts.known and facts.active_name == 'Buildings' and facts.active_id == buildings.id()
+    assert facts.vector_names == ('Buildings', 'Roads') and facts.selected_names == ('Buildings',)
+    assert facts.field('numeric') == 'height_m' and facts.field('text') == 'usage'
+    assert 'fid' not in dict(facts.active_fields) and 'opened' not in dict(facts.active_fields)
+    assert {'numeric_field', 'text_field', 'style_field'} <= facts.tokens()
+    roads.fields = lambda: [field('name')]
+    changed = read(facts_module, roads, buildings, active=roads)
+    assert changed.signature() != facts.signature() and changed.field('text') == 'name'
+
+
+def test_empty_projects_ignore_the_canvas_default_extent(facts_module, monkeypatch):
+    calls = []
+    monkeypatch.setattr(facts_module, '_focus', lambda *args: calls.append(True))
+    facts = facts_module.read_facts(project=Project(), canvas=object())
+    assert facts.known and facts.focus is None and calls == []
