@@ -20,6 +20,7 @@ from .providers.base import HttpRequest
 from .session import CAUSE_FAILED, CAUSE_STOPPED, NOT_RUN, STATUS_DONE, STATUS_RUN_TOOLS, AgentSession, TurnDecision
 from .permissions import ASK, MAX_ASKED_TOGETHER, PROTECTED, REFUSE, TURNED_OFF, PermissionPolicy, asked_alone
 from .tool_executor import Handler, ToolExecutor, connector_gate
+from .skill_commands import requested_skill
 
 logger = logging.getLogger("FilterMate.agent")
 
@@ -196,7 +197,13 @@ class ChatEngine:
         if dropped:
             self._executor.withdraw(dropped)
             self._released(dropped)
-        self._request_model(self._generation)
+        skill = requested_skill(text)
+        if skill is not None:
+            call = self._session.request_skill(skill)
+            generation = self._generation
+            self._defer(lambda: self._run_tools(generation, (call,), requested=True))
+        else:
+            self._request_model(self._generation)
         return True
 
     def cancel(self) -> None:
@@ -304,7 +311,7 @@ class ChatEngine:
         else:
             self._finish(ChatOutcome(OUTCOME_STOPPED, reason=decision.reason, kept_steps=decision.kept))
 
-    def _run_tools(self, generation: int, calls: Sequence[ToolCallPart]) -> None:
+    def _run_tools(self, generation: int, calls: Sequence[ToolCallPart], *, requested: bool = False) -> None:
         if not self._busy or generation != self._generation:
             return
         self._running_tools = True
@@ -330,6 +337,10 @@ class ChatEngine:
                     # The panel shows both steps, the failure then the run, so nothing looks silently fixed.
                     answers[position] = self._run_one(call, answered.get(position))
         self._session.add_tool_results(answers)
+        if requested and any(answer.is_error for answer in answers):
+            self._interrupt(OUTCOME_FAILED, CAUSE_FAILED,
+                            error=ProviderError(ERROR_BAD_REQUEST, 'The requested skill could not be loaded.'))
+            return
         self._defer(lambda: self._request_model(generation))
 
     def _confirm_together(self, calls: Sequence[ToolCallPart]) -> Dict[int, bool]:

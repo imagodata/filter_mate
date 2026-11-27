@@ -237,6 +237,16 @@ class AgentSession:
         self._restored = False
         self._turns = 0
 
+    def request_skill(self, name: str) -> ToolCallPart:
+        """Record an explicit user skill request before the first model turn, with its normal tool result.
+
+        This only builds the call: the executor still validates availability, permissions and user-skill review.
+        It costs no model turn and grants no permission.
+        """
+        call = ToolCallPart(f'user_skill_{self._requests}_{len(self._messages)}', 'load_skill', {'name': name})
+        self._messages.append(Message(ROLE_ASSISTANT, (call,)))
+        return call
+
     def add_followup_text(self, text: str) -> None:
         """A user correction within the active request, after every tool call has its result.
 

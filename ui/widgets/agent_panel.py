@@ -37,6 +37,7 @@ from ...core.agent.example_prompts import (
     CATALOG as EXAMPLE_CATALOG, Facts, SHOWN as EXAMPLES_SHOWN, adjust as adjust_examples, pick as pick_examples,
 )
 from ...core.agent.mentions import mention_rows
+from ...core.agent.skill_commands import completion_prefix
 from ...core.agent.modes import ACT, ASK, PLAN
 from ...core.agent.postures import ACT as POSTURE_ACT
 from ...core.agent.postures import PROPOSE, RESPOND, posture_from_mode, posture_or_default, posture_to_mode
@@ -299,7 +300,7 @@ class AgentInput(QPlainTextEdit):
     """The line to ask (2026-11-24: several lines). It grows with what is typed, up to MAX_LINES; Enter sends,
     Ctrl+Enter pushes into a running request, Shift+Enter goes to the line; the arrows give the previous requests
     from its first and last line; Escape stops;
-    "@" offers the layers of the project and writes the name chosen.
+    "@" offers project layers; "/" at the start offers skills and inserts an editable command.
 
     The API of the QLineEdit it replaced is kept (``text``, ``setText``, ``insert``, ``returnPressed``): the panel,
     the benches and the takes of the site use it.
@@ -318,6 +319,8 @@ class AgentInput(QPlainTextEdit):
         self._draft = ""
         # (id, name, qualifier) of the layers, for "@" rows that tell homonyms apart; the panel sets it.
         self.layer_rows: Callable[[], Sequence[tuple]] = lambda: ()
+        self.skill_rows: Callable[[], Sequence[tuple]] = lambda: ()
+        self._completion_kind = ''
         self.setTabChangesFocus(True)
         self.setLineWrapMode(QPlainTextEdit.LineWrapMode.WidgetWidth)
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
@@ -376,9 +379,31 @@ class AgentInput(QPlainTextEdit):
 
     # --- keys --------------------------------------------------------------------
 
+    def event(self, event):
+        # QWidget handles Tab as focus traversal before keyPressEvent. Complete a skill instead while its menu
+        # is open; outside that menu the normal accessibility/focus traversal remains in place.
+        if (event.type() == QEvent.Type.KeyPress and event.key() == Qt.Key.Key_Tab
+                and getattr(self, '_completion_kind', '') == 'skill' and self.completer.popup().isVisible()):
+            self.keyPressEvent(event)
+            return True
+        return super().event(event)
+
     def keyPressEvent(self, event) -> None:  # noqa: N802 - Qt name
         key = event.key()
         popup = self.completer.popup()
+        if popup.isVisible() and self._completion_kind == 'skill':
+            if key in (Qt.Key.Key_Enter, Qt.Key.Key_Return, Qt.Key.Key_Tab):
+                index = popup.currentIndex()
+                if not index.isValid():
+                    index = self.completer.completionModel().index(0, 0)
+                self._insert_row(index)
+                popup.hide()
+                event.accept()
+                return
+            if key == Qt.Key.Key_Escape:
+                popup.hide()
+                event.accept()
+                return
         if popup.isVisible() and key in (Qt.Key.Key_Enter, Qt.Key.Key_Return, Qt.Key.Key_Escape, Qt.Key.Key_Tab,
                                          Qt.Key.Key_Backtab):
             event.ignore()  # the completer takes them: the name chosen, or the list closed
@@ -429,27 +454,34 @@ class AgentInput(QPlainTextEdit):
         return match.group(1) if match else None
 
     def _offer_names(self) -> None:
-        typed = self._typed_mention()
+        skill = completion_prefix(self.text()[:self.textCursor().position()])
+        typed = skill if skill is not None else self._typed_mention()
         if typed is None:
             self.completer.popup().hide()
             return
         try:
-            rows = mention_rows(self.layer_rows())
+            rows = list(self.skill_rows()) if skill is not None else mention_rows(self.layer_rows())
         except Exception:  # a project closing
             rows = []
         if not rows:
             self.completer.popup().hide()
             return
         self._mention_rows = rows
+        self._completion_kind = 'skill' if skill is not None else 'layer'
         self._names_model.setStringList([label for label, _insert in rows])
-        self.completer.setCompletionPrefix(typed)
+        self.completer.setFilterMode(Qt.MatchFlag.MatchStartsWith if skill is not None else Qt.MatchFlag.MatchContains)
+        self.completer.setCompletionPrefix('/' + typed if skill is not None else typed)
         if self.completer.completionCount() == 0:
             self.completer.popup().hide()
             return
         rect = self.cursorRect()
         rect.setWidth(max(160, self.completer.popup().sizeHintForColumn(0)
                           + self.completer.popup().verticalScrollBar().sizeHint().width()))
+        if skill is not None:
+            rect.setWidth(min(rect.width(), max(160, self.viewport().width())))
         self.completer.complete(rect)
+        if skill is not None:
+            self.completer.popup().setCurrentIndex(self.completer.completionModel().index(0, 0))
 
     def _insert_row(self, index: QModelIndex) -> None:
         """The "@..." typed becomes the row chosen: a name, or the id of one layer among homonyms."""
@@ -460,8 +492,21 @@ class AgentInput(QPlainTextEdit):
         selected = index.data(Qt.ItemDataRole.DisplayRole)
         for label, inserted in self._mention_rows:
             if label == selected:
-                self._insert_name(inserted)
+                if self._completion_kind == 'skill':
+                    self._insert_skill(inserted)
+                else:
+                    self._insert_name(inserted)
                 return
+
+    def _insert_skill(self, name: str) -> None:
+        cursor = self.textCursor()
+        typed = completion_prefix(self.text()[:cursor.position()])
+        if typed is None:
+            return
+        after = self.text()[cursor.position():]
+        cursor.movePosition(QTextCursor.MoveOperation.Left, QTextCursor.MoveMode.KeepAnchor, len(typed) + 1)
+        cursor.insertText('/' + name + ('' if after and after[0].isspace() else ' '))
+        self.setTextCursor(cursor)
 
     def _insert_name(self, name: str) -> None:
         """The "@..." typed becomes the name chosen, as the model reads it."""
@@ -2062,7 +2107,9 @@ class AgentPanel(QFrame):
                                        PROPOSE: _tr("Describe what to plan…")}.get(
                                            self._posture, _tr("Ask the agent…")))
         if hasattr(self, "send_button"):  # screen readers hear what the line now takes (S5)
-            self.input.setAccessibleDescription(self.input.placeholderText())
+            hint = _tr('Type / for skills or @ for project layers. Enter/Tab chooses a skill; Enter sends the edited request.')
+            self.input.setToolTip(hint)
+            self.input.setAccessibleDescription(self.input.placeholderText() + '\n' + hint)
 
     def mode(self) -> str:
         return self._mode

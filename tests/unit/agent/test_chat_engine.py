@@ -14,7 +14,7 @@ from core.agent.messages import (
 from core.agent.providers import create_provider
 from core.agent.providers.base import ProviderConfig
 from core.agent.session import NOT_RUN, AgentSession
-from core.agent.tool_catalog import ToolSpec
+from core.agent.tool_catalog import ToolSpec, skill_tool
 from core.agent.tool_executor import ToolExecutor
 
 pytestmark = pytest.mark.unit
@@ -107,6 +107,77 @@ def setup():
     transport, listener, checkpoint = Transport(), Listener(), Checkpoint()
     engine = ChatEngine(session, ToolExecutor(tools, handlers), transport, listener, checkpoint)
     return engine, session, transport, listener, checkpoint, seen
+
+
+def _skill_setup(setup, handler=None):
+    from core.agent.skills import load
+    engine, session, transport, listener, checkpoint, seen = setup
+    tool = skill_tool({'ask_user'})
+    def loaded(args):
+        seen.append(args['name'])
+        return load(args['name'], {'ask_user'})
+    engine.offer_tools([tool], {'load_skill': handler or loaded})
+    return engine, session, transport, listener, checkpoint, seen
+
+
+def test_explicit_skill_is_loaded_before_the_first_provider_request(setup):
+    engine, session, transport, listener, checkpoint, seen = _skill_setup(setup)
+    assert engine.send('/brainstorm compare two options')
+    assert seen == ['brainstorm'] and len(transport.starts) == 1
+    assert session.messages[0].text == '/brainstorm compare two options'
+    assert session.messages[1].tool_calls[0].name == 'load_skill'
+    result = json.loads(session.messages[2].parts[0].content)
+    assert result['skill'] == 'brainstorm' and 'instructions' in result
+    assert session._turns == 0 and checkpoint.begins == 0
+    transport.emit(turn(STOP_END, TextPart('Two options.')))
+    assert not engine.busy and listener.outcomes[-1].status == 'done'
+
+
+@pytest.mark.parametrize('kind', ['unknown', 'disabled', 'declined', 'failed'])
+def test_failed_skill_command_never_falls_back_to_a_plain_model_request(setup, kind):
+    def unavailable(args):
+        raise ValueError('skill changed or was refused')
+    engine, session, transport, listener, checkpoint, seen = _skill_setup(
+        setup, unavailable if kind == 'failed' else None)
+    if kind == 'disabled':
+        engine._policy.rules = {'load_skill': 'never'}
+    elif kind == 'declined':
+        engine._policy.rules = {'load_skill': 'ask'}
+        listener.accept = False
+    engine.send('/missing' if kind == 'unknown' else '/brainstorm choose')
+    assert not transport.starts and not engine.busy and not seen
+    assert listener.outcomes[-1].status == 'failed' and not session.messages
+
+
+def test_repeated_user_skill_loads_recheck_the_handler_without_repeating_the_body(setup):
+    engine, session, transport, listener, checkpoint, seen = _skill_setup(setup)
+    engine.send('/brainstorm first')
+    transport.emit(turn(STOP_END, TextPart('Options')))
+    engine.send('/brainstorm refine')
+    assert seen == ['brainstorm', 'brainstorm'] and len(transport.starts) == 2
+    result = json.loads(session.messages[-1].parts[0].content)
+    assert result['already_loaded'] and 'instructions' not in result
+
+
+def test_cancel_before_a_scheduled_skill_load_runs_nothing(setup):
+    engine, session, transport, listener, checkpoint, seen = _skill_setup(setup)
+    pending = []
+    engine._defer = pending.append
+    engine.send('/brainstorm')
+    engine.cancel()
+    for callback in pending:
+        callback()
+    assert not seen and not transport.starts and not session.messages
+
+
+def test_slash_connector_load_still_requires_its_normal_confirmation(setup):
+    engine, session, transport, listener, checkpoint, seen = setup
+    tool = skill_tool(set(), connectors=[('connector-data', 'External data')], with_skills=False)
+    engine.offer_tools([tool], {'load_skill': lambda args: seen.append('connected') or {}})
+    listener.accept = False
+    engine.send('/connector-data find roads')
+    assert not seen and not transport.starts and not engine.busy
+    assert ('confirm', 'load_skill') in listener.log
 
 
 def test_text_only(setup):

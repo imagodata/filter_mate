@@ -285,6 +285,46 @@ def test_designer_preference_restored_when_the_controller_is_created(ctrl_module
     instance.panel.set_designer_mode.assert_called_with(True)
 
 
+def test_slash_menu_uses_only_actual_skill_schema_and_hides_unapproved_custom_descriptions(
+        ctrl_module, controller, monkeypatch):
+    tool = types.SimpleNamespace(name='load_skill', input_schema={
+        'properties': {'name': {'enum': ['designer', 'project-skill', 'connector-data']}}})
+    monkeypatch.setattr(controller, 'tools_and_handlers', lambda values: ([tool], {}, []))
+    registry = sys.modules[f'{_PKG}.core.agent.skills']
+    monkeypatch.setattr(registry, 'all_skills', lambda: {
+        'designer': registry.Skill(name='designer', title='Designer', summary='Design maps', body='Instructions'),
+        'project-skill': registry.Skill(name='project-skill', title='Custom', summary='UNREVIEWED TEXT',
+                                        body='Instructions', trust='project'),
+        'not-offered': registry.Skill(name='not-offered', title='Hidden', summary='Not offered', body='Instructions'),
+    })
+    rows = controller._skill_command_rows()
+    assert {name for _label, name in rows} == {'designer', 'project-skill', 'connector-data'}
+    assert 'UNREVIEWED' not in str(rows) and 'Design maps' in str(rows)
+    monkeypatch.setattr(controller, 'tools_and_handlers', lambda values: ([], {}, []))
+    assert controller._skill_command_rows() == []
+
+
+def test_unknown_slash_skill_leaves_the_draft_without_building_a_model(ctrl_module, controller, monkeypatch):
+    monkeypatch.setattr(controller, '_skill_command_rows', lambda: [('/designer', 'designer')])
+    builder = MagicMock()
+    monkeypatch.setattr(controller, '_build_engine', builder)
+    controller._mcp.busy = False
+    assert controller._on_send('/unknown my request') is False
+    builder.assert_not_called()
+    controller.panel.clear_input.assert_not_called()
+
+
+def test_slash_skill_during_push_is_queued_with_its_mode_without_steering_the_active_request(
+        ctrl_module, controller):
+    engine, transport = _engine(ctrl_module, controller, lambda arguments: {})
+    controller._request_posture = 'act'
+    controller._posture = 'act'
+    engine.send('First task')
+    assert controller._on_push('/brainstorm another solution')
+    controller.panel.queue_message.assert_called_once_with('/brainstorm another solution', 'act', first=False)
+    assert not engine._pushed and len(transport.starts) == 1
+
+
 @pytest.fixture
 def activity_state(controller):
     state = {"phase": "thinking"}

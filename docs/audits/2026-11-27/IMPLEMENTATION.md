@@ -58,6 +58,38 @@ des skills restent chargés à la demande.
 
 Résultats natifs : [Qt 5](designer-qt5.json), [Qt 6](designer-qt6.json).
 
+## Appeler les skills avec `/`
+
+Saisir `/` au début de la demande affiche les skills disponibles et leur description. Par exemple :
+`/brainstorm compare deux solutions`, `/designer propose une carte A4`, `/datasets trouve des données bâtiments`.
+Les flèches sélectionnent une suggestion ; Entrée ou Tab insère la commande dans le brouillon. L’utilisateur
+complète sa demande puis l’envoie avec Entrée. Échap ferme le menu. Les chemins comme `/tmp/carte.gpkg` et les
+mentions de commandes au milieu d’une phrase restent du texte ; la sélection des couches avec `@` est conservée.
+
+Une commande envoyée charge réellement le skill avant la première requête au modèle, via l’exécuteur habituel.
+Ce chargement ne consomme pas un tour de réflexion du modèle. Un refus, un skill indisponible ou une erreur
+arrête la demande sans la transmettre au modèle comme une demande ordinaire. Les outils désactivés, les
+autorisations des connecteurs et la validation des skills personnalisés restent appliqués. Les descriptions
+personnalisées non validées ne sont pas reprises dans les suggestions. Un nouvel appel vérifie à nouveau les
+autorisations et réutilise les instructions déjà présentes dans la conversation.
+
+Pendant une tâche active, une commande est mise en file avec le mode choisi, y compris en mode Push ; le skill
+est chargé au début de cette demande suivante. Une commande inconnue conserve le brouillon et indique comment
+voir les skills disponibles.
+
+Validation native sur QGIS 3.44 / Qt 5 et QGIS 4.3 / Qt 6 : clavier Entrée/Tab/Échap, autocomplétion, coexistence
+avec `@`, chargement du vrai skill intégré, réutilisation et arrêts pour indisponibilité ou désactivation. Les
+requêtes des trois formats Anthropic, OpenAI compatible et Ollama sont construites et enregistrées localement :
+aucun modèle ni service payant n’a été appelé. Le test du transport HTTP local passe séparément avec l’accès
+socket nécessaire. Rapports : [Qt 5](skill-commands-qt5.json), [Qt 6](skill-commands-qt6.json).
+
+La suite élargie donne 4 027 réussites et un échec lié à la fixture du menu, qui ne déclarait pas la nouvelle
+action Designer. Cette fixture est corrigée ; les 196 tests ciblés du menu, du contrôleur, de la découverte des
+skills et de la saisie passent ensuite. Le banc hors ligne conserve 188 réussites, avec 4 scénarios ignorés
+pour outils désactivés. Deux contrôles globaux de localisation restent en échec : plusieurs catalogues de langue
+n’ont pas encore tous les messages actifs récents. Les commandes et libellés français sont traduits et leur
+catalogue compilé ; la parité de toutes les langues reste à compléter, sans masquer ces échecs.
+
 ## Vérification du choix du SCR
 
 Les tests couvrent le SCR déjà adapté, Web Mercator pour les surfaces, un SCR hors de son domaine, les limites

@@ -15,6 +15,7 @@ from qgis.PyQt.QtCore import QCoreApplication, QEventLoop, QObject, QTimer
 from qgis.PyQt.QtWidgets import QDialog, QInputDialog, QLineEdit
 
 from ...adapters.agent.qt_transport import QtTransport
+from ...core.agent.skill_commands import requested_skill
 from ...adapters.agent.settings import (
     AgentSettings, KeyStoreError, delete_key, delete_own_key, load_settings, provider_config, read_key, save_settings, store_key,
     target_of, current_provider, read_providers, write_providers, read_mode, write_mode, read_designer_mode, write_designer_mode,
@@ -283,6 +284,7 @@ class AgentChatController(QObject):
         self.panel.thread.layer_names = self._linked_layer_names
         self.panel.thread.layer_references = self._linked_layers
         self.panel.mention_source = self._layers_in_tree_order
+        self.panel.input.skill_rows = self._skill_command_rows
         self.panel.layer_link_clicked.connect(self._on_layer_link)
         self.panel.refresh_examples()  # drawn for an unknown state in the panel: now for the project
         self.panel.send_requested.connect(self._on_send)
@@ -3435,6 +3437,31 @@ class AgentChatController(QObject):
         if not sent and generation == self._memory_generation:
             self.panel.restore_queued(text, posture)
 
+    def _skill_command_rows(self):
+        """Use the actual load_skill schema, without building a model or connecting to an external service."""
+        from ...core.agent import skills as skill_registry
+        try:
+            tools, _handlers, _active = self.tools_and_handlers(load_settings())
+            loader = next((tool for tool in tools if tool.name == LOAD_SKILL), None)
+            if loader is None:
+                return []
+            names = loader.input_schema['properties']['name']['enum']
+            registry = skill_registry.all_skills()
+            rows = []
+            for name in names:
+                skill = registry.get(name)
+                if skill is not None and skill.trust == 'builtin':
+                    detail = skill.summary
+                elif skill is not None:
+                    detail = _tr('Custom skill; review and permissions still apply')
+                else:
+                    detail = _tr('External connector; permissions still apply')
+                rows.append((f'/{name} — {one_line(detail, 180)}', name))
+            return sorted(rows, key=lambda row: row[1])
+        except Exception:
+            logger.debug('Agent: skill command list unavailable', exc_info=True)
+            return []
+
     def _on_push(self, text: str, queued: bool = False, posture: str = "") -> bool:
         """Add instructions to this exchange, keeping its permissions and undo point."""
         if self._abandoned or self._replaying or self._building:
@@ -3443,11 +3470,13 @@ class AgentChatController(QObject):
         chosen = posture_or_default(posture or self._posture)
         if engine is None or not engine.busy:
             return self._on_send(text, chosen, queued=queued)
-        if chosen != self._request_posture:
+        if chosen != self._request_posture or requested_skill(text) is not None:
             self.panel.queue_message(text, chosen, first=queued)
             if not queued and self.panel.input.text().strip() == text.strip():
                 self.panel.clear_input()
-            self.panel.set_status(_tr("Message queued with the selected mode; the running request keeps its permissions."))
+            self.panel.set_status(_tr('Skill request queued; it will load before the next request.')
+                                  if requested_skill(text) is not None else
+                                  _tr("Message queued with the selected mode; the running request keeps its permissions."))
             return True
         if not engine.push(text):
             return False
@@ -3467,6 +3496,10 @@ class AgentChatController(QObject):
             return False
         if self._mcp.busy:
             self._say(_tr("Another application is changing the project: try again in a moment."))
+            return False
+        skill = requested_skill(text)
+        if skill is not None and skill not in {name for _label, name in self._skill_command_rows()}:
+            self._say(_tr('Skill /{} is unavailable. Type / to see the available skills.').format(skill), error=True)
             return False
         values = load_settings()  # however the settings were saved
         self._request_mode = posture_to_mode(mode) if mode in (RESPOND, PROPOSE) else mode_or_default(mode or self._mode)

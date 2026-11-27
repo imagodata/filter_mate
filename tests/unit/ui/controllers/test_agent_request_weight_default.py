@@ -70,6 +70,17 @@ def plugin_tools(monkeypatch):
     monkeypatch.setattr(renderer, "_engine", "ok")
 
 
+def test_slash_discovery_uses_the_real_skill_catalogue_and_current_settings(plugin_tools, monkeypatch):
+    host = _Host()
+    host.tools_and_handlers = lambda values: Controller.tools_and_handlers(host, values)
+    values = agent_settings.AgentSettings(preset='anthropic', model='test')
+    monkeypatch.setattr(chat_controller, 'load_settings', lambda: values)
+    rows = Controller._skill_command_rows(host)
+    assert {'brainstorm', 'designer', 'datasets'} <= {name for _label, name in rows}
+    values = agent_settings.AgentSettings(preset='anthropic', model='test', tool_rules='{"load_skill":"never"}')
+    assert Controller._skill_command_rows(host) == []
+
+
 @pytest.fixture(scope="module")
 def weight():
     spec = importlib.util.spec_from_file_location("agent_request_weight", _ROOT / "scripts" / "agent_request_weight.py")

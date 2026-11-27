@@ -153,6 +153,7 @@ def test_the_menu_is_filled_from_the_settings(host, monkeypatch):
     monkeypatch.setattr(chat_controller, "qgis_databases", lambda: [])
     host.panel = SimpleNamespace(fill_options=MagicMock(), export_folder_action=MagicMock())
     host._mcp = SimpleNamespace(busy=False)
+    host.panel.designer_action = MagicMock()
     Controller._fill_options(host)
     groups, providers, mcp_on = host.panel.fill_options.call_args.args
     ticked = [source_id for _title, rows in groups for source_id, _name, on in rows if on]

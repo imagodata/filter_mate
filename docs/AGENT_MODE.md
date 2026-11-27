@@ -339,6 +339,18 @@ Rules worth keeping:
   are not automated. QGIS map themes reference named layer styles, not frozen renderer copies. Independent named
   styles and binding a layout map to a theme currently require native QGIS editing. Interface light/dark themes
   remain distinct from map themes.
+- **Slash skill commands**: type `/` at the start of the chat input to list available skills and their summaries.
+  Examples: `/brainstorm compare two workflows`, `/designer propose an A4 map`, `/datasets find building data`.
+  Arrows select; Enter or Tab inserts the command without sending it. Edit the request, then press Enter to send.
+  Escape closes the suggestions. A bare command is accepted; `/name` in prose and paths such as `/tmp/map.gpkg`
+  remain text. Only commands from the actual `load_skill` schema are suggested; disabled tools and missing
+  requirements still apply. Custom skills show a generic review notice until loading through their normal
+  review/authorization flow; enabled connector entries retain their connection confirmation.
+  An explicit command runs `load_skill` through the ordinary executor before the first provider request, so the
+  first model turn receives its instructions and available task tools. It consumes no model turn. A failed,
+  unavailable or refused skill stops that request without falling back to a plain model request. Repeated loads
+  recheck authorization and reuse instructions already kept in the conversation. A command sent while the chat
+  works is queued with its selected mode, including in Push mode; it loads before that later request.
 - **At most 16 model turns per request** (`max_model_turns`, `core/agent/session.py`). Two turns before the limit the
   model is told so, and a request that reaches it stops with a sentence that says why; what was done stays and can be
   undone.

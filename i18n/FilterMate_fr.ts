@@ -1871,6 +1871,58 @@ Do you agree to all of them? No runs none of them.</source>
         <source>Standard conversation workspace enabled.</source>
         <translation>Espace de conversation standard activé.</translation>
     </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3829"/>
+        <source>Available QGIS interfaces</source>
+        <translation>Interfaces QGIS disponibles</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="966"/>
+        <source>Conversation from another project</source>
+        <translation>Conversation d’un autre projet</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3450"/>
+        <source>Message queued with the selected mode; the running request keeps its permissions.</source>
+        <translation>Message mis en attente avec le mode choisi ; la demande en cours conserve ses autorisations.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="970"/>
+        <source>Project path unavailable</source>
+        <translation>Chemin du projet indisponible</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3830"/>
+        <source>QGIS interface: {}</source>
+        <translation>Interface QGIS : {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="4931"/>
+        <source>The QGIS interface could not be opened: {}</source>
+        <translation>Impossible d’ouvrir l’interface QGIS : {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3359"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3372"/>
+        <source>The conversation could not be archived. It has been kept open.</source>
+        <translation>Impossible d’archiver la conversation. Elle reste ouverte.</translation>
+    </message>
+    <message>
+        <source>Custom skill; review and permissions still apply</source>
+        <translation>Skill personnalisé ; validation et autorisations conservées</translation>
+    </message>
+    <message>
+        <source>External connector; permissions still apply</source>
+        <translation>Connecteur externe ; autorisations conservées</translation>
+    </message>
+    <message>
+        <source>Skill request queued; it will load before the next request.</source>
+        <translation>Demande de skill mise en file ; il sera chargé avant la prochaine demande.</translation>
+    </message>
+    <message>
+        <source>Skill /{} is unavailable. Type / to see the available skills.</source>
+        <translation>Le skill /{} est indisponible. Saisissez / pour voir les skills disponibles.</translation>
+    </message>
 </context>
 <context>
     <name>AgentPanel</name>
@@ -3766,6 +3818,51 @@ Do you agree to all of them? No runs none of them.</source>
     <message>
         <source>In the advanced Designer workspace, inspect existing QGIS map themes and propose how to organize them for different views and layouts. Do not save, replace, apply or remove a theme yet.</source>
         <translation>Dans l’atelier Designer avancé, examine les thèmes cartographiques QGIS existants et propose de les organiser pour différentes vues et mises en page. Ne sauvegarde, remplace, applique ou supprime encore aucun thème.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1121"/>
+        <source>Conversations</source>
+        <translation>Conversations</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="2220"/>
+        <source>Current request: {}. Next message: {}. It will wait for the current request.</source>
+        <translation>Demande en cours : {}. Prochain message : {}. Il attendra la fin de la demande en cours.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1174"/>
+        <location filename="../ui/widgets/agent_panel.py" line="1366"/>
+        <source>Open conversation</source>
+        <translation>Ouvrir la conversation</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1236"/>
+        <source>Project path unavailable</source>
+        <translation>Chemin du projet indisponible</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1367"/>
+        <source>Read conversation</source>
+        <translation>Consulter la conversation</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1122"/>
+        <source>Up to 200 recent conversations on this computer. Other projects open for reading only.</source>
+        <translation>Jusqu’à 200 conversations récentes sur cet ordinateur. Les autres projets s’ouvrent en consultation seule.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1237"/>
+        <source>current</source>
+        <translation>en cours</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1241"/>
+        <source>{} conversation(s)</source>
+        <translation>{} conversation(s)</translation>
+    </message>
+    <message>
+        <source>Type / for skills or @ for project layers. Enter/Tab chooses a skill; Enter sends the edited request.</source>
+        <translation>Saisissez / pour les skills ou @ pour les couches du projet. Entrée/Tab choisit un skill ; Entrée envoie la demande modifiée.</translation>
     </message>
 </context>
 <context>

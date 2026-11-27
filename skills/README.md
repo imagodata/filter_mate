@@ -27,6 +27,11 @@ only `ask_user` available. `designer` coordinates styles, labels, QGIS map theme
 handoff to native QGIS editors. Both are chat-only. The optional Advanced Designer workspace inserts editable
 requests; it keeps the current Respond/Propose/Act mode and tool permissions.
 
+In the chat, users may explicitly select a skill by typing `/` at the start of a request, for example
+`/brainstorm compare two solutions`. Enter/Tab inserts a suggestion for editing; sending the request loads the
+skill through the normal executor before the first model call. Availability, custom-skill review and connector
+permissions remain enforced. A failed load stops the request. A slash command during an active request is queued.
+
 ## SKILL.md
 
 ```

@@ -135,6 +135,68 @@ def test_at_offers_the_layers_and_writes_the_name():
     assert not completer.popup().isVisible()
 
 
+def test_slash_suggests_available_skills_and_keeps_the_request_editable():
+    panel = _panel()
+    panel.input.skill_rows = lambda: [('/brainstorm — compare solutions', 'brainstorm'),
+                                     ('/designer — maps and layouts', 'designer')]
+    sent = []
+    panel.send_requested.connect(sent.append)
+    panel.input.setFocus()
+    QtTest.QTest.keyClicks(panel.input, '/des')
+    _run()
+    completer = panel.input.completer
+    assert completer.popup().isVisible() and completer.completionCount() == 1
+    assert 'maps and layouts' in completer.currentCompletion()
+    completer.activated[QtCore.QModelIndex].emit(completer.popup().model().index(0, 0))
+    assert panel.input.text() == '/designer ' and not sent
+    completer.popup().hide()
+    QtTest.QTest.keyClicks(panel.input, 'a map')
+    assert not completer.popup().isVisible()
+    QtTest.QTest.keyClick(panel.input, Qt.Key_Return)
+    assert sent == ['/designer a map']
+    panel.close()
+
+
+def test_slash_completion_preserves_text_after_the_cursor_and_does_not_intercept_paths():
+    panel = _panel()
+    panel.input.skill_rows = lambda: [('/brainstorm — compare solutions', 'brainstorm')]
+    panel.input.setText('/bra\nKeep my detailed request')
+    cursor = panel.input.textCursor()
+    cursor.setPosition(4)
+    panel.input.setTextCursor(cursor)
+    panel.input._offer_names()
+    completer = panel.input.completer
+    completer.activated[QtCore.QModelIndex].emit(completer.popup().model().index(0, 0))
+    assert panel.input.text() == '/brainstorm\nKeep my detailed request'
+    panel.input.setText('/tmp/data.geojson')
+    panel.input._offer_names()
+    assert not completer.popup().isVisible()
+    panel.input.setText('use /brainstorm')
+    panel.input._offer_names()
+    assert not completer.popup().isVisible()
+    panel.close()
+
+
+@pytest.mark.parametrize('key', [Qt.Key_Return, Qt.Key_Tab])
+def test_slash_keyboard_accepts_the_first_suggestion_without_sending(key):
+    panel = _panel()
+    panel.input.skill_rows = lambda: [('/brainstorm — compare solutions', 'brainstorm')]
+    sent, stops = [], []
+    panel.send_requested.connect(sent.append)
+    panel.stop_requested.connect(lambda: stops.append(True))
+    panel.input.setFocus()
+    QtTest.QTest.keyClicks(panel.input, '/bra')
+    _run()
+    QtTest.QTest.keyClick(panel.input, key)
+    _run()
+    assert panel.input.text() == '/brainstorm ' and not sent
+    panel.input.setText('/')
+    panel.input._offer_names()
+    QtTest.QTest.keyClick(panel.input, Qt.Key_Escape)
+    assert not panel.input.completer.popup().isVisible() and not stops
+    panel.close()
+
+
 def test_at_offers_homonyms_apart_and_writes_the_id():
     panel = _panel()
     panel.input.layer_rows = lambda: [("id_est", "communes", "Est"), ("id_ouest", "communes", "Ouest")]

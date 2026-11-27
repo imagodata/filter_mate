@@ -1,0 +1,10 @@
+{
+  "qgis": "4.3.0-Master",
+  "checks_passed": true,
+  "providers_serialized": [
+    "anthropic",
+    "openai",
+    "ollama"
+  ],
+  "network_requests": 0
+}
