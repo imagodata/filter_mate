@@ -252,12 +252,6 @@ class ConfigurationManager(QObject):
                 "WIDGET": d.pushButton_action_export,
                 "SIGNALS": [("clicked", lambda state, x='export': d.launchTaskEvent(state, x))],
                 "ICON": None
-            },
-            "ABOUT": {
-                "TYPE": "PushButton",
-                "WIDGET": d.pushButton_action_about,
-                "SIGNALS": [("clicked", d.open_project_page)],
-                "ICON": None
             }
         }
 

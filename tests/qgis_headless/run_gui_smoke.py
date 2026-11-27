@@ -2482,7 +2482,7 @@ OPTION_STEPS = [s_options_menu, s_options_menu_check]
 # --- The buttons under their section; a section in its own QGIS panel (ui/layout/section_bars.py, section_panels.py)
 
 SECTION = {}
-ACTION_NAMES = ('filter', 'undo_filter', 'redo_filter', 'compare', 'unfilter', 'export', 'qfieldcloud', 'about')
+ACTION_NAMES = ('filter', 'undo_filter', 'redo_filter', 'unfilter', 'compare', 'export', 'qfieldcloud')
 FILTERING_ACTIONS = ACTION_NAMES[:5]
 DETACHED_KEY = 'FilterMate/panels/detached'
 
@@ -2609,7 +2609,7 @@ def s_section_startup_check():
         row = bars.frame('filtering')
         held = [name for name in FILTERING_ACTIONS if action_button(name) is not None
                 and action_button(name).parentWidget() is row]
-        check('startup: FILTERING holds Filter, Undo, Redo, Compare and Unfilter', held == list(FILTERING_ACTIONS),
+        check('startup: FILTERING holds Filter, Undo, Redo, Unfilter and Compare', held == list(FILTERING_ACTIONS),
               str(held))
         if 'filtering' not in wanted:
             open_section(d.FILTERING)
@@ -2672,7 +2672,7 @@ def s_section_bars():
     if not check('sections: the position is taken', bars is not None and manager.get_position() == 'sections'):
         return None
     expected = [name for name in FILTERING_ACTIONS if name in SECTION['all']]
-    check('sections: FILTERING shows Filter, Undo, Redo, Compare and Unfilter', actions_shown() == expected,
+    check('sections: FILTERING shows Filter, Undo, Redo, Unfilter and Compare', actions_shown() == expected,
           str(actions_shown()))
     check('sections: no bar for all', not d.frame_actions.isVisible())
     bar = bars.frame('filtering')
@@ -2691,11 +2691,13 @@ def s_section_bars():
     check('sections: Export is centred in its bar', len(gaps) >= 2 and abs(gaps[0] - gaps[-1]) <= 3, str(gaps))
     check('sections: Export acts', action_button('export').isEnabled())
     open_section(d.CONFIGURATION)
-    check('sections: CONFIGURATION shows About', actions_shown() == ['about'], str(actions_shown()))
+    check('sections: CONFIGURATION has no action buttons', actions_shown() == []
+          and action_button('about') is None, str(actions_shown()))
     open_section(None)
     grab('sections_nothing_open')
     check('sections: nothing open below, no button and no bar', actions_shown() == [] and not d.frame_actions.isVisible()
-          and not any(bars.frame(key).isVisible() for key in ('filtering', 'exporting', 'configuration')),
+          and not any(bars.frame(key) is not None and bars.frame(key).isVisible()
+                      for key in ('filtering', 'exporting', 'configuration')),
           str(actions_shown()))
     if 'agent' in d._fm_sections._headers:
         # 2026-11-16, audit: with AGENT open there was no button at all, while Undo, Redo and Compare walk its steps.
@@ -2736,9 +2738,9 @@ def s_section_bars():
         late.show()
         manager.set_position('bottom')
         QApplication.processEvents()
-        check('sections: back in the bar for all, it is after Export and before About',
-              late.parentWidget() is d.frame_actions and action_button('export').x() < late.x() < action_button('about').x(),
-              f"{action_button('export').x()} {late.x()} {action_button('about').x()}")
+        check('sections: back in the bar for all, it is after Export',
+              late.parentWidget() is d.frame_actions and action_button('export').x() < late.x(),
+              f"{action_button('export').x()} {late.x()}")
         d.frame_actions.layout().removeWidget(late)
         d.pushButton_action_qfieldcloud = None
         late.setParent(None)
@@ -2814,10 +2816,10 @@ def s_section_detach():
           and all(action_button(name).isVisible() for name in filtering))
     check('panels: they act with nothing open in the dock', action_button('filter').isEnabled()
           and action_button('unfilter').isEnabled() and d.filtering_detached)
-    # 2026-11-16, audit: the bar stayed in the dock for an Export greyed out beside About.
+    # The remaining export actions need no bar while EXPORTING is folded.
     check('panels: the other buttons stay in the bar of the dock, not shown while none of them acts',
           not d.frame_actions.isVisible() and action_button('export').parentWidget() is d.frame_actions
-          and action_button('about').parentWidget() is d.frame_actions and not action_button('export').isEnabled(),
+          and not action_button('export').isEnabled(),
           str(actions_shown()))
     check('panels: below the dock the first time, in its dock area', window.dockWidgetArea(panel) == window.dockWidgetArea(d)
           and panel_place(panel) == 'below' and not panel.isFloating(),
@@ -2837,7 +2839,7 @@ def s_section_detach():
           action_button('export').isEnabled() and action_button('filter').isEnabled() and d.frame_actions.isVisible()
           and action_button('export').isVisible())
     open_section(d.CONFIGURATION)
-    check('panels: CONFIGURATION open in the dock, the bar shows for About', d.frame_actions.isVisible())
+    check('panels: CONFIGURATION open in the dock needs no action bar', not d.frame_actions.isVisible())
     open_section(None)
     grab_widget(panel, 'panel_filtering')
     grab('dock_filtering_apart')
@@ -2908,22 +2910,20 @@ def s_section_stack():
           and action_button('filter').isEnabled() and filtering.isAncestorOf(action_button('filter')))
     open_section(d.CONFIGURATION)
     in_bar = [name for name in actions_shown() if action_button(name).parentWidget() is d.frame_actions]
-    shown_open = d.frame_actions.isVisible() and in_bar == ['about']
+    hidden_open = not d.frame_actions.isVisible() and in_bar == []
     open_section(None)
-    check('stack: the bar of the dock keeps About alone, shown while CONFIGURATION is open', shown_open
-          and not d.frame_actions.isVisible() and action_button('about').parentWidget() is d.frame_actions,
-          f"open={shown_open} in the bar={in_bar} folded={d.frame_actions.isVisible()}")
+    check('stack: CONFIGURATION needs no action bar', hidden_open and not d.frame_actions.isVisible(),
+          f"hidden while open={hidden_open} in the bar={in_bar} folded={d.frame_actions.isVisible()}")
     filtering.rail.chip('filtering').click()
     QApplication.processEvents()
     check('stack: a click on a chip of the panel opens its section, with its buttons', filtering.current() == 'filtering'
           and d.FILTERING.isVisible() and not d.EXPORTING.isVisible() and action_button('filter').isVisible()
           and not export.isVisible(), str(actions_shown()))
-    check('stack: About stays in the bar of the dock, folded while CONFIGURATION is',
-          not d.frame_actions.isVisible() and action_button('about').parentWidget() is d.frame_actions,
+    check('stack: the empty bar of the dock stays folded', not d.frame_actions.isVisible(),
           str(actions_shown()))
     check('stack: CONFIGURATION joins them', panels.open_smart('configuration')
           and filtering.members == ['filtering', 'exporting', 'configuration']
-          and filtering.isAncestorOf(action_button('about')), str(filtering.members))
+          and filtering.isAncestorOf(d.CONFIGURATION), str(filtering.members))
     QApplication.processEvents()
     check('stack: no bar and no lower stack left in the dock', not d.frame_actions.isVisible()
           and not d.splitter_main.widget(1).isVisible() and sections.is_open('exploring'))
@@ -5295,7 +5295,7 @@ SWITCH_SETTINGS = {
     'APP.DOCKWIDGET.COLORS.ACTIVE_THEME': ('light', 'dark'),
 }
 SWITCH_OWNERS = {'filter': 'filtering', 'undo_filter': 'filtering', 'redo_filter': 'filtering', 'compare': 'filtering',
-                 'unfilter': 'filtering', 'export': 'exporting', 'about': 'configuration'}
+                 'unfilter': 'filtering', 'export': 'exporting'}
 
 
 def pump(milliseconds=80):

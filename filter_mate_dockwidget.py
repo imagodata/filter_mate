@@ -919,7 +919,6 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
             ("ACTION", "REDO_FILTER"): self.tr("Redo the last filter"),
             ("ACTION", "UNFILTER"): self.tr("Remove the filters"),
             ("ACTION", "EXPORT"): self.tr("Export the layers"),
-            ("ACTION", "ABOUT"): self.tr("About FilterMate"),
             ("ACTION", "QFIELDCLOUD"): self.tr("QFieldCloud"),
             ("EXPLORING", "IDENTIFY"): self.tr("Identify the selected features"),
             ("EXPLORING", "ZOOM"): self.tr("Zoom to the selected features"),
@@ -967,7 +966,6 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
             ("ACTION", "REDO_FILTER"): "pushButton_action_redo_filter",
             ("ACTION", "UNFILTER"): "pushButton_action_unfilter",
             ("ACTION", "EXPORT"): "pushButton_action_export",
-            ("ACTION", "ABOUT"): "pushButton_action_about",
             ("ACTION", "QFIELDCLOUD"): "pushButton_action_qfieldcloud",
             ("EXPLORING", "IDENTIFY"): "pushButton_exploring_identify",
             ("EXPLORING", "ZOOM"): "pushButton_exploring_zoom",
@@ -3604,7 +3602,6 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
             widget_info = self.widgets["ACTION"].get(name)
             if widget_info and widget_info.get("WIDGET"):
                 widget_info["WIDGET"].setEnabled(s[i])
-        self.widgets["ACTION"]["ABOUT"]["WIDGET"].setEnabled(True)
         if self._action_bar_manager:  # the bar of the open section; a button that came late goes to its section
             self._action_bar_manager.sync_sections()
         self.set_exporting_properties()

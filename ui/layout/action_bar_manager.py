@@ -15,7 +15,7 @@ from qgis.PyQt import QtWidgets
 from qgis.PyQt.QtCore import Qt
 
 from .base_manager import LayoutManagerBase
-from .section_bars import SECTIONS_POSITION, SectionBars
+from .section_bars import ACTION_ORDER, SECTIONS_POSITION, SectionBars
 
 if TYPE_CHECKING:
     from filter_mate_dockwidget import FilterMateDockWidget
@@ -27,7 +27,7 @@ def even_action_spacing(layout: Optional[QtWidgets.QLayout]) -> None:
     """One growing gap, the same, between each two buttons of a horizontal action bar.
 
     The bar of the .ui spreads its buttons with a spacer between each two; a button added by the code (Compare after
-    Redo, QFieldCloud after Export) came without one and stayed stuck to its neighbor while the other gaps grew with
+    Unfilter, QFieldCloud after Export) came without one and stayed stuck to its neighbor while the other gaps grew with
     the width of the dock. Called again after a button is added or removed. A button hidden takes no gap.
     """
     if not isinstance(layout, QtWidgets.QHBoxLayout):
@@ -173,8 +173,7 @@ class ActionBarManager(LayoutManagerBase):
             if self._position in ('left', 'right'):
                 self.apply_position()
             else:
-                # For top/bottom, use the default horizontal layout. Its size constraints too: without them the
-                # about button took its icon + padding (42 px) and the frame its stylesheet padding (63 px in all).
+                # For top/bottom, use the default horizontal layout with its size constraints.
                 if self._position == 'top':
                     # The .ui puts the bar at the bottom: 'top' was applied by a live change only, and came back
                     # at the bottom after a restart while the setting still said top (2026-11-17, review).
@@ -373,17 +372,7 @@ class ActionBarManager(LayoutManagerBase):
         """The action buttons of the one bar; ``every`` adds those a section carries (section_bars.py)."""
         lent = self._section_bars.lent() if self._section_bars is not None and not every else ()
         buttons = []
-        button_names = [
-            'pushButton_action_filter',
-            'pushButton_action_undo_filter',
-            'pushButton_action_redo_filter',
-            'pushButton_action_compare',
-            'pushButton_action_unfilter',
-            'pushButton_action_export',
-            'pushButton_action_qfieldcloud',
-            'pushButton_action_about'
-        ]
-        for name in button_names:
+        for name in ACTION_ORDER:
             if name not in lent and getattr(self.dockwidget, name, None) is not None:
                 buttons.append(getattr(self.dockwidget, name))
         return buttons

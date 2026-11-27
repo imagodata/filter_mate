@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
 """The buttons of the action bar, under the section they act in.
 
-* FILTERING has Filter, Undo, Redo, Compare and Unfilter; EXPORTING has Export (and QFieldCloud, with its extension);
-  CONFIGURATION has About. The dock already ties them: a button is on only while its section is open.
+* FILTERING has Filter, Undo, Redo, Unfilter and Compare; EXPORTING has Export (and QFieldCloud, with its extension).
+  The dock already ties them: a button is on only while its section is open.
 * ``ACTION_BAR_POSITION`` = ``sections``: no bar for all. Each section shows its own buttons at the bottom of the
   dock while it is open; with none open below (EXPLORING alone) there is no bar, and it gets its room. With AGENT
   open, the buttons of FILTERING show: Undo, Redo and Compare walk the steps of the agent then.
 * A section in its own panel (ui/layout/section_panels.py) takes its buttons with it, whatever the position. The
   bar for all at the bottom, left with the buttons of the other sections, shows only while the section of one of
-  them is open: not for an Export greyed out beside About. At the top or on a side it stays: coming and going
+  them is open. At the top or on a side it stays: coming and going
   there would move what is under or beside it at each section opened.
 
 The buttons are those of the form, moved from a bar to another: what is wired to them keeps working.
@@ -24,18 +24,18 @@ SECTIONS_POSITION = "sections"
 ONE_BAR = ""  # in a plan, the key of the bar for all
 ACTION_ORDER = (
     "pushButton_action_filter", "pushButton_action_undo_filter", "pushButton_action_redo_filter",
-    "pushButton_action_compare", "pushButton_action_unfilter", "pushButton_action_export",
-    "pushButton_action_qfieldcloud", "pushButton_action_about",
+    "pushButton_action_unfilter", "pushButton_action_compare", "pushButton_action_export",
+    "pushButton_action_qfieldcloud",
 )
 SECTION_BUTTONS = {
     "filtering": ACTION_ORDER[:5],
     "exporting": ACTION_ORDER[5:7],
-    "configuration": ACTION_ORDER[7:],
+    "configuration": (),
 }
 # The page of each section in the tool box of the dock (its attribute on the dock).
 SECTION_PAGES = {"filtering": "FILTERING", "exporting": "EXPORTING", "configuration": "CONFIGURATION"}
 # With AGENT open in the dock they walk the steps of the agent (FilterMateDockWidget.agent_has_focus).
-AGENT_BUTTONS = ACTION_ORDER[1:4]
+AGENT_BUTTONS = ("pushButton_action_undo_filter", "pushButton_action_redo_filter", "pushButton_action_compare")
 BAR_NAME = "frame_actions"  # the bars of the sections are named as the one bar: its style rules apply to them
 GAP = "gap"  # in the signature of a row, a growing gap
 
@@ -183,7 +183,7 @@ class SectionBars:
     # --- a button that comes by another hand ---------------------------------------
 
     def _watch_bar(self, bar: Any) -> None:
-        """Compare is made beside Redo and QFieldCloud after Export, both after the dock, each in the bar it finds
+        """Compare is made beside Unfilter and QFieldCloud after Export, both after the dock, each in the bar it finds
         its neighbour in (and it evens the gaps of that bar its own way): the rows are put right once it is done."""
         if bar is None:
             return

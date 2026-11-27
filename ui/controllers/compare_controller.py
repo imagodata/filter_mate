@@ -178,8 +178,9 @@ class CompareController(QObject):
         redo = getattr(self._dock, "pushButton_action_redo_filter", None)
         if redo is None:
             return None
-        parent = redo.parentWidget()
-        layout = _layout_holding(parent.layout() if parent is not None else None, redo)
+        previous = getattr(self._dock, "pushButton_action_unfilter", None) or redo
+        parent = previous.parentWidget()
+        layout = _layout_holding(parent.layout() if parent is not None else None, previous)
         if layout is None:
             return None
         button = QPushButton(parent)
@@ -194,7 +195,7 @@ class CompareController(QObject):
         button.setMaximumSize(redo.maximumSize())
         button.setCursor(Qt.CursorShape.PointingHandCursor)
         button.setAccessibleName(_tr("Compare before and after the last filter"))
-        index = layout.indexOf(redo)
+        index = layout.indexOf(previous)
         layout.insertWidget(index + 1, button, 0, layout.itemAt(index).alignment())
         even_action_spacing(layout)  # the same gap on both sides of it as between the other buttons
         button.toggled.connect(self._on_toggled)

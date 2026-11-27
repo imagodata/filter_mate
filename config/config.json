@@ -133,7 +133,7 @@
           "right",
           "sections"
         ],
-        "description": "Position of the action bar: 'top' (horizontal at top), 'bottom' (horizontal at bottom), 'left' (vertical on left side), 'right' (vertical on right side), 'sections' (no bar for all: each section shows its own buttons while it is open - Filter, Undo, Redo, Compare and Unfilter for FILTERING, Export for EXPORTING, About for CONFIGURATION)"
+        "description": "Position of the action bar: 'top' (horizontal at top), 'bottom' (horizontal at bottom), 'left' (vertical on left side), 'right' (vertical on right side), 'sections' (no bar for all: each section shows its own buttons while it is open - Filter, Undo, Redo, Unfilter and Compare for FILTERING, Export for EXPORTING)"
       },
       "SECTION_HEADERS": {
         "value": "rail",
@@ -253,8 +253,7 @@
             "REDO_FILTER": "redo.png",
             "UNFILTER": "unfilter.png",
             "RESET": "reset.png",
-            "EXPORT": "export.png",
-            "ABOUT": "icon.png"
+            "EXPORT": "export.png"
           },
           "EXPLORING": {
             "IDENTIFY": "identify_alt.png",

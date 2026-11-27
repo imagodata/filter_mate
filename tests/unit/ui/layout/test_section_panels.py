@@ -27,7 +27,7 @@ def _load(module):
 bars = _load("section_bars")
 panels = _load("section_panels")
 
-FILTER, UNDO, REDO, COMPARE, UNFILTER, EXPORT, QFIELDCLOUD, ABOUT = bars.ACTION_ORDER
+FILTER, UNDO, REDO, UNFILTER, COMPARE, EXPORT, QFIELDCLOUD = bars.ACTION_ORDER
 
 
 # --- which bar holds each button -------------------------------------------------
@@ -39,16 +39,16 @@ def test_one_bar_holds_every_button_by_default():
 
 def test_sections_position_gives_each_section_its_buttons():
     plan = bars.bar_plan(bars.SECTIONS_POSITION)
-    assert plan["filtering"] == (FILTER, UNDO, REDO, COMPARE, UNFILTER)
+    assert plan["filtering"] == (FILTER, UNDO, REDO, UNFILTER, COMPARE)
     assert plan["exporting"] == (EXPORT, QFIELDCLOUD)
-    assert plan["configuration"] == (ABOUT,)
+    assert plan["configuration"] == ()
     assert plan[bars.ONE_BAR] == ()
 
 
 def test_a_detached_section_takes_its_buttons_whatever_the_position():
     plan = bars.bar_plan("bottom", ["filtering"])
-    assert plan["filtering"] == (FILTER, UNDO, REDO, COMPARE, UNFILTER)
-    assert plan[bars.ONE_BAR] == (EXPORT, QFIELDCLOUD, ABOUT)
+    assert plan["filtering"] == (FILTER, UNDO, REDO, UNFILTER, COMPARE)
+    assert plan[bars.ONE_BAR] == (EXPORT, QFIELDCLOUD)
     assert "exporting" not in plan and "configuration" not in plan
 
 
@@ -69,13 +69,13 @@ def test_every_button_is_in_one_bar_and_one_only():
 # --- a button back in the one bar --------------------------------------------------
 
 def test_a_button_goes_back_before_the_first_one_that_follows_it():
-    present = [FILTER, None, UNFILTER, None, ABOUT]
+    present = [FILTER, None, UNFILTER, None, QFIELDCLOUD]
     assert bars.insert_position(present, UNDO) == 2
     assert bars.insert_position(present, EXPORT) == 4
 
 
 def test_the_last_button_goes_after_the_last_one():
-    assert bars.insert_position([FILTER, None, EXPORT], ABOUT) == 3
+    assert bars.insert_position([FILTER, None, EXPORT], QFIELDCLOUD) == 3
 
 
 def test_a_button_goes_first_in_an_empty_bar_or_before_all_the_others():
@@ -85,7 +85,7 @@ def test_a_button_goes_first_in_an_empty_bar_or_before_all_the_others():
 
 
 def test_a_widget_the_bar_does_not_know_stays_last():
-    assert bars.insert_position([FILTER, "something_else"], ABOUT) == 1
+    assert bars.insert_position([FILTER, "something_else"], QFIELDCLOUD) == 1
 
 
 # --- the row of a section ----------------------------------------------------------
@@ -506,7 +506,7 @@ def test_a_section_turned_off_is_offered_nothing_and_is_not_counted():
 def test_a_section_turned_off_leaves_its_buttons_to_the_bar_for_all():
     plan = bars.bar_plan(bars.SECTIONS_POSITION, (), ["filtering"])
     assert "filtering" not in plan
-    assert plan[bars.ONE_BAR] == (FILTER, UNDO, REDO, COMPARE, UNFILTER)
+    assert plan[bars.ONE_BAR] == (FILTER, UNDO, REDO, UNFILTER, COMPARE)
     assert plan["exporting"] == (EXPORT, QFIELDCLOUD)
 
 
@@ -518,13 +518,13 @@ def test_a_section_turned_off_carries_nothing_even_when_it_was_apart():
 
 
 def test_the_bar_for_all_shows_only_while_one_of_its_buttons_acts():
-    """FILTERING in its own panel left a bar in the dock for an Export greyed out beside About."""
+    """FILTERING in its own panel leaves only export actions in the dock's bar."""
     left = bars.bar_plan("bottom", detached=("filtering",))[bars.ONE_BAR]
-    assert left == ("pushButton_action_export", "pushButton_action_qfieldcloud", "pushButton_action_about")
+    assert left == ("pushButton_action_export", "pushButton_action_qfieldcloud")
     assert not bars.one_bar_serves(left, open_key=None)
     assert not bars.one_bar_serves(left, open_key="filtering")  # its panel has its buttons
     assert bars.one_bar_serves(left, open_key="exporting")
-    assert bars.one_bar_serves(left, open_key="configuration")
+    assert not bars.one_bar_serves(left, open_key="configuration")
     assert not bars.one_bar_serves(left, open_key=None, agent=True)  # nothing of FILTERING is left in it
 
 
