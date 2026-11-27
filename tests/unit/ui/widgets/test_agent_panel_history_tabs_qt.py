@@ -69,13 +69,41 @@ def _panel():
     return panel
 
 
-def test_two_tabs_this_project_first():
+def test_three_tabs_this_project_first():
     panel = _panel()
-    assert [panel.history_tabs.tabText(i) for i in range(panel.history_tabs.count())] == ["This project", "All projects"]
+    assert [panel.history_tabs.tabText(i) for i in range(panel.history_tabs.count())] == [
+        "This project", "All projects", "Conversations"]
     assert panel.history_tabs.currentIndex() == panel_module.HISTORY_PROJECT
     assert panel.history_pages.currentWidget() is panel.history_list and panel.history_list.count() == 1
     assert panel.history_count.text() == "this project · 1 turn(s)"
     assert panel.history_undo_button.isVisibleTo(panel) and not panel.clear_global_button.isVisibleTo(panel)
+
+
+def test_conversations_open_a_thread_and_other_projects_are_labelled_read_only():
+    panel = _panel()
+    panel.set_conversations([
+        {'id': 'one', 'project': 'here', 'path': '/p/current.qgz', 'title': 'First question', 'updated': 1},
+        {'id': 'two', 'project': 'other', 'path': '/p/other.qgz', 'title': 'Other question', 'updated': 2},
+    ], 'here', 'one')
+    opened = []
+    panel.conversation_open_requested.connect(opened.append)
+    panel.history_tabs.setCurrentIndex(panel_module.HISTORY_CONVERSATIONS)
+    assert panel.history_pages.currentWidget() is panel.conversation_list
+    assert not panel.clear_global_button.isVisibleTo(panel)
+    assert not panel.resend_button.isVisibleTo(panel)
+    assert not panel.history_undo_button.isVisibleTo(panel)
+    panel.conversation_list.setCurrentRow(0)
+    assert panel.open_conversation_button.text() == 'Open conversation'
+    panel.open_conversation_button.click()
+    assert opened == ['one']
+    panel.conversation_list.setCurrentRow(1)
+    assert panel.open_conversation_button.text() == 'Read conversation'
+    panel.open_conversation_button.click()
+    assert opened == ['one', 'two']
+    panel.set_working(True)
+    assert not panel.open_conversation_button.isEnabled()
+    panel._open_selected_conversation()
+    assert opened == ['one', 'two']
 
 
 def test_all_projects_lists_every_request_and_its_project():

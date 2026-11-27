@@ -82,7 +82,8 @@ _TURN_ROLE = Qt.ItemDataRole.UserRole
 _STEP_ROLE = Qt.ItemDataRole.UserRole + 1
 _RANK_ROLE = Qt.ItemDataRole.UserRole + 2  # the rank of the turn applied in the history of the agent (a step: its turn)
 # The tabs of the history (2026-11-24): the turns of the open project, the requests of every project.
-HISTORY_PROJECT, HISTORY_ALL = 0, 1
+HISTORY_PROJECT, HISTORY_ALL, HISTORY_CONVERSATIONS = 0, 1, 2
+_CONVERSATION_ROLE = int(Qt.ItemDataRole.UserRole) + 20
 
 PRESET_LABELS = {"anthropic": "Claude (Anthropic)", "mistral": "Mistral", "openai": "OpenAI", "ollama": "Ollama (local)"}
 # Only what can be named without going stale: the user can type any model.
@@ -624,6 +625,7 @@ class AgentPanel(QFrame):
     settings_tab_requested = pyqtSignal(str)
     resend_requested = pyqtSignal(str)
     history_clear_requested = pyqtSignal()  # the list of the tab "All projects" emptied
+    conversation_open_requested = pyqtSignal(str)
     step_undo_requested = pyqtSignal(int)
     compare_requested = pyqtSignal(int, int)  # the rank of a turn applied, its step (-1: the whole turn)
     card_compare_requested = pyqtSignal(object)  # the compare_key of a card of the thread (the controller set it)
@@ -1074,14 +1076,16 @@ class AgentPanel(QFrame):
         header.addStretch(1)
         header.addWidget(self.history_count)
 
-        # Two tabs: the turns of this project (undo, redo, compare act on them), and the requests of every project,
-        # kept from one session to the next (send one again here, or empty the list).
+        # Project changes, individual requests, and conversations restored without replaying their actions.
         self.history_tabs = QTabBar(page)
         self.history_tabs.setObjectName("tabBar_agent_history")
         self.history_tabs.setDrawBase(False)
         self.history_tabs.setExpanding(False)
         self.history_tabs.addTab(_tr("This project"))
         self.history_tabs.addTab(_tr("All projects"))
+        self.history_tabs.addTab(_tr("Conversations"))
+        self.history_tabs.setTabToolTip(HISTORY_CONVERSATIONS, _tr(
+            'Up to 200 recent conversations on this computer. Other projects open for reading only.'))
         self.history_tabs.currentChanged.connect(self._on_history_tab)
 
         self.history_list = QListWidget(page)
@@ -1094,11 +1098,19 @@ class AgentPanel(QFrame):
         self.global_list.setWordWrap(True)
         self.global_list.setFrameShape(QFrame.Shape.NoFrame)
         self.global_list.itemSelectionChanged.connect(self._on_turn_selected)
+        self.conversation_list = QListWidget(page)
+        self.conversation_list.setObjectName('listWidget_agent_conversations')
+        self.conversation_list.setWordWrap(True)
+        self.conversation_list.setFrameShape(QFrame.Shape.NoFrame)
+        self.conversation_list.itemSelectionChanged.connect(self._on_turn_selected)
+        self.conversation_list.itemDoubleClicked.connect(lambda _item: self._open_selected_conversation())
         self.history_pages = QStackedWidget(page)
         self.history_pages.addWidget(self.history_list)
         self.history_pages.addWidget(self.global_list)
+        self.history_pages.addWidget(self.conversation_list)
         self._project_count_text = ""
         self._global_count_text = ""
+        self._conversation_count_text = ''
 
         self.history_undo_button = QPushButton(_tr("Undo the last"), page)
         self.history_undo_button.setObjectName("pushButton_agent_history_undo")
@@ -1124,6 +1136,11 @@ class AgentPanel(QFrame):
         self.resend_button.setCursor(Qt.CursorShape.PointingHandCursor)
         self.resend_button.setEnabled(False)
         self.resend_button.clicked.connect(self._resend_selected)
+        self.open_conversation_button = QPushButton(_tr('Open conversation'), page)
+        self.open_conversation_button.setObjectName('pushButton_agent_open_conversation')
+        self.open_conversation_button.setVisible(False)
+        self.open_conversation_button.setEnabled(False)
+        self.open_conversation_button.clicked.connect(self._open_selected_conversation)
         self.clear_global_button = QPushButton(_tr("Empty the list"), page)
         self.clear_global_button.setObjectName("pushButton_agent_history_clear")
         self.clear_global_button.setToolTip(_tr("Forget the requests of every project kept on this computer; the "
@@ -1142,6 +1159,7 @@ class AgentPanel(QFrame):
         buttons.addWidget(self.step_button)
         buttons.addWidget(self.clear_global_button)
         buttons.addWidget(self.resend_button)
+        buttons.addWidget(self.open_conversation_button)
 
         self.step_button.setVisible(False)
         layout = QVBoxLayout(page)
@@ -1159,12 +1177,41 @@ class AgentPanel(QFrame):
         project = index == HISTORY_PROJECT
         for button in (self.history_undo_button, self.history_redo_button):
             button.setVisible(project)
-        self.clear_global_button.setVisible(not project)
-        self.history_count.setText(self._project_count_text if project else self._global_count_text)
+        self.clear_global_button.setVisible(index == HISTORY_ALL)
+        self.resend_button.setVisible(index != HISTORY_CONVERSATIONS)
+        self.open_conversation_button.setVisible(index == HISTORY_CONVERSATIONS)
+        self.history_count.setText((self._project_count_text, self._global_count_text,
+                                   self._conversation_count_text)[index])
         self._on_turn_selected()
 
     def _current_history_list(self) -> QListWidget:
+        if self.history_tabs.currentIndex() == HISTORY_CONVERSATIONS:
+            return self.conversation_list
         return self.global_list if self.history_tabs.currentIndex() == HISTORY_ALL else self.history_list
+
+    def set_conversations(self, entries, project: str, active: str) -> None:
+        self.conversation_list.clear()
+        palette, dark = tokens(self._dark()), self._dark()
+        for entry in entries:
+            item = QListWidgetItem()
+            item.setData(_CONVERSATION_ROLE, entry['id'])
+            here = entry['project'] == project
+            item.setData(_CONVERSATION_ROLE + 1, here)
+            when = time.strftime('%d/%m %H:%M', time.localtime(entry['updated']))
+            place = _tr('this project') if here else entry['path'] or _tr('Project path unavailable')
+            state = _tr('current') if entry['id'] == active else ''
+            item.setToolTip(plain_tooltip(place))
+            self._history_row(item, when, short_request(entry['title']), place, state, True,
+                              palette, dark, target=self.conversation_list)
+        self._conversation_count_text = _tr('{} conversation(s)').format(len(entries))
+        if self.history_tabs.currentIndex() == HISTORY_CONVERSATIONS:
+            self.history_count.setText(self._conversation_count_text)
+        self._on_turn_selected()
+
+    def _open_selected_conversation(self) -> None:
+        items = self.conversation_list.selectedItems()
+        if items and not self._working:
+            self.conversation_open_requested.emit(str(items[0].data(_CONVERSATION_ROLE)))
 
     def set_global_history(self, entries, project_path: str = "") -> None:
         """``entries``: the requests of every project (core/agent/request_log.py), oldest first; those of the open
@@ -1279,6 +1326,10 @@ class AgentPanel(QFrame):
 
     def _on_turn_selected(self) -> None:
         items = self._current_history_list().selectedItems()
+        conversation = self.history_tabs.currentIndex() == HISTORY_CONVERSATIONS
+        self.open_conversation_button.setEnabled(conversation and bool(items) and not self._working)
+        self.open_conversation_button.setText(_tr('Open conversation') if not items or
+                                             items[0].data(_CONVERSATION_ROLE + 1) else _tr('Read conversation'))
         step = items[0].data(_STEP_ROLE) if items else None
         typed_here = (bool(items) and step is None and bool(items[0].data(_TURN_ROLE))
                       and not str(items[0].data(_TURN_ROLE) or "").startswith(EXTERNAL_MARK))
@@ -1503,11 +1554,14 @@ class AgentPanel(QFrame):
             f" {palette['fm_group_border']}; }}"
             f"QWidget#widget_agent_history_footer {{ background: {palette['fm_group']}; border: none; border-top: 1px solid"
             f" {palette['fm_group_border']}; border-bottom-left-radius: 6px; border-bottom-right-radius: 6px; }}"
-            "QListWidget#listWidget_agent_history, QListWidget#listWidget_agent_history_all { background: transparent;"
+            "QListWidget#listWidget_agent_history, QListWidget#listWidget_agent_history_all,"
+            " QListWidget#listWidget_agent_conversations { background: transparent;"
             " border: none; outline: 0; }"
-            f"QListWidget#listWidget_agent_history::item, QListWidget#listWidget_agent_history_all::item {{"
+            f"QListWidget#listWidget_agent_history::item, QListWidget#listWidget_agent_history_all::item,"
+            f" QListWidget#listWidget_agent_conversations::item {{"
             f" border-bottom: 1px solid {palette['fm_group']}; }}"
             f"QListWidget#listWidget_agent_history::item:selected, QListWidget#listWidget_agent_history_all::item:selected"
+            f", QListWidget#listWidget_agent_conversations::item:selected"
             f" {{ background: {palette['fm_active']}; }}"
             f"QTabBar#tabBar_agent_history {{ background: transparent; }}"
             f"QTabBar#tabBar_agent_history::tab {{ font-size: 12px; padding: 5px 12px; margin: 0; border: none;"

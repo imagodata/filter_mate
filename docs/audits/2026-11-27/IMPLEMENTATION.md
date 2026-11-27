@@ -14,7 +14,7 @@ des propositions encore à réaliser.
 | R10 — dépendance MCP facultative | Corrigé | Le test d’API est ignoré lorsque MCP manque. |
 | Choix intelligent du SCR | Implémenté | Domaine d’utilisation vérifié, diagnostic du SCR actuel, recommandation conserver/changer, distinction affichage/analyse. |
 | R02/R08 — budget mémoire et persistance | À réaliser | Conserver la distinction entre données actives et données retenues pour annuler. |
-| F01 — conversations dans l’historique | À réaliser | Plusieurs conversations et réouverture, sans rejouer leurs outils. |
+| F01 — conversations dans l’historique | Implémenté | Onglet Conversations, reprise dans le projet d’origine, consultation des autres projets, migration des anciens échanges. |
 | A01 — lectures de sélection et flash | À réaliser | Déplacer les lectures potentiellement lentes hors du fil d’interface. |
 | Transitions animées et pilotage étendu de QGIS | À réaliser | Les correctifs de zoom ne constituent pas encore une animation commune. |
 
@@ -36,3 +36,24 @@ Références techniques : [SCR des projets et couches dans QGIS](https://docs.qg
   22 contrôles réussis chacun. Banc hors ligne : 171 scénarios réussis, 4 ignorés pour outils désactivés.
 - Les autres résultats sont consignés dans les commits correspondants ; ces contrôles ciblés ne signifient pas
   que toute la suite du dépôt a été exécutée.
+
+## Conversations conservées et rouvertes
+
+« Nouvelle conversation » archive les échanges et le contexte compatible du modèle. L’onglet Conversations
+permet de les rouvrir dans leur projet d’origine ; une conversation d’un autre projet s’affiche dans une fenêtre
+de consultation, sans changer de projet ni transmettre son contenu à la conversation active. Aucun outil passé
+n’est relancé. Les permissions sont oubliées lors d’un changement de conversation et la compatibilité du serveur,
+du compte, du modèle et du partage des valeurs reste vérifiée avant reprise du contexte.
+
+L’archive SQLite réside dans le profil QGIS (`filter_mate/agent-conversations.sqlite3`) et ne modifie pas le projet.
+Elle conserve les 200 conversations les plus récentes contenant une demande. Les limites existantes du transcript
+(60 000 caractères) et de la session modèle (250 000 caractères) continuent de s’appliquer. Les anciens emplacements
+par projet sont importés une fois. « Enregistrer sous » conserve l’identité de la conversation ; les projets jamais
+enregistrés ont des identités distinctes. Après redémarrage, leurs échanges restent consultables dans l’historique.
+
+La création d’une conversation est refusée si son archivage échoue, afin de conserver les échanges affichés.
+Les contrôles couvrent aussi le signal de changement de nom pendant l’ouverture d’un projet, qui doit retrouver
+son archive et non la remplacer par celle du projet vide intermédiaire.
+
+Validation : 1 141 tests des contrôleurs et de l’historique passent ; le scénario natif passe sur QGIS 3.44 / Qt 5
+et QGIS 4.3 / Qt 6, y compris la migration et la conservation d’un projet non modifié.

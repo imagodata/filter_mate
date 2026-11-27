@@ -19,7 +19,7 @@ from ...adapters.agent.settings import (
     AgentSettings, KeyStoreError, delete_key, delete_own_key, load_settings, provider_config, read_key, save_settings, store_key,
     target_of, current_provider, read_providers, write_providers, read_mode, write_mode,
 )
-from ...adapters.agent import request_log_store, session_store, transcript_store
+from ...adapters.agent import conversation_store, request_log_store, session_store, transcript_store
 from ...adapters.agent.memory_store import change_memory, memory_path, project_sources, read_memory, source_signature
 from ...adapters.agent.project_notes_store import read_notes, write_notes
 from ...adapters.agent.recipes_store import approve_live, live_approved, read_recipes, write_recipes
@@ -271,6 +271,8 @@ class AgentChatController(QObject):
         # Token diet, lot 3: what the requests of this conversation sent already (core/agent/request_context.py).
         self._context_memory = ContextMemory()
         self._transcript_key = ""
+        self._conversations = conversation_store.open_store()
+        self._conversation_project, self._conversation_id, self._conversation_path = '', '', ''
         self._answer = []
         self._header_label = None
         self.panel = AgentPanel(parent_widget)
@@ -301,6 +303,7 @@ class AgentChatController(QObject):
         self.panel.history_requested.connect(self._show_history)
         self.panel.resend_requested.connect(self._on_resend)
         self.panel.history_clear_requested.connect(self._clear_request_log)
+        self.panel.conversation_open_requested.connect(self._open_conversation)
         self.panel.step_undo_requested.connect(self._on_undo_to_step)
         self.panel.compare_requested.connect(self._on_compare)
         self.panel.card_compare_requested.connect(self._on_card_compare)
@@ -581,6 +584,10 @@ class AgentChatController(QObject):
         key = transcript_store.project_key()
         if key != self._transcript_key:
             self._transcript_key = key
+            self._conversation_path = QgsProject.instance().fileName() or ''
+            if (getattr(self, '_conversations', None) is not None and self._conversation_project and
+                    self._conversation_id):
+                self._conversations.alias(key, self._conversation_project)
             if self._transcript:  # empty while a project opens: what is stored for it must stay
                 self._save_transcript()
                 self._save_session()
@@ -603,6 +610,31 @@ class AgentChatController(QObject):
     def _save_transcript(self) -> None:
         if self._transcript_key:
             transcript_store.save(self._transcript_key, self._transcript)
+        self._archive_conversation()
+
+    def _archive_conversation(self, session=None) -> bool:
+        store = getattr(self, '_conversations', None)
+        if store is None:
+            return True
+        try:
+            if not self._conversation_project:
+                return True  # clearing a project: do not save its old engine into the new project
+            if not self._conversation_id:
+                self._conversation_id = store.start(self._conversation_project, self._conversation_path)
+            store.save(self._conversation_id, self._conversation_project, self._transcript,
+                       session=session, path=self._conversation_path)
+            return True
+        except Exception:
+            logger.warning('Agent: conversation could not be archived', exc_info=True)
+            return False
+
+    def _stored_session(self) -> str:
+        store = getattr(self, '_conversations', None)
+        if store is not None and self._conversation_id:
+            entry = store.get(self._conversation_id)
+            if entry is not None:
+                return entry['session']
+        return session_store.load(self._transcript_key)
 
     @staticmethod
     def _session_context(values) -> str:
@@ -613,24 +645,26 @@ class AgentChatController(QObject):
     def _save_session(self) -> None:
         """Keep the real conversation for this project, so the discussion can be taken up again after the project
         reopens or QGIS restarts. Under the model it talked to: resumed only for the same destination."""
-        if not self._transcript_key or self._engine is None:
+        if self._engine is None:
             return
         try:
             preset, model = getattr(self, "_engine_identity", ("", ""))
             session = self._engine.session
-            session_store.save(self._transcript_key,
-                               session_dump(session.messages, session.usage, session.summarized, preset, model,
-                                            context=getattr(self, "_engine_context", "")))
+            text = session_dump(session.messages, session.usage, session.summarized, preset, model,
+                                context=getattr(self, "_engine_context", ""))
+            if self._transcript_key:
+                session_store.save(self._transcript_key, text)
+            self._archive_conversation(session=text)
         except Exception:  # keeping is a convenience: a request is never failed for it
             logger.debug("Agent: the conversation could not be kept", exc_info=True)
 
     def _resume_session(self, session: AgentSession, values) -> None:
         """Take up the conversation kept for this project, when it talked to the same model; else the next request
         is told the recap of the thread, as before. Only into a session that sent nothing yet."""
-        if not self._transcript_key:
+        if not self._transcript_key and getattr(self, '_conversations', None) is None:
             return
         try:
-            text = session_store.load(self._transcript_key)
+            text = self._stored_session()
             if not session_resumable(text, values.preset, values.model, context=self._session_context(values)):
                 return
             saved = session_parse(text)
@@ -643,7 +677,7 @@ class AgentChatController(QObject):
         """A conversation kept for this project, for the model of the settings: the next request takes it up again."""
         try:
             values = load_settings()
-            return session_resumable(session_store.load(self._transcript_key), values.preset, values.model,
+            return session_resumable(self._stored_session(), values.preset, values.model,
                                      context=self._session_context(values))
         except Exception:
             logger.debug("Agent: the kept conversation could not be read", exc_info=True)
@@ -655,6 +689,21 @@ class AgentChatController(QObject):
         self._memory_generation += 1
         self._transcript_key = transcript_store.project_key()
         self._transcript = transcript_store.load(self._transcript_key)
+        store = getattr(self, '_conversations', None)
+        if store is not None:
+            try:
+                self._conversation_path = QgsProject.instance().fileName() or ''
+                self._conversation_project = (self._conversation_project if not self._transcript_key and
+                                              self._conversation_project else store.project(self._transcript_key))
+                archived = store.head(self._conversation_project)
+                if archived is None:
+                    self._conversation_id = store.start(self._conversation_project, self._conversation_path)
+                    self._archive_conversation(session=session_store.load(self._transcript_key))
+                else:
+                    self._conversation_id = archived['id']
+                    self._transcript = archived['transcript']
+            except Exception:
+                logger.warning('Agent: conversation archive could not be restored', exc_info=True)
         self._recap_from = 0  # the thread shown again is what the next conversation is told of
         self._drop_engine()
         self.panel.input.forget()
@@ -864,8 +913,50 @@ class AgentChatController(QObject):
         self._refresh_history()
 
     def _show_history(self) -> None:
+        self._save_transcript()
+        self._save_session()
         self._refresh_history()
+        store = getattr(self, '_conversations', None)
+        if store is not None:
+            try:
+                self.panel.set_conversations(store.list(), self._conversation_project, self._conversation_id)
+            except Exception:
+                logger.warning('Agent: conversation list could not be read', exc_info=True)
         self.panel.show_history()
+
+    def _open_conversation(self, identifier: str) -> None:
+        if self.chat_busy():
+            return
+        store = getattr(self, '_conversations', None)
+        entry = store.get(identifier) if store is not None else None
+        if entry is None:
+            return
+        if entry['project'] != self._conversation_project:
+            # Other projects are read-only: no project switch, action replay or context injection.
+            from qgis.PyQt.QtWidgets import QDialogButtonBox, QTextBrowser, QVBoxLayout
+            dialog = QDialog(self.panel)
+            dialog.setWindowTitle(_tr('Conversation from another project'))
+            dialog.resize(640, 520)
+            layout = QVBoxLayout(dialog)
+            browser = QTextBrowser(dialog)
+            browser.setPlainText((entry['path'] or _tr('Project path unavailable')) + '\n\n' + '\n\n'.join(
+                f"{item['kind']}: {item['text']}" + (f"\n{item['detail']}" if item.get('detail') else '')
+                for item in entry['transcript']))
+            layout.addWidget(browser)
+            buttons = QDialogButtonBox(QDialogButtonBox.StandardButton.Close, dialog)
+            buttons.rejected.connect(dialog.reject)
+            layout.addWidget(buttons)
+            dialog.exec()
+            return
+        if identifier != self._conversation_id:
+            self._save_transcript()
+            if self._reset_view() is False:  # saves model context and forgets prior permissions
+                return
+            self._conversation_id = identifier
+            self._transcript = entry['transcript']
+            self._archive_conversation(session=entry['session'])
+            self._restore_transcript()
+        self.panel.show_thread()
 
     def chat_busy(self) -> bool:
         return self._building or self._replaying or (self._engine is not None and self._engine.busy)
@@ -896,6 +987,9 @@ class AgentChatController(QObject):
 
     def _on_project_cleared(self) -> None:
         """What was said is about the layers of the project that just went away. What is stored stays."""
+        self._save_session()
+        self._archive_conversation()
+        self._conversation_project, self._conversation_id, self._conversation_path = '', '', ''
         self.panel.hold_examples()
         self._outputs.clear()
         self._charts.forget()  # the charts of a project closed, and their data, go with it
@@ -921,6 +1015,9 @@ class AgentChatController(QObject):
         self._transcript, self._transcript_key = [], ""
         self.panel.input.forget()
         self._reset_view()
+        store = getattr(self, '_conversations', None)
+        if store is not None:
+            self._conversation_project = store.project()
         self._offer_setup_again()
         self._wizard.offer_back_again()  # a new project has no thread to read: the link stays within reach
         self._refresh_history()
@@ -3133,11 +3230,25 @@ class AgentChatController(QObject):
         self._seen = None  # another conversation has seen nothing yet
         self._context_memory.forget()
 
-    def _reset_view(self) -> None:
+    def _reset_view(self) -> Optional[bool]:
+        if not self._archive_conversation():
+            self._say(_tr('The conversation could not be archived. It has been kept open.'), error=True)
+            return False
         self._leave_memory_cards()
         self._memory_generation += 1
         self._restart_engine()
         session_store.save(self._transcript_key, "")  # a reset must not resurrect the conversation just saved
+        store = getattr(self, '_conversations', None)
+        if store is not None and self._conversation_project:
+            try:
+                identifier = store.start(self._conversation_project, self._conversation_path)
+            except Exception:
+                logger.warning('Agent: new conversation could not be created', exc_info=True)
+                self._say(_tr('The conversation could not be archived. It has been kept open.'), error=True)
+                return False
+            self._transcript = []
+            self._conversation_id = identifier
+            self._save_transcript()
         self._policy.forget()  # another conversation, or another project: what was allowed is asked again
         # What came before was said to another provider, or under other settings: the next conversation is not told.
         self._recap_from = len(self._transcript)
@@ -3147,10 +3258,15 @@ class AgentChatController(QObject):
         self._wizard.forget()
 
     def new_conversation(self) -> None:
-        """The user starts again: what this project's conversation kept is forgotten."""
+        """Archive this conversation and start an empty one, including for an unsaved project."""
+        self._save_transcript()
         self._keep_setup_offered()  # an empty thread was asked for: the offer does not come back in it
-        self._reset_view()
+        if self._reset_view() is False:
+            return
         self._transcript = []
+        store = getattr(self, '_conversations', None)
+        if store is not None:
+            self._conversation_id = store.start(self._conversation_project, self._conversation_path)
         self._recap_from = 0
         self.panel.input.forget()
         self._charts.forget()

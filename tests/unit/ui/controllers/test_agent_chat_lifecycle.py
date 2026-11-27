@@ -187,6 +187,7 @@ def ctrl_module(monkeypatch):
         _module(monkeypatch, name)
     _module(monkeypatch, ".adapters.agent.settings", load_settings=lambda: SETTINGS,
             KeyStoreError=type("KeyStoreError", (Exception,), {}))
+    _module(monkeypatch, '.adapters.agent.conversation_store', open_store=lambda: None)
     store = _module(monkeypatch, ".adapters.agent.transcript_store", project_key=lambda: "key", load=lambda key: [])
     store.saved = []
     store.save = lambda key, transcript: store.saved.append((key, list(transcript)))
@@ -1309,6 +1310,112 @@ def test_same_destination_resumes_after_tools_restart(ctrl_module, controller, s
     next_engine, _transport = _engine(ctrl_module, controller, lambda arguments: {})
     controller._resume_session(next_engine.session, SETTINGS)
     assert [message.text for message in next_engine.session.messages] == ["keep working on these communes"]
+
+
+@pytest.fixture
+def archive(ctrl_module, controller, saved_conversations, tmp_path, monkeypatch):
+    from core.agent.conversations import ConversationStore
+    store = ConversationStore(tmp_path / 'conversations.sqlite3')
+    controller._conversations = store
+    controller._conversation_project = store.project('project-a')
+    controller._conversation_path = '/p/source.qgz'
+    controller._conversation_id = store.start(controller._conversation_project, controller._conversation_path)
+    monkeypatch.setattr(FakeQgsProject.project, 'fileName', lambda: '/p/source.qgz', raising=False)
+    monkeypatch.setattr(ctrl_module.transcript_store, 'project_key', lambda: 'project-a')
+    return store
+
+
+def test_new_conversation_is_archived_and_reopened_without_replaying_tools(ctrl_module, controller, archive):
+    engine, _transport = _engine(ctrl_module, controller, lambda arguments: pytest.fail('tool was replayed'))
+    engine.session.add_user_text('Original context')
+    controller._engine_identity = (SETTINGS.preset, SETTINGS.model)
+    controller._engine_context = controller._session_context(SETTINGS)
+    controller._record('user', 'Original request')
+    controller._record('action', 'Filter applied')
+    controller._policy.grant('export_layers')
+    identifier = controller._conversation_id
+    controller.new_conversation()
+    assert controller._conversation_id != identifier
+    assert controller._transcript == []
+    assert archive.get(identifier)['session']
+    assert not controller._policy.granted
+    controller._record('user', 'Second request')
+    second = controller._conversation_id
+    controller._open_conversation(identifier)
+    assert archive.get(second)['transcript'][0]['text'] == 'Second request'
+    assert [entry['text'] for entry in controller._transcript] == ['Original request', 'Filter applied']
+    assert archive.head(controller._conversation_project)['id'] == identifier
+    next_engine, _transport = _engine(ctrl_module, controller, lambda arguments: pytest.fail('tool was replayed'))
+    controller._resume_session(next_engine.session, SETTINGS)
+    assert [message.text for message in next_engine.session.messages] == ['Original context']
+
+
+def test_another_project_conversation_is_read_only(controller, archive):
+    other_project = archive.project('another-project')
+    other = archive.start(other_project, '/p/other.qgz')
+    archive.save(other, other_project, [{'kind': 'user', 'text': 'Other question'}])
+    active = controller._conversation_id
+    controller._record('user', 'Current question')
+    controller._open_conversation(other)
+    assert controller._conversation_id == active
+    assert controller._transcript[0]['text'] == 'Current question'
+    assert archive.head(controller._conversation_project)['id'] == active
+
+
+def test_save_as_retains_identity_and_closing_cannot_transfer_old_context(
+        ctrl_module, controller, archive, monkeypatch):
+    controller._record('user', 'Saved under a new name')
+    previous = controller._conversation_id
+    monkeypatch.setattr(ctrl_module.transcript_store, 'project_key', lambda: 'saved-as')
+    controller._on_file_name_changed()
+    assert archive.project('saved-as') == controller._conversation_project
+    engine, _transport = _engine(ctrl_module, controller, lambda arguments: {})
+    engine.session.add_user_text('Private context of the old project')
+    controller._engine_identity = (SETTINGS.preset, SETTINGS.model)
+    controller._engine_context = controller._session_context(SETTINGS)
+    controller._on_project_cleared()
+    assert archive.get(previous)['session']
+    assert controller._stored_session() == ''
+    assert archive.head(controller._conversation_project) is None
+
+
+def test_reset_to_another_provider_archives_but_does_not_resume_its_context(
+        ctrl_module, controller, archive):
+    engine, _transport = _engine(ctrl_module, controller, lambda arguments: {})
+    engine.session.add_user_text('Private provider context')
+    controller._engine_identity = (SETTINGS.preset, SETTINGS.model)
+    controller._engine_context = controller._session_context(SETTINGS)
+    controller._record('user', 'Private provider question')
+    previous = controller._conversation_id
+    controller._reset_view()
+    assert archive.get(previous)['session']
+    assert controller._stored_session() == ''
+    assert controller._conversation_id != previous
+
+
+def test_archive_write_failure_keeps_the_conversation_open(controller, archive, monkeypatch):
+    controller._record('user', 'Do not lose this conversation')
+    identifier = controller._conversation_id
+    controller.panel.clear_thread.reset_mock()
+    def failed_save(*args, **kwargs):
+        raise OSError('disk full')
+    monkeypatch.setattr(archive, 'save', failed_save)
+    controller.new_conversation()
+    assert controller._conversation_id == identifier
+    assert controller._transcript[0]['text'] == 'Do not lose this conversation'
+    controller.panel.clear_thread.assert_not_called()
+
+
+def test_reading_a_project_does_not_overwrite_its_existing_archive_identity(controller, archive):
+    controller._record('user', 'Conversation of the saved project')
+    controller._save_transcript()
+    project, identifier = controller._conversation_project, controller._conversation_id
+    controller._on_project_cleared()
+    controller._on_file_name_changed()  # QGIS emits this while reading, before readProject
+    controller._on_project_read()
+    assert controller._conversation_project == project
+    assert controller._conversation_id == identifier
+    assert controller._transcript[0]['text'] == 'Conversation of the saved project'
 
 
 # --- the context of a request taken out of the conversation is sent again ----------------------------------------
