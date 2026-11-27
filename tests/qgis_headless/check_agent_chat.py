@@ -1082,7 +1082,7 @@ def check_chat(provider, layer, authcfg, work):
     check("not set up: a way to set it up, no examples",
           panel.configure_button.isVisible() and not panel.example_buttons[0].isVisible())
     check("not set up: nothing can be asked yet (mockup: Welcome)", not panel.input.isEnabled()
-          and not panel.send_button.isEnabled() and panel.more_button.isEnabled())
+          and not panel.send_button.isEnabled() and panel.activity_icon.isEnabled())
     check("nothing to undo: no button", not panel.undo_offered() and not panel.undo_button.isVisible())
 
     def settings(**changes):

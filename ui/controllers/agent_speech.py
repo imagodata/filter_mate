@@ -72,7 +72,7 @@ class AgentSpeechController(QObject):
             self._capture = factory(lambda: self._listening(generation),
                 lambda error: self._fail(error) if generation == self._generation else None,
                 lambda: self.transcribe() if generation == self._generation else None, self)
-            self.host.panel.set_speech_state('recording', _tr('Requesting microphone access…'))
+            self.host.panel.set_speech_state('recording', _tr('Requesting microphone access…'), can_transcribe=False)
             self._capture.start(values.device)
         except (ValueError, RuntimeError, ImportError) as exc:
             self._fail(str(exc))

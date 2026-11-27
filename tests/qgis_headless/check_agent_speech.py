@@ -182,10 +182,14 @@ def main():
         try:
             panel.microphone_button.click()
             check('recording is visible and Enter cannot submit a partial dictation',
-                  panel._speech_state == 'recording' and not panel.send_button.isEnabled())
+                  panel._speech_state == 'recording' and not panel.send_button.isEnabled()
+                  and panel.speech_finish.isVisible() and panel.speech_finish.isEnabled())
             panel.input.returnPressed.emit()
             check('dictation never sends an agent request on Enter', not sent)
-            panel.microphone_button.click()
+            panel.speech_finish.click()
+            check('stop and transcribe opens a visible, cancellable transcription state',
+                  panel._speech_state == 'transcribing' and panel.speech_progress.isVisible()
+                  and not panel.speech_finish.isVisible() and panel.speech_cancel.isEnabled())
             until(lambda: panel._speech_state == 'idle')
         finally:
             QNetworkProxy.setApplicationProxy(proxy)

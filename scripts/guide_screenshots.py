@@ -799,9 +799,9 @@ def s_grab_new_agent_welcome():
 
 
 def s_new_agent_menu():
-    """The menu of the ⋯ button, popped up over the thread, with the Feedback entries beside it."""
+    """The network icon menu, popped up over the thread, with the Feedback entries beside it."""
     panel = agent_panel()
-    button = panel.more_button
+    button = panel.activity_icon
     menu = button.menu()
     menu.popup(QPoint(0, 0))
     QApplication.processEvents()

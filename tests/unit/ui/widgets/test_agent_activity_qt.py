@@ -78,14 +78,14 @@ def test_indicators_own_separate_renderers(activity):
     assert widget._renderer.animated() and not second._renderer.animated()
 
 
-def test_missing_qtsvg_keeps_the_indicator_hidden(activity, monkeypatch):
+def test_missing_qtsvg_keeps_the_menu_button_visible(activity, monkeypatch):
     app, parent, _, module = activity
     monkeypatch.setitem(sys.modules, 'qgis.PyQt.QtSvg', None)
     widget = module.AgentActivityIcon(parent)
     parent.show()
     widget.set_working(True)
     app.processEvents()
-    assert widget._renderer is None and not widget.isVisible()
+    assert widget._renderer is None and widget.isVisible() and not widget.icon().isNull()
 
 
 def test_action_phases_change_the_picture_without_restarting_on_each_text_chunk(activity, monkeypatch):
@@ -134,7 +134,8 @@ def test_user_interactions_are_static_except_live_dictation_and_never_replace_ac
     parent.show()
     widget.set_interaction('queued')
     assert widget.display_phase == 'queued' and not widget._renderer.animated()
-    assert widget.accessibleName() == widget.toolTip() and 'queued' in widget.toolTip()
+    assert widget.accessibleName() == 'More actions' and 'queued' in widget.accessibleDescription()
+    assert 'queued' in widget.toolTip()
 
 
 def test_all_phases_render_valid_distinct_static_artwork_and_static_states_never_animate(activity):

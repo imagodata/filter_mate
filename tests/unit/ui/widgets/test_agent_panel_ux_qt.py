@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """The AGENT panel made easier to read (2026-11-24), on real Qt widgets (PyQt5, offscreen): the steps of a request
-folded rather than taken away, the line to ask that says the mode, a link to a new conversation, the menu "⋯" in three
+folded rather than taken away, the line to ask that says the mode, a link to a new conversation, the icon menu in three
 groups.
 
 Loaded under a private package with ``qgis.PyQt`` pointing at PyQt5 for the import only (the root conftest mocks Qt
@@ -18,10 +18,10 @@ import pytest
 pytestmark = pytest.mark.unit
 
 try:
-    from PyQt6 import QtCore, QtGui, QtWidgets
+    from PyQt6 import QtCore, QtGui, QtTest, QtWidgets
 except ImportError:
     QtWidgets = pytest.importorskip("PyQt5.QtWidgets")
-    from PyQt5 import QtCore, QtGui
+    from PyQt5 import QtCore, QtGui, QtTest
 
 _ROOT = pathlib.Path(__file__).resolve().parents[4]
 _PKG = "fm_agent_panel_ux_test"
@@ -468,7 +468,7 @@ def test_push_fits_a_narrow_panel_while_working():
     panel.show()
     _APP.processEvents()
     assert panel.width() == 280
-    for widget in (panel.input, panel.followup_button, panel.send_button, panel.more_button):
+    for widget in (panel.input, panel.followup_button, panel.send_button, panel.activity_icon):
         assert panel.rect().contains(widget.geometry())
     panel.close()
 
@@ -489,7 +489,7 @@ def test_effort_control_keeps_a_narrow_panel_usable():
 
 def test_the_menu_has_three_groups_new_conversation_first():
     panel = _ready_panel()
-    menu = panel.more_button.menu()
+    menu = panel.activity_icon.menu()
     groups, current = [], []
     for action in menu.actions():
         if action.isSeparator():
@@ -501,6 +501,65 @@ def test_the_menu_has_three_groups_new_conversation_first():
     assert [len(group) > 0 for group in groups] == [True, True, True]
     assert groups[0][0] == "New conversation"
     assert "Agent settings" in groups[1] and "Feedback" in groups[2]
+
+
+@pytest.mark.parametrize('keyboard', [False, True])
+def test_network_icon_opens_the_actions_menu_with_mouse_or_keyboard(keyboard):
+    panel = _ready_panel()
+    panel.show()
+    _APP.processEvents()
+    icon = panel.activity_icon
+    menu = icon.menu()
+    opened = []
+    panel.options_requested.connect(lambda: opened.append(True))
+    assert panel.findChild(QtWidgets.QToolButton, 'toolButton_agent_more') is None
+    assert icon.accessibleName() == 'More actions'
+    icon.setFocus()
+    QtCore.QTimer.singleShot(50, menu.close)
+    if keyboard:
+        QtTest.QTest.keyClick(icon, QtCore.Qt.Key.Key_Space)
+    else:
+        QtTest.QTest.mouseClick(icon, QtCore.Qt.MouseButton.LeftButton, pos=QtCore.QPoint(16, 16))
+    assert opened == [True]
+    panel.set_working(True)
+    assert not icon.isEnabled() and icon._renderer.animated()
+    panel.close()
+
+
+def test_dictation_offers_an_explicit_stop_then_a_cancellable_transcription_without_sending():
+    panel = _ready_panel()
+    panel.resize(280, 560)
+    panel.show()
+    panel.input.setText('Keep this draft')
+    stopped, cancelled, sent = [], [], []
+    panel.microphone_requested.connect(lambda: stopped.append(True))
+    panel.microphone_cancel_requested.connect(lambda: cancelled.append(True))
+    panel.send_requested.connect(sent.append)
+    panel.set_speech_state('recording', 'Requesting microphone access…', can_transcribe=False)
+    assert not panel.speech_finish.isEnabled() and not panel.microphone_button.isEnabled()
+    panel.speech_finish.click()
+    assert not stopped
+    panel.set_speech_state('recording', 'Recording… 0:02 / 5:00 · Local service')
+    _APP.processEvents()
+    assert panel.speech_finish.isVisible() and panel.speech_finish.isEnabled()
+    assert panel.speech_finish.accessibleName() == 'Stop recording and transcribe'
+    assert not panel.speech_progress.isVisible() and not panel.send_button.isEnabled()
+    assert panel.width() == 280 and panel.rect().contains(panel.speech_row.geometry())
+    panel.speech_finish.click()
+    assert stopped == [True]
+    panel.set_speech_state('transcribing', 'Transcribing…')
+    _APP.processEvents()
+    assert not panel.speech_finish.isVisible() and panel.speech_progress.isVisible()
+    assert panel.speech_label.text().startswith('Transcribing')
+    assert panel.speech_cancel.text() == 'Cancel' and panel.speech_cancel.toolTip() == 'Cancel transcription'
+    panel._on_send()
+    assert not sent and panel.input.text() == 'Keep this draft'
+    panel.speech_cancel.click()
+    assert cancelled == [True]
+    panel.set_speech_state('idle')
+    assert not panel.speech_row.isVisible() and panel.send_button.isEnabled()
+    assert panel.input.text() == 'Keep this draft'
+    panel.close()
 
 
 def test_a_local_model_is_said_on_the_welcome():

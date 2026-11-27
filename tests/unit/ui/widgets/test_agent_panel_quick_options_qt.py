@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Sources, model and the MCP server in the menu "⋯" of the AGENT panel, on real Qt5/Qt6 widgets (offscreen): one
+"""Sources, model and the MCP server in the network icon menu of the AGENT panel, on real Qt5/Qt6 widgets (offscreen): one
 submenu per group of sources, a tick per source, the providers set up with the current one checked (2026-11-16).
 
 Loaded under a private package with ``qgis.PyQt`` pointing at the installed binding for the import only (the root
@@ -123,19 +123,19 @@ def test_options_are_asked_when_the_menu_opens():
     panel = panel_module.AgentPanel()
     asked = []
     panel.options_requested.connect(lambda: asked.append(True))
-    panel.more_button.menu().aboutToShow.emit()
+    panel.activity_icon.menu().aboutToShow.emit()
     assert asked == [True]
 
 
 def test_the_unstable_processing_model_designer_is_not_offered_in_the_menu():
     panel = _filled()
-    entries = _texts(panel.more_button.menu())
+    entries = _texts(panel.activity_icon.menu())
     assert "Processing model designer…" not in entries
     assert "Save project and layers…" in entries and "Microphone settings…" in entries
 
 
 def _open_group(panel):
-    root = panel.more_button.menu()
+    root = panel.activity_icon.menu()
     root.popup(QtCore.QPoint(20, 20))
     root.setActiveAction(panel.sources_menu.menuAction())
     panel.sources_menu.popup(root.mapToGlobal(root.actionGeometry(panel.sources_menu.menuAction()).topRight()))
@@ -189,7 +189,8 @@ def test_escape_closes_the_source_submenu():
 def test_clicking_outside_closes_the_menu_chain():
     panel = _filled()
     root, group = _open_group(panel)
-    QtTest.QTest.mouseClick(group, QtCore.Qt.MouseButton.LeftButton, pos=QtCore.QPoint(-10, -10))
+    outside = group.mapFromGlobal(QtCore.QPoint(-100, -100))
+    QtTest.QTest.mouseClick(group, QtCore.Qt.MouseButton.LeftButton, pos=outside)
     assert not group.isVisible() and not root.isVisible()
 
 
@@ -198,7 +199,7 @@ def test_the_mcp_toggle_stays_open_but_opening_settings_closes_the_menu():
     toggles, settings = [], []
     panel.mcp_toggled.connect(toggles.append)
     panel.settings_requested.connect(lambda: settings.append(True))
-    root = panel.more_button.menu()
+    root = panel.activity_icon.menu()
     root.popup(QtCore.QPoint(20, 20))
     _click(root, panel.mcp_action)
     _click(root, panel.mcp_action)
