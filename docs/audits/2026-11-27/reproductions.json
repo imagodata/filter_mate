@@ -1,0 +1,79 @@
+{
+  "qgis": "3.44.15-Solothurn",
+  "cases": [
+    {
+      "case": "zoom_point_greenwich",
+      "accepted": false,
+      "error": "'greenwich' has nothing to zoom to"
+    },
+    {
+      "case": "zoom_point_france",
+      "accepted": true,
+      "width_before": 5.338912133891213,
+      "width_after": 26.694560669456067,
+      "result": {
+        "extent_wkt": "Polygon ((-12.34728033472803332 35, 14.34728033472803332 35, 14.34728033472803332 55, -12.34728033472803332 55, -12.34728033472803332 35))",
+        "scale": 9153360.650556715
+      }
+    },
+    {
+      "case": "zoom_point_origin",
+      "accepted": true,
+      "width_before": 5.338912133891213,
+      "width_after": 2.6694560669456067,
+      "result": {
+        "extent_wkt": "Polygon ((-1.33472803347280333 -1, 1.33472803347280333 -1, 1.33472803347280333 1, -1.33472803347280333 1, -1.33472803347280333 -1))",
+        "scale": 1821653.0175532142
+      }
+    },
+    {
+      "case": "late_autozoom_overwrites_manual_pan",
+      "manual_view": "8.3263598326359833,10.0000000000000000 : 21.6736401673640167,20.0000000000000000",
+      "after_delivery": "-0.4014644351464400,43.9500000000000028 : 2.4014644351464396,46.0499999999999972",
+      "overwritten": true
+    },
+    {
+      "case": "mixed_autozoom_drops_raster",
+      "requested": [
+        "async-source",
+        "raster-target"
+      ],
+      "queued": [
+        "async-source"
+      ]
+    },
+    {
+      "case": "save_does_not_release_memory_budget",
+      "durable": true,
+      "memory_bytes_retained": 125,
+      "budget": 125,
+      "next_byte_error": "the agent's memory budget is full: use a smaller area or resolution, or save the project and its layers to a folder you choose"
+    },
+    {
+      "case": "respond_selected_but_push_emitted",
+      "displayed_posture": "respond",
+      "mode_selector_enabled": true,
+      "pushes": [
+        "Donne seulement ton avis"
+      ],
+      "new_requests": []
+    },
+    {
+      "case": "push_policy_keeps_act_when_respond_displayed",
+      "displayed": "respond",
+      "effective_request": "act",
+      "filter_verdict": "run"
+    },
+    {
+      "case": "session_single_slot_clear",
+      "after_new_conversation": "",
+      "project_key": "5253df4be79cd9733bf9"
+    },
+    {
+      "case": "native_processing_exceeds_memory_budget",
+      "budget": 1,
+      "output_size": 98304,
+      "output_valid": true
+    }
+  ]
+}
