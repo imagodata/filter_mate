@@ -1664,11 +1664,10 @@ class AgentPanel(QFrame):
             " border-radius: 6px; background: transparent; }"
             "QToolButton#toolButton_agent_mode:hover, QToolButton#toolButton_agent_effort:hover, QToolButton#toolButton_agent_followup:hover {"
             f" background: {palette['fm_hover']}; }}"
-            "QToolButton#toolButton_agent_mode:focus, QToolButton#toolButton_agent_effort:focus, QToolButton#toolButton_agent_followup:focus {"
+            "QToolButton#toolButton_agent_mode:focus {"
+            f" border-color: {palette['fm_field_border']}; }}"
+            "QToolButton#toolButton_agent_effort:focus, QToolButton#toolButton_agent_followup:focus {"
             f" border-color: {palette['fm_accent']}; }}"
-            # Act keeps an accent border so its permission to change the project remains visible.
-            + (f"QToolButton#toolButton_agent_mode {{ border-color: {palette['fm_accent']}; }}"
-               if getattr(self, "_posture", POSTURE_ACT) == POSTURE_ACT else "") +
             # The frame alone paints the background: a viewport or a page with one of its own squares the corners.
             "QScrollArea#scrollArea_agent_welcome > QWidget#qt_scrollarea_viewport, QWidget#widget_agent_welcome"
             " { background: transparent; }"
@@ -1768,8 +1767,7 @@ class AgentPanel(QFrame):
                 ("redo_button", "redo", QStyle.StandardPixmap.SP_ArrowForward)):
             button = getattr(self, name, None)
             if button is not None:
-                color = tokens(dark)['fm_accent'] if name == 'mode_button' and posture == POSTURE_ACT else None
-                icon = render_icon(key, dark, color)
+                icon = render_icon(key, dark)
                 button.setIcon(icon if icon is not None else self.style().standardIcon(fallback))
         for name, key in (("new_action", "new_conversation"), ("history_action", "history"),
                           ("recipes_menu", "recipes"), ("sources_menu", "projection"),

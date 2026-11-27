@@ -208,12 +208,20 @@ def test_the_line_to_ask_says_the_mode():
     assert panel.input.placeholderText() == "Connect a provider to start"
 
 
-def test_act_draws_its_chip_in_the_accent():
+@pytest.mark.parametrize('dark', [False, True])
+def test_modes_use_neutral_toolbar_colors(dark):
     panel = _ready_panel()
-    panel.set_mode(panel_module.ACT)
-    assert "font-weight: 600" in panel.styleSheet()
-    panel.set_mode(panel_module.ASK)
-    assert "font-weight: 600; }QToolButton" not in panel.styleSheet()
+    panel._dark = lambda: dark
+    sheets = []
+    for mode in (panel_module.ASK, panel_module.PLAN, panel_module.ACT):
+        panel.set_mode(mode)
+        sheets.append(panel.styleSheet())
+        image = panel.mode_button.icon().pixmap(22, 22).toImage()
+        colors = [image.pixelColor(x, y) for x in range(image.width()) for y in range(image.height())
+                  if image.pixelColor(x, y).alpha()]
+        assert colors and all(color.red() == color.green() == color.blue() for color in colors)
+    assert len(set(sheets)) == 1
+    panel.close()
 
 
 def test_new_conversation_stays_in_place_and_follows_the_thread():
