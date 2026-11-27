@@ -62,7 +62,7 @@ from ...core.agent.providers.ollama_chat import (
 from ...core.agent.sources import (
     KIND_MCP, KIND_STAC, MAX_CUSTOM, ORIGIN_COMMUNITY, ORIGIN_LOCAL, ORIGIN_OFFICIAL, ORIGIN_USER, SOURCE_GROUPS, all_sources,
     custom_from_json, source_group,
-    custom_to_json, make_source,
+    custom_to_json, guess_source_kind, make_source, source_draft,
 )
 from ..styles.mockup_design import FONT_FAMILY, plugin_is_dark, render_icon, tokens
 from ..styles.theme_manager import OWN_STYLE_PROPERTY
@@ -3197,6 +3197,7 @@ class AgentSettingsDialog(QDialog):
         self.new_address = QLineEdit(page)
         self.new_address.setPlaceholderText(_tr("https://... or a portal address"))
         self.new_kind = QComboBox(page)
+        self.new_kind.addItem(_tr('Detect service type'), '')
         for kind, label in ((KIND_MCP, _tr("MCP connector")), (KIND_OPENDATASOFT, "Opendatasoft"), (KIND_CKAN, "CKAN"),
                             (KIND_WFS, "WFS"), (KIND_WMS, "WMS"), (KIND_WMTS, "WMTS"), (KIND_STAC, "STAC"), (KIND_XYZ, _tr("Basemap (XYZ)")),
                             (KIND_GEOCODER, _tr("Place search")), (KIND_OVERPASS, "OpenStreetMap (Overpass)")):
@@ -3204,6 +3205,14 @@ class AgentSettingsDialog(QDialog):
         self.add_button = QPushButton(_tr("Add"), page)
         self.add_button.setObjectName("pushButton_agent_add_source")
         self.add_button.clicked.connect(self._on_add_source)
+        self._source_kind_manual = False
+        self.new_kind.activated.connect(lambda *_: setattr(self, '_source_kind_manual', True))
+        self.new_address.textChanged.connect(self._detect_source_kind)
+        self.new_name = QLineEdit(page)
+        self.new_name.setPlaceholderText(_tr('Source name (optional)'))
+        self.new_name.setMaxLength(100)
+        self.new_enabled = QCheckBox(_tr('Enable after adding'), page)
+        self.new_enabled.setChecked(True)
         add_row = QHBoxLayout()
         add_row.addWidget(self.new_address, 1)
         add_row.addWidget(self.new_kind)
@@ -3213,6 +3222,10 @@ class AgentSettingsDialog(QDialog):
         layout.addWidget(self.sources_tree, 1)
         layout.addLayout(row)
         layout.addLayout(add_row)
+        details = QHBoxLayout()
+        details.addWidget(self.new_name, 1)
+        details.addWidget(self.new_enabled)
+        layout.addLayout(details)
         self._fill_sources(set(values.enabled_sources))
         return page
 
@@ -3233,8 +3246,9 @@ class AgentSettingsDialog(QDialog):
         item.setCheckState(0, Qt.CheckState.Checked if checked else Qt.CheckState.Unchecked)
         item.setData(0, _TURN_ROLE, source.id)
         item.setToolTip(0, plain_tooltip(f"{source.note}\n{source.address}".strip()))
+        return item
 
-    def _fill_sources(self, enabled_ids) -> None:
+    def _fill_sources(self, enabled_ids, selected_id=None) -> None:
         self.sources_tree.clear()
         groups = [(title, lambda source, key=key: source_group(source) == key) for key, title in source_group_titles()]
         for title, belongs in groups:
@@ -3251,7 +3265,9 @@ class AgentSettingsDialog(QDialog):
                 continue  # QGIS keeps no PostgreSQL connection: no empty group
             for source in members:
                 if belongs(source):
-                    self._source_item(group, source, source.id in enabled_ids)
+                    item = self._source_item(group, source, source.id in enabled_ids)
+                    if source.id == selected_id:
+                        self.sources_tree.setCurrentItem(item)
         self.sources_tree.expandAll()
         self._on_source_selected()
 
@@ -3288,8 +3304,12 @@ class AgentSettingsDialog(QDialog):
             self.source_result.setText(self._tester(source))
 
     def _on_add_source(self) -> None:
+        if not self.new_kind.currentData():
+            self.source_result.setText(_tr('Choose the service type if it cannot be detected from the address.'))
+            self.new_kind.setFocus()
+            return
         try:
-            source = make_source(self.new_address.text(), self.new_kind.currentData())
+            source = make_source(**source_draft(self.new_address.text(), self.new_kind.currentData(), self.new_name.text()))
         except ValueError as exc:
             self.source_result.setText(str(exc))
             return
@@ -3298,9 +3318,33 @@ class AgentSettingsDialog(QDialog):
                 self.source_result.setText(_tr("Too many sources added: remove one first."))
                 return
             self._custom.append(source)
-        checked = set(self._checked_ids()) | {source.id}
+        checked = set(self._checked_ids())
+        if self.new_enabled.isChecked():
+            checked.add(source.id)
+        self._source_kind_manual = False
         self.new_address.clear()
-        self._fill_sources(checked)
+        self.new_name.clear()
+        self.new_kind.setCurrentIndex(0)
+        self._fill_sources(checked, selected_id=source.id)
+        self.source_result.setText(_tr('Source added to this form. Save these settings to keep it.'))
+
+    def _detect_source_kind(self, address):
+        if not self._source_kind_manual:
+            kind = guess_source_kind(address)
+            self.new_kind.setCurrentIndex(max(self.new_kind.findData(kind), 0))
+
+    def prefill_source(self, draft):
+        """Review an agent proposal without adding, enabling, testing or saving anything."""
+        self.select_tab('sources')
+        self._source_kind_manual = False
+        self.new_address.setText(draft['address'])
+        self.new_name.setText(draft.get('title', ''))
+        if draft.get('kind'):
+            self.new_kind.setCurrentIndex(max(self.new_kind.findData(draft['kind']), 0))
+            self._source_kind_manual = True
+        self.new_enabled.setChecked(False)
+        self.source_result.setText(_tr('Unverified suggestion. Review the address and type, then test or add it yourself.'))
+        self.new_address.setFocus()
 
     def _on_remove_source(self) -> None:
         source = self._selected_source()

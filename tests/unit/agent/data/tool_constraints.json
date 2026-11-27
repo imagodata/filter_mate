@@ -2911,6 +2911,26 @@
   ],
   "type": "object"
  },
+ "search_data_sources": {
+  "additionalProperties": false,
+  "properties": {
+   "limit": {
+    "default": 5,
+    "maximum": 8,
+    "minimum": 1,
+    "type": "integer"
+   },
+   "query": {
+    "maxLength": 400,
+    "minLength": 1,
+    "type": "string"
+   }
+  },
+  "required": [
+   "query"
+  ],
+  "type": "object"
+ },
  "search_imagery": {
   "properties": {
    "bbox": {
@@ -4142,6 +4162,42 @@
    "path": {
     "maxLength": 200,
     "type": "string"
+   },
+   "source": {
+    "additionalProperties": false,
+    "properties": {
+     "address": {
+      "maxLength": 2000,
+      "minLength": 1,
+      "type": "string"
+     },
+     "kind": {
+      "default": "auto",
+      "enum": [
+       "auto",
+       "mcp",
+       "opendatasoft",
+       "ckan",
+       "wfs",
+       "wms",
+       "wmts",
+       "stac",
+       "xyz",
+       "geocoder",
+       "overpass"
+      ],
+      "type": "string"
+     },
+     "title": {
+      "default": "",
+      "maxLength": 100,
+      "type": "string"
+     }
+    },
+    "required": [
+     "address"
+    ],
+    "type": "object"
    },
    "target": {
     "enum": [

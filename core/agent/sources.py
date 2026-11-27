@@ -7,7 +7,7 @@ import json
 import re
 from dataclasses import asdict, dataclass
 from typing import Any, Dict, Iterable, List, Sequence, Tuple
-from urllib.parse import urlsplit
+from urllib.parse import parse_qs, parse_qsl, urlencode, urlsplit, urlunsplit
 
 from .basemaps import BASEMAPS, template_problem
 from .elevation import SOURCES as ELEVATION_SOURCES
@@ -16,7 +16,7 @@ from .population import SOURCES as POPULATION_SOURCES
 from .mcp_client import server_url_problem
 from .open_data import (
     KIND_CKAN, KIND_DATABASE, KIND_DATAGOUV, KIND_ELEVATION, KIND_GEOCODER, KIND_OPENDATASOFT, KIND_OVERPASS,
-    KIND_POPULATION, KIND_STAC, KIND_WFS, KIND_WMS, KIND_WMTS, KIND_XYZ,
+    KIND_POPULATION, KIND_STAC, KIND_WEB_SEARCH, KIND_WFS, KIND_WMS, KIND_WMTS, KIND_XYZ,
     NO_DATA_KINDS, base_url,
 )
 
@@ -98,6 +98,9 @@ BUILT_IN: Tuple[Source, ...] = (
            "IGN Géoplateforme tools. Start it first: TRANSPORT_TYPE=http npx -y @ignfab/geocontext"),
     Source("osm_mcp", "OpenStreetMap (MCP)", KIND_MCP, "https://openstreetmap.caseyjhand.com/mcp", ORIGIN_COMMUNITY,
            "Places and Overpass queries, worldwide"),
+    Source('web_search', 'DuckDuckGo (web source search)', KIND_WEB_SEARCH, 'https://html.duckduckgo.com/html/',
+           ORIGIN_COMMUNITY, 'Search queries go to DuckDuckGo. Finds unverified candidate websites; does not visit, '
+           'enable or download from them. May require a browser check.'),
 )
 BUILT_IN += tuple(Source(server.id, server.title, KIND_OVERPASS, server.url, ORIGIN_COMMUNITY, server.note)
                   for server in OVERPASS_SERVERS)
@@ -136,6 +139,68 @@ def make_source(address: str, kind: str, title: str = "") -> Source:
     digest = hashlib.blake2b(f"{kind}|{address}".encode("utf-8"), digest_size=3).hexdigest()
     identifier = _ID.sub("_", f"{kind}_{parts.netloc}{parts.path}".lower()).strip("_")[:30] + "_" + digest
     return Source(identifier, " ".join((title or "").split())[:60] or parts.netloc, kind, address, origin)
+
+
+def guess_source_kind(address: str) -> str:
+    """Recognize explicit service hints in a pasted URL, without contacting it or guessing from a website name."""
+    if not isinstance(address, str):
+        return ''
+    address = address.strip()
+    try:
+        parts = urlsplit(base_url(address))
+        query = {key.lower(): value for key, value in parse_qs(parts.query).items()}
+    except ValueError:
+        return ''
+    service = (query.get('service') or [''])[0].lower()
+    if service in (KIND_WFS, KIND_WMS, KIND_WMTS):
+        return service
+    path = parts.path.lower().rstrip('/')
+    if all(part in address.lower() for part in ('{z}', '{x}', '{y}')):
+        return KIND_XYZ
+    for kind in (KIND_WFS, KIND_WMS, KIND_WMTS, KIND_MCP):
+        if path.endswith('/' + kind):
+            return kind
+    if '/api/3/' in path or path.endswith(('/api/3', '/ckan')):
+        return KIND_CKAN
+    if '/api/explore/' in path or parts.hostname == 'data.opendatasoft.com':
+        return KIND_OPENDATASOFT
+    if path.endswith(('/stac', '/stac/v1', '/catalog.json')):
+        return KIND_STAC
+    return ''
+
+
+def source_draft(address: str, kind: str = 'auto', title: str = '') -> Dict[str, str]:
+    """A validated local form draft: no source saved, enabled or contacted."""
+    if not isinstance(address, str) or not address.strip() or len(address) > 2000:
+        raise ValueError('give a source address of at most 2000 characters')
+    if not isinstance(title, str) or len(title) > 100:
+        raise ValueError('the source title is at most 100 characters')
+    address = address.strip()
+    if '://' not in address:
+        address = 'https://' + address
+    selected = guess_source_kind(address) if kind == 'auto' else kind
+    if selected:
+        if selected in (KIND_WFS, KIND_WMS, KIND_WMTS):
+            parts = urlsplit(base_url(address))
+            # A pasted GetCapabilities URL is a service endpoint, not a request to repeat with duplicate parameters.
+            query = [(key, value) for key, value in parse_qsl(parts.query, keep_blank_values=True)
+                     if key.lower() not in ('service', 'request', 'version')]
+            address = urlunsplit((parts.scheme, parts.netloc, parts.path, urlencode(query), ''))
+        elif selected in (KIND_CKAN, KIND_OPENDATASOFT):
+            parts = urlsplit(base_url(address))
+            marker = '/api/3' if selected == KIND_CKAN else '/api/explore'
+            lower = parts.path.lower()
+            if marker + '/' in lower or lower.endswith(marker):
+                address = urlunsplit((parts.scheme, parts.netloc, parts.path[:lower.index(marker)], '', ''))
+        source = make_source(address, selected, title)
+        return {'address': source.address, 'kind': source.kind, 'title': source.title}
+    if kind != 'auto':
+        raise ValueError('unknown type of source')
+    normalized = base_url(address.strip())
+    problem = server_url_problem(normalized)
+    if problem:
+        raise ValueError(problem)
+    return {'address': normalized, 'kind': '', 'title': ' '.join(title.split())[:60]}
 
 
 def database_sources(names: Iterable[Any]) -> Tuple[Source, ...]:

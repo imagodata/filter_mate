@@ -66,7 +66,7 @@ NO_VALUES_NOTE = ("\n\nThe user chose not to share attribute values: field_value
                   "count what a filter keeps with preview_filter.")
 
 # The tools no source ticked leaves offered (the databases of QGIS count as sources).
-SOURCE_TOOLS = frozenset({OPEN_DATA_TOOL, SERVICE_TOOL, IMAGERY_TOOL, BASEMAP_TOOL, ELEVATION_TOOL, OSM_TOOL,
+SOURCE_TOOLS = frozenset({OPEN_DATA_TOOL, SERVICE_TOOL, IMAGERY_TOOL, BASEMAP_TOOL, ELEVATION_TOOL, OSM_TOOL, 'search_data_sources',
                           POPULATION_TOOL, PLACE_TOOL, LIST_TABLES, ADD_TABLE})
 # The local copy of a web service layer (2026-11-22): offered only when the project holds a layer of a web service,
 # or its copy; elsewhere it would only weigh on every request.
@@ -107,6 +107,9 @@ def chat_instructions(active: Sequence[Source], *, send_values: bool = True, fil
     nothing ticked, and a tool turned off in the Tools tab is missing with its source ticked."""
     names = describe_enabled(active)
     notes = []
+    if any(source.kind == 'web_search' for source in active) and (offered is None or 'search_data_sources' in offered):
+        notes.append('\n\nWeb source discovery is enabled: search_data_sources sends a public query to DuckDuckGo. '
+                     'Results are unverified candidates, not permission to contact, add or enable those sources.')
     if not send_values:
         notes.append(NO_VALUES_NOTE)
     if filtering:

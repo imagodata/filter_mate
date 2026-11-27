@@ -47,6 +47,19 @@
 <context>
     <name>AgentChat</name>
     <message>
+        <source>Review and add source: {}</source>
+        <translation>Vérifier et ajouter la source : {}</translation>
+    </message>
+    <message>
+        <source>Open this search in the browser</source>
+        <translation>Ouvrir cette recherche dans le navigateur</translation>
+    </message>
+    <message>
+        <source>sends the search query to DuckDuckGo; result sites are not visited</source>
+        <translation>envoie la recherche à DuckDuckGo ; les sites trouvés ne sont pas consultés</translation>
+    </message>
+
+    <message>
         <source>Wait for the current request to finish before changing the export folder.</source>
         <translation>Attendez la fin de la demande en cours avant de changer le dossier d’export.</translation>
     </message>
@@ -1849,6 +1862,31 @@ Do you agree to all of them? No runs none of them.</source>
 </context>
 <context>
     <name>AgentPanel</name>
+    <message>
+        <source>Detect service type</source>
+        <translation>Détecter le type de service</translation>
+    </message>
+    <message>
+        <source>Source name (optional)</source>
+        <translation>Nom de la source (facultatif)</translation>
+    </message>
+    <message>
+        <source>Enable after adding</source>
+        <translation>Activer après l’ajout</translation>
+    </message>
+    <message>
+        <source>Source added to this form. Save these settings to keep it.</source>
+        <translation>Source ajoutée au formulaire. Enregistrez ces paramètres pour la conserver.</translation>
+    </message>
+    <message>
+        <source>Unverified suggestion. Review the address and type, then test or add it yourself.</source>
+        <translation>Suggestion non vérifiée. Vérifiez l’adresse et le type, puis testez ou ajoutez la source.</translation>
+    </message>
+    <message>
+        <source>Choose the service type if it cannot be detected from the address.</source>
+        <translation>Choisissez le type de service s’il ne peut pas être détecté à partir de l’adresse.</translation>
+    </message>
+
     <message>
         <source>Default export folder…</source>
         <translation>Dossier d’export par défaut…</translation>

@@ -3,10 +3,10 @@ name: datasets
 title: Find datasets and suitable sources
 description: find datasets and suggest sources, including disabled ones
 metadata:
-  version: 1
+  version: 2
   plugin_min: 5.1.3
   audience: chat
-  tools: agent_options, show_settings_link, search_open_data, search_imagery, list_database_tables, describe_layer, list_layers, add_layer, add_service_layer, ask_user, turn_on_agent_options
+  tools: agent_options, show_settings_link, search_data_sources, search_open_data, search_imagery, list_database_tables, describe_layer, list_layers, add_layer, add_service_layer, ask_user, turn_on_agent_options
   requires: agent_options, show_settings_link
   risk: read
   trust: builtin
@@ -43,6 +43,29 @@ that the plugin has no way to find the data. Propose the appropriate source and 
   for features, STAC for imagery, WMS/WMTS for maps. Do not guess a URL or call a disabled service to verify it.
 
 ## Search and compare actual datasets
+
+### Discover a new source on the web
+
+When the provided state does not already answer, agent_options says whether web_search (DuckDuckGo) is enabled.
+If it is off, offer to enable it from Sources; never query it while off. If enabled and search_data_sources is
+offered, search with a public topic and place plus useful terms such as open data, WFS, CKAN or STAC. Do not send
+private attributes, connection information or internal addresses. An enabled web-search connector can also be
+used through its normal permissions.
+
+Web results are unverified candidate pages, not proof that an endpoint works or that a dataset is suitable. Give
+the source links and explain that distinction. A browser challenge or an unreadable search response is a failed
+search: offer the browser button, never pretend that candidates were retrieved. Do not bypass a browser check.
+When a result is a portal homepage rather than a service endpoint, refine the search with its domain and terms
+such as WFS GetCapabilities or STAC API. Never present a homepage as a working WFS or invent an endpoint path.
+
+For a promising endpoint, call show_settings_link with target sources and source containing address, kind and
+title. Use the returned URL; do not invent a service path on a website. kind auto recognizes explicit URL hints,
+otherwise the user chooses the type. The button opens a prefilled form only after the user clicks. It tests,
+adds, enables and saves nothing by itself. The user can test it, add it, choose whether to enable it and save the
+settings. A proposed source starts with Enable after adding unchecked. Only after that review and a later request
+may its authorized tools search datasets. Never use add_layer to bypass source review or activation.
+
+### Search an authorized catalogue
 
 1. When offered and authorized, search_open_data searches the selected enabled portal or service with the theme
    and place. search_imagery narrows satellite imagery by area, date and cloud cover. list_database_tables explores an

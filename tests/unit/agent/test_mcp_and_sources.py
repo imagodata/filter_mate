@@ -148,6 +148,9 @@ class TestSources:
         for source in BUILT_IN:
             if source.is_connector:
                 assert server_url_problem(source.address) == "", source.id
+            elif source.kind == 'web_search':
+                with pytest.raises(ValueError):  # searching must not authorize downloading from this provider
+                    resolve_platform(platform_name(source))
             else:
                 assert resolve_platform(platform_name(source))[0] == source.kind, source.id
 

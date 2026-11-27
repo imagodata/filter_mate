@@ -36,6 +36,7 @@ KIND_GEOCODER = "geocoder"
 # What holds no data to search nor to read: ticked alone, these open neither search_open_data nor the web to add_layer.
 # A database connection kept by QGIS: no platform of the web, its tables are listed and added by tools of their own.
 KIND_DATABASE = "database"
+KIND_WEB_SEARCH = 'web_search'  # finds candidate source sites, never reads their datasets or authorizes their domains
 # An elevation model: tiles of one square degree, of which add_elevation reads the part an area needs. Nothing
 # is searched in it, and a model never writes one of its addresses.
 KIND_ELEVATION = "elevation"
@@ -45,7 +46,7 @@ KIND_OVERPASS = "overpass"
 # A population grid: people per pixel, of which add_population reads the part an area needs, summed by blocks.
 # Nothing is searched in it, and a model never writes its address.
 KIND_POPULATION = "population"
-NO_DATA_KINDS = (KIND_XYZ, KIND_GEOCODER, KIND_DATABASE, KIND_ELEVATION, KIND_OVERPASS, KIND_POPULATION)
+NO_DATA_KINDS = (KIND_XYZ, KIND_GEOCODER, KIND_DATABASE, KIND_ELEVATION, KIND_OVERPASS, KIND_POPULATION, KIND_WEB_SEARCH)
 # What only shows images or places: ticked alone, these do not open the web to add_layer (a WMS is searched, though).
 NO_FILE_KINDS = NO_DATA_KINDS + (KIND_WMS, KIND_WMTS)
 KINDS = (KIND_DATAGOUV, KIND_OPENDATASOFT, KIND_CKAN, KIND_WFS, KIND_STAC, KIND_XYZ, KIND_WMS, KIND_WMTS, KIND_GEOCODER,

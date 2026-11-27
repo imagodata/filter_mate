@@ -45,7 +45,8 @@ GOLDEN = {  # (length, sha256 of the UTF-8 text); 2026-11-16, lot 1 of the token
     # sources not ticked in one paragraph, a shorter way of working. 2026-11-26: Esri and regional basemap IDs, then explicit layer/output hyperlink syntax; condensed for the model designer entry.
     "default": (3989, "f299220a66e2637f989fa50f5e33fd436cc279e388cc01f66e1e79ace4729167"),
     "no_values_local": (4473, "02f4960027d911a9fa9b16ad16cca54195797853094e7e3f2611233e674c5291"),
-    "every_source": (5842, "d119aab70725e3aa4ddbf2c68d0ca49260f839d5b97e808d97bf8b48e8db223c"),
+    # 2026-11-27: the optional web-search source adds its explicit scope; default sources remain unchanged.
+    "every_source": (6023, "c02a9c1ba8363e95bc14fb1580314ddb3eeecdb21723414179e98376536454d9"),
 }
 _EVERY = tuple(source.id for source in sources.BUILT_IN)
 CONFIGS = {
@@ -80,7 +81,7 @@ def test_source_tools():
     chat_setup = importlib.import_module(f"{_PKG}.core.agent.chat_setup")
     assert chat_setup.SOURCE_TOOLS == {"search_open_data", "add_service_layer", "search_imagery", "add_basemap",
                                        "add_elevation", "add_osm_features", "add_population", "find_place",
-                                       "list_database_tables", "add_database_table"}
+                                       "list_database_tables", "add_database_table", 'search_data_sources'}
 
 
 def test_a_settings_link_turned_off_in_the_tools_tab_is_not_named_by_the_note():
@@ -90,3 +91,10 @@ def test_a_settings_link_turned_off_in_the_tools_tab_is_not_named_by_the_note():
     text = Controller._prompt(values, [])
     assert "never guess coordinates" in text and "call show_settings_link" not in text
     assert "call show_settings_link" in Controller._prompt(CONFIGS["default"][0], [])
+
+
+def test_a_web_search_tool_turned_off_is_not_advertised_as_available():
+    setup = importlib.import_module(f'{_PKG}.core.agent.chat_setup')
+    active = [source for source in sources.BUILT_IN if source.id == 'web_search']
+    assert 'Web source discovery is enabled' in setup.chat_instructions(active, offered={'search_data_sources'})
+    assert 'Web source discovery is enabled' not in setup.chat_instructions(active, offered={'agent_options'})

@@ -320,6 +320,11 @@ Rules worth keeping:
   that catalogue queries and enables no source. The agent can recommend suitable disabled sources, distinguish
   analysis datasets from basemaps and search authorized sources without loading layers. Enabling a source requires
   an explicit request and its normal confirmation, effective after the current request.
+  Optional **DuckDuckGo (web source search)** enables `search_data_sources` for public candidate discovery. It
+  never visits or enables result sites and grants no download access. A browser check offers a manual search link.
+  A proposed source opens a prefilled review form through `show_settings_link` (`target: sources`, `source` with
+  address, kind and title). The user tests, adds, chooses activation and saves it; agent proposals start unchecked.
+  Pasted service/API URLs are detected and normalized, with an optional name and explicit type selection when unknown.
 - **At most 16 model turns per request** (`max_model_turns`, `core/agent/session.py`). Two turns before the limit the
   model is told so, and a request that reaches it stops with a sentence that says why; what was done stays and can be
   undone.

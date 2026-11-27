@@ -103,6 +103,15 @@ FEEDBACK_FORMS = ("usage", "feature", "testers", "services")
 # Tools of the chat alone: the history of the agent lives in QGIS, not behind the REST API.
 CHAT_ONLY = (
     ToolSpec(
+        'search_data_sources',
+        'Search the web for candidate data portals and OGC services, only when web_search is enabled. Send a public '
+        'topic and place, never private field values or connection details. Returns candidate titles, URLs and '
+        'snippets; they are unverified. Visits, adds and enables no result site. Use datasets for the review workflow.',
+        {'type': 'object', 'properties': {'query': {'type': 'string', 'minLength': 1, 'maxLength': 400},
+                                        'limit': {'type': 'integer', 'minimum': 1, 'maximum': 8, 'default': 5}},
+         'required': ['query'], 'additionalProperties': False},
+        title='Find data sources on the web', read_only=True, open_world=True, chat_only=True),
+    ToolSpec(
         name=OPEN_MODEL, title="Open the Processing model designer",
         description=("Open a registered model by algorithm_id, a new declarative definition, or a blank QGIS model "
                      "designer when both are omitted. Never executes steps or saves a file: the user chooses Save "
@@ -477,12 +486,20 @@ CHAT_ONLY = (
                      "something you may not (the settings of the agent, APP.OPTIONS.AGENT, a name or a path), or "
                      "asks where a setting is; target feedback: a form of the site, usage (an opinion, a problem), "
                      "feature (an idea), testers (try what comes next), services (training, support), when the user "
-                     "wants to say so. It changes nothing; the user clicks it. Returns shown."),
+                     "wants to say so. With target sources, source prefills an unverified custom-source draft for "
+                     "the user to review and add; it never saves, enables or tests it. It changes nothing; the user clicks it. Returns shown."),
         input_schema={"type": "object", "properties": {
             "target": {"type": "string", "enum": list(SETTINGS_TABS) + ["setting", "feedback"]},
             "path": {"type": "string", "maxLength": 200,
                      "description": "For target setting: the path of the setting (from describe_settings)"},
-            "form": {"type": "string", "enum": list(FEEDBACK_FORMS), "description": "Target feedback"}},
+            "form": {"type": "string", "enum": list(FEEDBACK_FORMS), "description": "Target feedback"},
+            'source': {'type': 'object', 'description': 'Target sources only: a draft, added only by the user.',
+                       'properties': {'address': {'type': 'string', 'minLength': 1, 'maxLength': 2000},
+                                      'kind': {'type': 'string', 'enum': ['auto', 'mcp', 'opendatasoft', 'ckan', 'wfs', 'wms',
+                                                                        'wmts', 'stac', 'xyz', 'geocoder', 'overpass'],
+                                               'default': 'auto'},
+                                      'title': {'type': 'string', 'maxLength': 100, 'default': ''}},
+                       'required': ['address'], 'additionalProperties': False}},
             "required": ["target"], "additionalProperties": False},
         read_only=True, chat_only=True),
     ToolSpec(

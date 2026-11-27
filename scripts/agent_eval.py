@@ -719,6 +719,11 @@ class SimulatedProject:
             "select_features": select_features, "set_layers_visibility": operation, "add_layer": add_layer,
             "segment_objects": segment_objects, "similar_objects": similar_objects,
             "remove_layers": operation, "search_open_data": search_open_data,
+            'search_data_sources': lambda args: {
+                'provider': 'scripted web search', 'query': args['query'],
+                'results': [{'title': 'Official geodata catalogue', 'url': 'https://geo.example.org/wfs',
+                             'description': 'WFS service candidate', 'kind_hint': 'wfs', 'verified': False}],
+                'note': 'Unverified candidates; no result site visited.'},
             "add_service_layer": lambda args: {"layer_id": "wfs_1", "name": args.get("name") or args["typename"], "layer_kind": "vector"},
             "find_place": lambda args: {"platform": args["platform"], "query": args["query"], "count": 1, "places": [{
                 "name": args["query"], "label": args["query"], "kind": "municipality", "longitude": 1.44, "latitude": 43.6,

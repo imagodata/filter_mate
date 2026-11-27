@@ -25,6 +25,7 @@ des propositions encore à réaliser.
 | Dossier des exports de l’agent | Implémenté | Choix local mémorisé par l’utilisateur, annulation sans export et destinations dans les profils QGIS refusées. |
 | Réseau SVG au repos et variantes | Implémenté | Icône persistante, repos statique et 22 états liés aux tâches et interactions. |
 | Recherche de datasets et sources désactivées | Implémenté | Skill disponible sans source externe active, catalogue local enrichi et propositions d’activation explicites. |
+| Découverte Web et sources personnalisées | Implémenté | Recherche Web optionnelle et bornée, candidats non vérifiés, proposition par formulaire prérempli et ajout confirmé par l’utilisateur. |
 
 ## Vérification du choix du SCR
 
@@ -291,3 +292,33 @@ Le dépôt compte 23 skills, dont 22 pour le chat et 16 pour MCP. Ce nouveau ski
 les exports de skills MCP restent cohérents. Le banc hors ligne couvre 178 scénarios actifs, dont quatre nouveaux
 sur l’inspection locale, la proposition sans activation, la recherche sans chargement et l’activation différée.
 Ces scénarios sont scriptés : ils ne constituent pas un benchmark de qualité d’un modèle distant.
+
+## Recherche Web de sources et ajout personnalisé
+
+La source intégrée `web_search`, désactivée par défaut, autorise `search_data_sources` dans le chat. Les requêtes
+publiques sont envoyées à DuckDuckGo, sans consulter les sites trouvés. L’activation de ce moteur n’autorise ni
+les domaines des candidats ni leur téléchargement. Le client existant borne chaque lecture à 20 secondes et
+2 Mio, respecte le proxy QGIS et l’annulation. Les liens et extraits renvoyés restent des candidats non vérifiés.
+
+Un contrôle navigateur, une erreur HTTP ou une réponse illisible produit un échec explicite avec une proposition
+d’ouverture manuelle de la recherche. Aucun contournement ni résultat fictif n’est utilisé. Le skill `datasets`
+guide la recherche de portails puis d’endpoints, sans présenter une page d’accueil comme un service fonctionnel.
+Le mode HTML est documenté par [DuckDuckGo](https://duckduckgo.com/duckduckgo-help-pages/features/non-javascript) ;
+sa disponibilité et son format peuvent évoluer, d’où ce repli explicite vers le navigateur.
+
+`show_settings_link`, avec `target: sources` et un objet `source`, propose un bouton de révision. Le clic ouvre
+les Sources avec nom, adresse et type préremplis. La source n’est ni enregistrée, ni testée, ni activée à ce stade.
+« Activer après l’ajout » est décoché pour une proposition de l’agent. L’utilisateur choisit Tester, Ajouter puis
+Enregistrer les paramètres ; une simple suggestion du modèle ne vaut pas autorisation.
+
+L’ajout manuel reconnaît les types explicites des URL, conserve le choix de type effectué par l’utilisateur et
+accepte un nom facultatif. Les liens GetCapabilities et les URL d’API CKAN/Opendatasoft sont ramenés à leur base
+de service, en préservant les paramètres de routage OGC. La nouvelle source est sélectionnée pour faciliter son
+test. Le formulaire gère les doublons et demande un type lorsqu’il ne peut pas être déduit.
+
+Validation : scénarios de formulaire réels en français sur QGIS 3.44 / Qt 5 et QGIS 4.3 / Qt 6, sans écriture des
+préférences avant Enregistrer. Une recherche réelle de portails géographiques belges a retourné trois candidats ;
+aucun de leurs sites n’a été consulté ni activé. Rapports [Qt 5](source-discovery-qt5.json),
+[Qt 6](source-discovery-qt6.json) et [lecture Web réelle](source-web-live-summary.json).
+Le banc hors ligne couvre désormais 181 scénarios actifs, avec les propositions de source et les recherches sans
+activation ni chargement.

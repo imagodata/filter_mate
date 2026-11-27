@@ -1,0 +1,25 @@
+{
+  "qgis": "3.44.15-Solothurn",
+  "native_checks_passed": true,
+  "live": {
+    "status": "results",
+    "count": 3,
+    "results": [
+      {
+        "title": "WFS Services with data for Belgium",
+        "url": "https://wfs.michelstuyts.be/?lang=en",
+        "verified": false
+      },
+      {
+        "title": "geo.be",
+        "url": "https://www.geo.be/",
+        "verified": false
+      },
+      {
+        "title": "Open Data - Statbel",
+        "url": "https://statbel.fgov.be/en/open-data?category=191",
+        "verified": false
+      }
+    ]
+  }
+}

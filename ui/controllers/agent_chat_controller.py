@@ -49,7 +49,7 @@ from ...core.agent.open_data import (
     parse_extra_domains,
 )
 from ...core.agent.sources import (
-    KIND_MCP, ORIGIN_COMMUNITY, ORIGIN_LOCAL, ORIGIN_OFFICIAL, all_sources, custom_from_json, enabled,
+    KIND_MCP, KIND_WEB_SEARCH, ORIGIN_COMMUNITY, ORIGIN_LOCAL, ORIGIN_OFFICIAL, all_sources, custom_from_json, enabled,
     database_sources, model_name, platform_aliases, platform_domains, platform_name,
 )
 from ...core.agent.modes import ACT, level_for, mode_note, mode_or_default
@@ -1229,6 +1229,15 @@ class AgentChatController(QObject):
         from ...core.agent.settings_reference import get as get_setting
         from ...core.agent.tool_catalog import SETTINGS_TABS
         target = str(arguments.get("target", ""))
+        draft = None
+        if arguments.get('source') is not None:
+            if target != 'sources' or not isinstance(arguments['source'], dict):
+                raise ToolFailure('source is a draft for target sources only')
+            from ...core.agent.sources import source_draft
+            try:
+                draft = source_draft(**arguments['source'])
+            except (TypeError, ValueError) as exc:
+                raise ToolFailure(str(exc)) from None
         if target == "setting":
             try:
                 row = get_setting(plugin_settings.settings_rows(), str(arguments.get("path") or ""))
@@ -1252,12 +1261,38 @@ class AgentChatController(QObject):
                            "other_applications": "Other applications"}  # the titles of the tabs, already translated
             names = {key: QCoreApplication.translate("AgentPanel", word) for key, word in panel_words.items()}
             label = _tr("Open Agent settings: {}").format(names[target])
-            self._links.append(lambda: self.open_settings(tab=target))
+            if draft is not None:
+                label = _tr('Review and add source: {}').format(draft['title'] or urlsplit(draft['address']).hostname)
+                self._links.append(lambda: self.open_settings(tab='sources', source_draft=draft))
+            else:
+                self._links.append(lambda: self.open_settings(tab=target))
         else:
             raise ToolFailure(f"Unknown target {target!r}.")
         click = self._links[-1]
         self.panel.add_link(label, click)
         return {"shown": label}
+
+    def _search_data_sources_tool(self, arguments) -> dict:
+        from ...core.agent.source_search import SourceSearchError, search_url
+        values = load_settings()
+        if not any(source.kind == KIND_WEB_SEARCH for source in enabled(
+                all_sources(custom_from_json(values.custom_sources)), values.enabled_sources)):
+            raise ToolFailure('Web source search is disabled. The user enables web_search in Sources first.')
+        from ...adapters.agent.source_search import search_data_sources
+        try:
+            return search_data_sources(arguments.get('query'), arguments.get('limit', 5))
+        except SourceSearchError as exc:
+            try:
+                url = search_url(arguments.get('query'))
+            except SourceSearchError:
+                raise ToolFailure(str(exc)) from None
+            def open_search():
+                from qgis.PyQt.QtCore import QUrl
+                from qgis.PyQt.QtGui import QDesktopServices
+                QDesktopServices.openUrl(QUrl(url))
+            self._links.append(open_search)
+            self.panel.add_link(_tr('Open this search in the browser'), open_search)
+            raise ToolFailure(str(exc)) from None
 
     @staticmethod
     def _open_feedback(form: str, ref: str) -> None:
@@ -1270,7 +1305,7 @@ class AgentChatController(QObject):
         if manager is None or not manager.reveal_setting(path):
             self._say(_tr("This setting is not shown in the configuration tree."), error=True)
 
-    def open_settings(self, tab: str = "") -> bool:
+    def open_settings(self, tab: str = "", source_draft=None) -> bool:
         """Ask for the settings; True when saved.
 
         Not while a request or a recipe runs, nor while its conversation is made (the link of an earlier error card
@@ -1280,9 +1315,9 @@ class AgentChatController(QObject):
         if self._building or self._replaying or (self._engine is not None and self._engine.busy):
             self._say(_tr("Stop the request, or wait for its end, to open the settings."), error=True)
             return False
-        return self._settings_dialog(tab)
+        return self._settings_dialog(tab, source_draft=source_draft) if source_draft is not None else self._settings_dialog(tab)
 
-    def _settings_dialog(self, tab: str = "") -> bool:
+    def _settings_dialog(self, tab: str = "", source_draft=None) -> bool:
         """The settings dialog; True when saved."""
         values = load_settings()
         protected = set(read_protected())
@@ -1311,6 +1346,8 @@ class AgentChatController(QObject):
                                             for tool in chat_tools() if tool.name not in AGENT_OWN | DISABLED_TOOLS])
         if tab:
             dialog.select_tab(tab)
+        if source_draft is not None:
+            dialog.prefill_source(source_draft)
         try:
             if dialog.exec() != QDialog.DialogCode.Accepted:
                 return False
@@ -1593,6 +1630,8 @@ class AgentChatController(QObject):
             if source.is_connector:
                 line += " — " + _tr("sends what the agent asks to {}").format(
                     one_line(urlsplit(source.address).netloc or source.address, 100))
+            elif source.kind == KIND_WEB_SEARCH:
+                line += ' — ' + _tr('sends the search query to DuckDuckGo; result sites are not visited')
             lines.append(line)
         if change.mcp_server:
             lines.append("• " + _tr("The MCP server of the plugin: other applications on this computer can then drive "
@@ -1661,6 +1700,8 @@ class AgentChatController(QObject):
             left_out.add(VIEW_MAP)  # an image of the map shows its labels and symbols: a value as much as a field
         if not kinds - {KIND_MCP, KIND_STAC, *NO_DATA_KINDS} and not searched:
             left_out.add(OPEN_DATA_TOOL)
+        if KIND_WEB_SEARCH not in kinds or not for_chat:
+            left_out.add('search_data_sources')
         if not kinds & set(SERVICE_KINDS) and not set(configured_kinds.values()) & set(SERVICE_KINDS):
             left_out.add(SERVICE_TOOL)
         if KIND_STAC not in kinds:
@@ -1756,6 +1797,7 @@ class AgentChatController(QObject):
         handlers[REMOVE_RECIPE] = self._remove_recipe_tool
         handlers[ASK_USER] = self._ask_user_tool
         handlers["show_settings_link"] = self._settings_link_tool
+        handlers['search_data_sources'] = self._search_data_sources_tool
         handlers[AGENT_OPTIONS] = self._agent_options_tool
         handlers[TURN_OFF_OPTIONS] = self._turn_off_options_tool
         handlers[TURN_ON_OPTIONS] = self._turn_on_options_tool
@@ -3131,6 +3173,14 @@ class AgentChatController(QObject):
     def _test_source(self, source) -> str:
         """For the Sources tab: does it answer, and with what?"""
         try:
+            if source.kind == KIND_WEB_SEARCH:
+                from ...adapters.agent.source_search import search_data_sources
+                from ...core.agent.source_search import SourceSearchError
+                try:
+                    search_data_sources('public geospatial data portals', 1)
+                    return _tr('It answers.')
+                except SourceSearchError as exc:
+                    return str(exc)[:300]
             if source.is_connector:
                 return _tr("{} tools available").format(len(McpConnection(source).list_tools()))
             domains = platform_domains([source])
@@ -3641,7 +3691,7 @@ class AgentChatController(QObject):
             setter(phase)
 
     def _tool_activity(self, call: ToolCallPart) -> str:
-        if call.name in ('search_open_data', 'search_imagery', 'find_place', 'find_algorithms', 'list_tables'):
+        if call.name in ('search_open_data', 'search_data_sources', 'search_imagery', 'find_place', 'find_algorithms', 'list_database_tables'):
             return 'searching'
         if call.name in ('run_algorithm', 'contour_lines', 'make_cartogram', 'cross_filter', 'geometry_filter',
                          'point_cloud_filter', 'apply_filter', 'segment_objects'):
