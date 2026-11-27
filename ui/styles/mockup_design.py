@@ -144,6 +144,9 @@ ICON_BODIES: Dict[str, str] = {
     'reset_all': '<path d="M12 21s-6-5.5-6-11a6 6 0 0112 0c0 5.5-6 11-6 11z"/><path d="M4 4l16 16"/>',
     'agent': '<path d="M4 5h16v11H9l-5 4z"/><path d="M8 9h8M8 12h5"/>',
     'agent_send': '<path d="M4 12l16-8-6 16-3-6z"/><path d="M11 14l9-10"/>',
+    'agent_push': '<path d="M13 2L3 14h8l-1 8 11-12h-8z"/>',
+    'agent_queue': '<path d="M4 6h16M4 12h7M4 18h7"/><circle cx="17" cy="16" r="5"/>'
+                   '<path d="M17 13v3l2 1"/>',
     'agent_microphone': '<rect x="9" y="3" width="6" height="12" rx="3"/><path d="M6 10v2a6 6 0 0 0 12 0v-2M12 18v3M9 21h6"/>',
     'agent_stop': '<rect x="6" y="6" width="12" height="12" rx="2" fill="currentColor"/>',
     'history': '<path d="M3 10a9 9 0 1 1 1.8 7.4M3 4v6h6"/><path d="M12 7v5l3 2"/>',

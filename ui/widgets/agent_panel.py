@@ -885,7 +885,9 @@ class AgentPanel(QFrame):
         self.followup_button.setObjectName("toolButton_agent_followup")
         self.followup_button.setCursor(Qt.CursorShape.PointingHandCursor)
         self.followup_button.setPopupMode(QToolButton.ToolButtonPopupMode.InstantPopup)
-        self.followup_button.setToolButtonStyle(Qt.ToolButtonStyle.ToolButtonTextOnly)
+        self.followup_button.setToolButtonStyle(Qt.ToolButtonStyle.ToolButtonIconOnly)
+        self.followup_button.setIconSize(QSize(ACTION_ICON_SIZE, ACTION_ICON_SIZE))
+        self.followup_button.setFixedSize(ACTION_BUTTON_SIZE, ACTION_BUTTON_SIZE)
         self.followup_button.setAccessibleName(_tr("Messages sent while the agent works"))
         followup_menu = QMenu(self.followup_button)
         self._followup_actions = {}
@@ -1414,8 +1416,6 @@ class AgentPanel(QFrame):
             " padding: 0 4px; min-height: 0; min-width: 0; }"
             f"QPushButton#pushButton_agent_queued_push {{ border: none; background: transparent;"
             f" color: {palette['fm_accent']}; padding: 0 4px; min-height: 0; min-width: 0; }}"
-            f"QToolButton#toolButton_agent_followup {{ min-width: 0; max-width: 80px; min-height: 20px;"
-            f" max-height: 20px; padding: 0 4px; border: none; background: transparent; color: {muted}; }}"
             f"QToolButton#toolButton_agent_send {{ min-width: {INPUT_HEIGHT}px; max-width: {INPUT_HEIGHT}px;"
             f" min-height: {INPUT_HEIGHT}px; max-height: {INPUT_HEIGHT}px; border: none; border-radius: 6px;"
             f" background: {send_color}; }}"
@@ -1428,11 +1428,14 @@ class AgentPanel(QFrame):
             f" border-radius: 6px; background: {palette['fm_field']}; }}"
             f"QToolButton#toolButton_agent_microphone:focus {{ border-color: {palette['fm_accent']}; }}"
             f"QLabel#label_agent_speech {{ color: {mic_color}; }}"
-            f"QToolButton#toolButton_agent_effort {{ min-width: {ACTION_BUTTON_SIZE}px; max-width: {ACTION_BUTTON_SIZE}px;"
+            "QToolButton#toolButton_agent_effort, QToolButton#toolButton_agent_followup {"
+            f" min-width: {ACTION_BUTTON_SIZE}px; max-width: {ACTION_BUTTON_SIZE}px;"
             f" min-height: {ACTION_BUTTON_SIZE}px; max-height: {ACTION_BUTTON_SIZE}px; border: 1px solid transparent;"
             " border-radius: 6px; background: transparent; }"
-            f"QToolButton#toolButton_agent_effort:hover {{ background: {palette['fm_hover']}; }}"
-            f"QToolButton#toolButton_agent_effort:focus {{ border-color: {palette['fm_accent']}; }}"
+            "QToolButton#toolButton_agent_effort:hover, QToolButton#toolButton_agent_followup:hover {"
+            f" background: {palette['fm_hover']}; }}"
+            "QToolButton#toolButton_agent_effort:focus, QToolButton#toolButton_agent_followup:focus {"
+            f" border-color: {palette['fm_accent']}; }}"
             f"QToolButton#toolButton_agent_mode {{ min-width: 0; max-width: 240px; min-height: 20px;"
             f" max-height: 22px; padding: 0 8px; border: 1px solid {palette['fm_field_border']}; border-radius: 10px;"
             f" background: {palette['fm_field']}; color: {palette['fm_text']}; font-size: 11px; }}"
@@ -1526,6 +1529,8 @@ class AgentPanel(QFrame):
         """One icon language for the toolbar, menus and recipe actions, in either theme."""
         if hasattr(self, "effort_button"):
             self._refresh_effort_button()
+        if hasattr(self, "followup_button"):
+            self._refresh_followup_button()
         for name, key, fallback in (
                 ("history_button", "history", QStyle.StandardPixmap.SP_FileDialogDetailedView),
                 ("recipes_button", "recipes", QStyle.StandardPixmap.SP_FileIcon),
@@ -2035,12 +2040,24 @@ class AgentPanel(QFrame):
         self._followup_mode = mode if mode in ("push", "queue") else "push"
         if persist:
             QSettings().setValue(_FOLLOWUP_MODE, self._followup_mode)
-        for chosen, action in self._followup_actions.items():
-            action.setChecked(chosen == self._followup_mode)
-        self.followup_button.setText(_tr("Push") if self._followup_mode == "push" else _tr("Queue"))
-        self.followup_button.setToolTip(_tr("Messages during a run: Push or Queue. Ctrl+Shift+Enter uses the other mode."))
+        self._refresh_followup_button()
         self._refresh_followup_hint()
         self._refresh_send_action()
+
+    def _refresh_followup_button(self) -> None:
+        dark = self._dark()
+        for chosen, action in self._followup_actions.items():
+            action.setChecked(chosen == self._followup_mode)
+            icon = render_icon("agent_" + chosen, dark)
+            fallback = (QStyle.StandardPixmap.SP_ArrowRight if chosen == "push" else
+                        QStyle.StandardPixmap.SP_FileDialogListView)
+            action.setIcon(icon if icon is not None else self.style().standardIcon(fallback))
+        self.followup_button.setIcon(self._followup_actions[self._followup_mode].icon())
+        title = (_tr("Push: guide the running request") if self._followup_mode == "push" else
+                 _tr("Queue: wait for the current request to finish"))
+        tooltip = title + "\n" + _tr("Messages during a run: Push or Queue. Ctrl+Shift+Enter uses the other mode.")
+        self.followup_button.setToolTip(tooltip)
+        self.followup_button.setAccessibleDescription(tooltip)
 
     def _refresh_followup_hint(self) -> None:
         text = (_tr("Enter guides the running request. Ctrl+Shift+Enter queues a follow-up.")
