@@ -1854,6 +1854,108 @@ Do you agree to all of them? No runs none of them.</source>
         <source>Opening the Processing model designer</source>
         <translation>Відкриття конструктора моделей обробки</translation>
     </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1283"/>
+        <source>Review and add source: {}</source>
+        <translation>Перевірити та додати джерело: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1312"/>
+        <source>Open this search in the browser</source>
+        <translation>Відкрити пошук в браузері</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1653"/>
+        <source>sends the search query to DuckDuckGo; result sites are not visited</source>
+        <translation>відправляє пошуковий запит на DuckDuckGo; сайти результатів не відвідуються</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1500"/>
+        <source>Wait for the current request to finish before changing the export folder.</source>
+        <translation>Почекайте, поки поточний запит закінчиться перед зміною експортної папки.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1506"/>
+        <source>Default export folder: {}</source>
+        <translation>Папка експорт по замовчуванняму: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1519"/>
+        <source>Export cancelled. Choose a default export folder from the agent menu to export.</source>
+        <translation>Експорт скасований. Виберіть дефолтну папку експорт з меню агента для експорту.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3461"/>
+        <source>Message sent to the running agent; applied at its next step.</source>
+        <translation>Повідомлення, надіслане виконавчому агенту; застосовано на наступному кроку.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="540"/>
+        <source>Wait for the current request to finish before changing the Designer workspace.</source>
+        <translation>Почекайте, поки поточний запит закінчиться перед зміною робочого простору Дизайнера.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="549"/>
+        <source>Advanced Designer workspace enabled: styles, layouts and QGIS map themes.</source>
+        <translation>Розповсюджено робоче простору Advanced Designer: стилі, макети та тематики карти QGIS.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="550"/>
+        <source>Standard conversation workspace enabled.</source>
+        <translation>Стандартна зона розмови включена.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3829"/>
+        <source>Available QGIS interfaces</source>
+        <translation>Доступні інтерфейси QGIS</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="966"/>
+        <source>Conversation from another project</source>
+        <translation>Перемова з іншого проекту</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3450"/>
+        <source>Message queued with the selected mode; the running request keeps its permissions.</source>
+        <translation>Повідомлення в черзі з обраним режимом; запущений запит зберігає свої дозволи.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="970"/>
+        <source>Project path unavailable</source>
+        <translation>Проектний шлях недоступний</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3830"/>
+        <source>QGIS interface: {}</source>
+        <translation>QGIS інтерфейс: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="4931"/>
+        <source>The QGIS interface could not be opened: {}</source>
+        <translation>Інтерфейс QGIS не міг бути відкритий: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3359"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3372"/>
+        <source>The conversation could not be archived. It has been kept open.</source>
+        <translation>Переговори не могли бути зафіксовані. Він був відкритий.</translation>
+    </message>
+    <message>
+        <source>Custom skill; review and permissions still apply</source>
+        <translation>Намовний досвід; перегляд і дозвіли все ще застосовуються</translation>
+    </message>
+    <message>
+        <source>External connector; permissions still apply</source>
+        <translation>Зовнішній з'єднання; дозвіли все ще застосовуються</translation>
+    </message>
+    <message>
+        <source>Skill request queued; it will load before the next request.</source>
+        <translation>Запрос на кваліфікацію в черзі; він буде завантажений до наступного запиту.</translation>
+    </message>
+    <message>
+        <source>Skill /{} is unavailable. Type / to see the available skills.</source>
+        <translation>Навичка /{} недоступна. Введіть /, щоб переглянути доступні навички.</translation>
+    </message>
 </context>
 <context>
     <name>AgentData</name>
@@ -1948,6 +2050,22 @@ If you choose No, these data stay in memory and will be lost when the project cl
         <location filename="../ui/controllers/agent_data.py" line="70"/>
         <source>Wait for the current request to finish before saving its data.</source>
         <translation>Дочекайтеся завершення поточного запиту, перш ніж зберігати його дані.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_data.py" line="91"/>
+        <location filename="../ui/controllers/agent_data.py" line="121"/>
+        <source>Do not offer again this session</source>
+        <translation>Не повторюйте цю сесію.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_data.py" line="92"/>
+        <source>Hide save suggestions until QGIS restarts. You can still save from the agent menu.</source>
+        <translation>Зберігайте пропозиції до того часу, поки QGIS не запуститься. Ви все ще можете заощадити з меню агентів.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_data.py" line="93"/>
+        <source>Save suggestions are hidden for this QGIS session. The data stay in memory.</source>
+        <translation>Заховані пропозиції приховані для цієї сесії QGIS. Дані зберігаються в пам'яті.</translation>
     </message>
 </context>
 <context>
@@ -3703,6 +3821,236 @@ If you choose No, these data stay in memory and will be lost when the project cl
         <location filename="../ui/widgets/agent_panel.py" line="727"/>
         <source>Processing model designer…</source>
         <translation>Конструктор моделей обробки…</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="3263"/>
+        <source>Detect service type</source>
+        <translation>Тип служби виявлення</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="3275"/>
+        <source>Source name (optional)</source>
+        <translation>Назва джерела (подібна)</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="3277"/>
+        <source>Enable after adding</source>
+        <translation>Увімкнути після додавання</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="3392"/>
+        <source>Source added to this form. Save these settings to keep it.</source>
+        <translation>Додано джерело до цієї форми. Зберігайте ці налаштування, щоб зберегти його.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="3409"/>
+        <source>Unverified suggestion. Review the address and type, then test or add it yourself.</source>
+        <translation>Неперевірений пропозиція. Перегляньте адресу і вкладі, а потім перевіріть або додайте її самостійно.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="3371"/>
+        <source>Choose the service type if it cannot be detected from the address.</source>
+        <translation>Виберіть тип служби, якщо його не можна виявити з адреси.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="798"/>
+        <source>Default export folder…</source>
+        <translation>Папка експорт по замовчуванням...</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="749"/>
+        <source>Push</source>
+        <translation>Push</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="742"/>
+        <source>Send now</source>
+        <translation>Посилайте зараз.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="746"/>
+        <source>Send the first waiting message to the running agent</source>
+        <translation>Відправити перше повідомлення до агента.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="911"/>
+        <source>Messages sent while the agent works</source>
+        <translation>Повідомлення, що надсилаються, поки агент працює</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="914"/>
+        <location filename="../ui/widgets/agent_panel.py" line="2209"/>
+        <source>Push: guide the running request</source>
+        <translation>Push: провідіть запит</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="915"/>
+        <location filename="../ui/widgets/agent_panel.py" line="2210"/>
+        <source>Queue: wait for the current request to finish</source>
+        <translation>Черга: чекати завершення поточного запиту</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="2040"/>
+        <source>Queue</source>
+        <translation>Черга</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="2211"/>
+        <source>Messages during a run: Push or Queue. Ctrl+Shift+Enter uses the other mode.</source>
+        <translation>Повідомлення під час бігу: натискання або очереди. Ctrl+Shift+Enter використовує інший режим.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="2222"/>
+        <source>Enter guides the running request. Ctrl+Shift+Enter queues a follow-up.</source>
+        <translation>Введіть провідний запит. Ctrl+Shift+Enter ряди продовження.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="2224"/>
+        <source>Enter queues a follow-up. Ctrl+Shift+Enter guides the running request.</source>
+        <translation>Введіть черги. Ctrl+Shift+Enter вказує на запущений запит.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="2231"/>
+        <source>Send to the running agent (Enter)</source>
+        <translation>Відправляйте до оперативного агента (Вхід)</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="2232"/>
+        <source>Queue the request (Enter)</source>
+        <translation>Засідайте запит (введіть)</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1038"/>
+        <source>Enter sends in the selected mode. Esc stops. Ctrl+Shift+Enter uses the other mode.</source>
+        <translation>Введення відправляє в обраному режимі. Ескорпеція зупиняється. Ctrl+Shift+Enter використовує інший режим.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="780"/>
+        <location filename="../ui/widgets/agent_panel.py" line="781"/>
+        <location filename="../ui/widgets/agent_panel.py" line="2086"/>
+        <source>Dictate with the microphone</source>
+        <translation>Диктуйте за допомогою мікрофона</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="824"/>
+        <source>Microphone settings…</source>
+        <translation>Настройки мікрофона...</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="854"/>
+        <source>Cancel dictation</source>
+        <translation>Відкласти диктант</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="2085"/>
+        <source>Stop recording and transcribe</source>
+        <translation>Перестань записувати і переписати</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="2086"/>
+        <source>Cancel transcription</source>
+        <translation>Занклювати транскрипцію</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="800"/>
+        <source>Advanced Designer workspace</source>
+        <translation>Просудований дизайнерський робочий простір</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="803"/>
+        <source>Brainstorm a solution…</source>
+        <translation>Брейст-стоурм рішення...</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="995"/>
+        <source>Designer</source>
+        <translation>Дизайнер</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="999"/>
+        <source>Ideas</source>
+        <translation>Ідеї</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="999"/>
+        <source>Styles</source>
+        <translation>Стилі</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1000"/>
+        <source>Print layout</source>
+        <translation>Розклад друку</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1000"/>
+        <source>Map themes</source>
+        <translation>Тематика карти</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1005"/>
+        <source>Insert an editable request: {}</source>
+        <translation>Введіть редагувальний запит: {}</translation>
+    </message>
+    <message>
+        <source>Help me brainstorm and refine a solution from the current context. Propose two or three options and ask only questions that change the choice. Do not change the project yet.</source>
+        <translation>Допоможіть мені подумати і випрацювати рішення з поточного контексту. Задайте два або три варіанти і запитайте лише питання, які змінюють вибір. Не змінюйте проект ще.</translation>
+    </message>
+    <message>
+        <source>In the advanced Designer workspace, propose refined layer styles and labels for this project. Compare two directions with readable colors and hierarchy. Do not apply them yet.</source>
+        <translation>У передовій робочому просторі дизайнера запропонуйте витончені стилі та етикети для цього проекту. Порівняйте дві напрямки з читальними кольорами і ієрархією. Не застосовуйте їх ще.</translation>
+    </message>
+    <message>
+        <source>In the advanced Designer workspace, propose a print layout: purpose, page format, map, legend, scale and typography. Refine the proposal with me before creating or changing anything.</source>
+        <translation>У розширеному робочому просторі Дизайнера запропонуйте оформлення друку: ціль, формат сторінки, карта, легенда, масштаб і типографія. До того, як щось створити або змінити.</translation>
+    </message>
+    <message>
+        <source>In the advanced Designer workspace, inspect existing QGIS map themes and propose how to organize them for different views and layouts. Do not save, replace, apply or remove a theme yet.</source>
+        <translation>У передовій робочому просторі Дизайнера перевіряйте існуючі тематики карт QGIS і пропонуйте, як організувати їх для різних поглядів та макетів. Не збережіть, не замінюйте, не застосуйте або не видаліть тему.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1121"/>
+        <source>Conversations</source>
+        <translation>Переговори</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="2220"/>
+        <source>Current request: {}. Next message: {}. It will wait for the current request.</source>
+        <translation>Текучий запит: {}. Наступне повідомлення: {}. Він чекатиме на поточну прохання.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1174"/>
+        <location filename="../ui/widgets/agent_panel.py" line="1366"/>
+        <source>Open conversation</source>
+        <translation>Відкрита розмова</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1236"/>
+        <source>Project path unavailable</source>
+        <translation>Проектний шлях недоступний</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1367"/>
+        <source>Read conversation</source>
+        <translation>Читати розмову</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1122"/>
+        <source>Up to 200 recent conversations on this computer. Other projects open for reading only.</source>
+        <translation>До 200 останніх розмов на цьому комп'ютері. Інші проекти відкриті лише для читання.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1237"/>
+        <source>current</source>
+        <translation>поточний</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1241"/>
+        <source>{} conversation(s)</source>
+        <translation>{} розмова</translation>
+    </message>
+    <message>
+        <source>Type / for skills or @ for project layers. Enter/Tab chooses a skill; Enter sends the edited request.</source>
+        <translation>Тип / для навичок або @ для пластин проекту. Enter/Tab вибирає навичок; Enter надсилає редагуваний запит.</translation>
     </message>
 </context>
 <context>
@@ -14991,6 +15339,502 @@ Folder: {6}</source>
         <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
         <source>Kept points</source>
         <translation type="obsolete">Збережені точки</translation>
+    </message>
+</context>
+<context>
+    <name>AgentSpeech</name>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="279"/>
+        <source>Audio stays in memory and is discarded after transcription. The text is inserted in the draft; you review it and press Send yourself.</source>
+        <translation>Аудіозапис залишається в пам’яті та видаляється після розшифрування. Текст вставляється в чернетку; перевірте його та самостійно натисніть Надіслати.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="41"/>
+        <source>Automatic, or a language code: fr, en…</source>
+        <translation>Автоматичний або код мови: fr, en...</translation>
+    </message>
+    <message>
+        <source>Choose a transcription model (at most 200 characters).</source>
+        <translation>Виберіть модель транскрипції (найбільше 200 символів).</translation>
+    </message>
+    <message>
+        <source>Choose a transcription service.</source>
+        <translation>Виберіть послугу транскрипції.</translation>
+    </message>
+    <message>
+        <source>Choose whether to send recorded audio to this transcription service.</source>
+        <translation>Виберіть, чи відправити запис аудіо на цю послугу транскрипції.</translation>
+    </message>
+    <message>
+        <source>Configure the microphone service before recording.</source>
+        <translation>Конфігуруйте послугу мікрофона перед записом.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_speech.py" line="134"/>
+        <source>Dictation added to the draft. Review it, then press Send.</source>
+        <translation>Додано диктант до проекту. Проверяйте його, а потім натисніть Посилати.</translation>
+    </message>
+    <message>
+        <source>Language is an ISO code such as fr or en, or empty for automatic detection.</source>
+        <translation>Мова є ISO-кодом, таким як fr або en, або порожнім для автоматичного виявлення.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_speech.py" line="94"/>
+        <source>Local service</source>
+        <translation>Місцеві послуги</translation>
+    </message>
+    <message>
+        <source>Microphone access was denied. Enable it in system privacy settings.</source>
+        <translation>Доступ до мікрофона був відмовлений. Отримайте його в налаштуваннях конфіденційності системи.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_speech.py" line="39"/>
+        <source>Microphone configured. Click the microphone to dictate.</source>
+        <translation>Мікрофон налаштований. Націсніть на мікрофон, щоб диктовати.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="21"/>
+        <source>Microphone settings</source>
+        <translation>Настройки мікрофона</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_speech.py" line="140"/>
+        <source>Microphone: {}</source>
+        <translation>Микрофон: {}</translation>
+    </message>
+    <message>
+        <source>No audio was recorded. Check the microphone and try again.</source>
+        <translation>Ніщо не записано. Перевір мікрофон і спробуй ще раз.</translation>
+    </message>
+    <message>
+        <source>No microphone is available. Check the device in Microphone settings.</source>
+        <translation>Микрофон немає. Перевірте пристрій у налаштуванні мікрофона.</translation>
+    </message>
+    <message>
+        <source>No speech was recognized. Try recording again.</source>
+        <translation>Ніякі виступи не були визнані. Спробуй записати ще раз.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="51"/>
+        <source>Previously selected microphone (unavailable)</source>
+        <translation>Раніше обраний мікрофон (не доступний)</translation>
+    </message>
+    <message>
+        <source>Qt Multimedia is unavailable in this QGIS installation.</source>
+        <translation>Qt Multimedia недоступна в цій установці QGIS.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_speech.py" line="95"/>
+        <source>Recording… {} · {}</source>
+        <translation>Запишування... {} · {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="58"/>
+        <source>Remove stored transcription key</source>
+        <translation>Знімайте збережений ключ транскрипції</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_speech.py" line="75"/>
+        <location filename="../ui/widgets/agent_speech.py" line="170"/>
+        <source>Requesting microphone access…</source>
+        <translation>Запрошуємо доступ до мікрофона...</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="61"/>
+        <source>Send recorded audio to this service for transcription</source>
+        <translation>Відправить записану аудіо на цю послугу для транскрипції</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="281"/>
+        <source>Start your local OpenAI-compatible transcription server first. No audio leaves this computer.</source>
+        <translation>Почніть свій місцевий OpenAI-compatible Спершу транскрипційний сервер. З цього комп'ютера не виходить жодного звуку.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="55"/>
+        <source>Stored key</source>
+        <translation>Ключ зберіг</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="43"/>
+        <source>System default microphone</source>
+        <translation>Система дефолтований мікрофон</translation>
+    </message>
+    <message>
+        <source>The API key contains an invalid character.</source>
+        <translation>Ключ API містить недійсний знак.</translation>
+    </message>
+    <message>
+        <source>The chat provider has no stored key for this transcription address.</source>
+        <translation>Постачальник чат не має зберігений ключ для цієї адреси транскрипції.</translation>
+    </message>
+    <message>
+        <source>The local transcription service must run on this computer (localhost).</source>
+        <translation>Локальна служба транскрипції повинна працювати на цьому комп'ютері (localhost).</translation>
+    </message>
+    <message>
+        <source>The microphone audio format is not supported.</source>
+        <translation>Звуковий формат мікрофона не підтримується.</translation>
+    </message>
+    <message>
+        <source>The microphone could not be started. Check permissions and audio input settings.</source>
+        <translation>Микфону не можна було запустити. Перевірте дозволів і налаштування аудіо-вхідних даних.</translation>
+    </message>
+    <message>
+        <source>The microphone stopped unexpectedly. Check the selected input device.</source>
+        <translation>Микрокфон несподівано зупинився. Перевірте обраний вхідний пристрій.</translation>
+    </message>
+    <message>
+        <source>The recorded audio is empty or exceeds the dictation limit.</source>
+        <translation>Знятий аудіо пусте або перевищує ліміт диктування.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="282"/>
+        <source>The selected service receives the recorded audio and may charge for transcription. Keys are stored in the QGIS authentication database.</source>
+        <translation>Вибрана послуга отримує записану аудіо і може брати за транскрипцію. Ключі зберігаються в базі даних аутентифікації QGIS.</translation>
+    </message>
+    <message>
+        <source>The stored transcription key belongs to another service address.</source>
+        <translation>Зберігений ключ транскрипції належить іншому адресі служби.</translation>
+    </message>
+    <message>
+        <source>The transcript is too long for a dictation.</source>
+        <translation>Перепис занадто довгий для диктування.</translation>
+    </message>
+    <message>
+        <source>The transcription response is too large.</source>
+        <translation>Реакція на транскрипцію занадто велика.</translation>
+    </message>
+    <message>
+        <source>The transcription service could not be reached. Check its address and connection.</source>
+        <translation>Службу транскрипції не було. Перевір його адресу і зв'язок.</translation>
+    </message>
+    <message>
+        <source>The transcription service did not return a JSON transcript.</source>
+        <translation>Сервіс транскрипції не повернув транскрипту JSON.</translation>
+    </message>
+    <message>
+        <source>The transcription service redirected the request. Check its address in Microphone settings.</source>
+        <translation>Служба транскрипції перенаправила запит. Перевірте його адресу в налаштуваннях мікрофона.</translation>
+    </message>
+    <message>
+        <source>The transcription service took too long to answer.</source>
+        <translation>Служба транскрипції потрапила занадто довго, щоб відповісти.</translation>
+    </message>
+    <message>
+        <source>This transcription service needs an API key.</source>
+        <translation>Цей сервіс транскрипції потребує ключ API.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_speech.py" line="112"/>
+        <location filename="../ui/widgets/agent_speech.py" line="233"/>
+        <source>Transcribing…</source>
+        <translation>Перепис...</translation>
+    </message>
+    <message>
+        <source>Use a service address without credentials, query or fragment.</source>
+        <translation>Використовуйте адресу служби без ознак, запитів або фрагментів.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="56"/>
+        <source>Use the chat provider's key for this same address</source>
+        <translation>Використовуйте ключ постачальника чату для цього ж адресу</translation>
+    </message>
+    <message>
+        <source>Local server (OpenAI-compatible)</source>
+        <translation>Локальний сервер (OpenAI-compatible)</translation>
+    </message>
+    <message>
+        <source>Transcription service</source>
+        <translation>Сервіс транскрипції</translation>
+    </message>
+    <message>
+        <source>Service address</source>
+        <translation>Адреса служби</translation>
+    </message>
+    <message>
+        <source>Transcription model</source>
+        <translation>Модель транскрипції</translation>
+    </message>
+    <message>
+        <source>Language</source>
+        <translation>Мова</translation>
+    </message>
+    <message>
+        <source>Microphone</source>
+        <translation>Микрофон</translation>
+    </message>
+    <message>
+        <source>API key</source>
+        <translation>Ключ API</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="68"/>
+        <location filename="../ui/widgets/agent_speech.py" line="139"/>
+        <source>Test microphone</source>
+        <translation>Перевірити мікрофон</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="70"/>
+        <source>Test transcription</source>
+        <translation>Перевірити розшифрування</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="76"/>
+        <source>Microphone level: %p%</source>
+        <translation>Рівень мікрофона: %p%</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="77"/>
+        <source>Record up to 10 seconds, then test transcription with the settings above.</source>
+        <translation>Запишіть до 10 секунд, а потім перевіріть транскрипцію за допомогою параметрів вище.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="122"/>
+        <source>Settings changed. Test transcription again.</source>
+        <translation>Настройки змінилися. Знову переписку.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="154"/>
+        <source>Test cancelled.</source>
+        <translation>Тест скасований.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="169"/>
+        <source>Stop microphone test</source>
+        <translation>Перевірка спинення мікрофона</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="190"/>
+        <source>Speak into the microphone… {} / 10 s</source>
+        <translation>Говоріть у мікрофон... {} / 10 с</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="203"/>
+        <source>Recording ready. Click Test transcription to check the service.</source>
+        <translation>Запис готовий. Націсніть тест-транскрипцію, щоб перевірити послугу.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="232"/>
+        <source>Cancel transcription</source>
+        <translation>Занклювати транскрипцію</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="246"/>
+        <source>Transcription test succeeded.</source>
+        <translation>Переписний тест пройшов успішно.</translation>
+    </message>
+    <message>
+        <source>Mistral requires a two-letter language code such as fr or en, or empty for automatic detection.</source>
+        <translation>Mistral вимагає двобуквенного мовного коду, такого як fr або en, або порожнього для автоматичного виявлення.</translation>
+    </message>
+</context>
+<context>
+    <name>AgentEditCommits</name>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="101"/>
+        <source>A memory layer stays in memory after saving its edits. Save project and layers to keep it after closing QGIS.</source>
+        <translation>Склад пам'яті зберігається в пам'яти після збереження його редагувань. Зберігайте проект і шари для збереження після закриття QGIS.</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="24"/>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="27"/>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="30"/>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="41"/>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="45"/>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="47"/>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="50"/>
+        <source>The transaction group could not be verified. Use QGIS to save these edits.</source>
+        <translation>Групу операцій не вдалося перевірити. Використовуйте QGIS для збереження цих редагувань.</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="85"/>
+        <source>Layer edits are still pending.</source>
+        <translation>Редагування шарів все ще чекають.</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="91"/>
+        <source>Layer edits</source>
+        <translation>Зміни шарів</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="91"/>
+        <source>Save the layer edits?</source>
+        <translation>Зберегти зміни шарів?</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="92"/>
+        <source>Save layer edits</source>
+        <translation>Зберегти зміни шарів</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="92"/>
+        <source>Keep pending</source>
+        <translation>Залишити зміни незбереженими</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="93"/>
+        <source>Checking and saving the layer edits…</source>
+        <translation>Перевірка та збереження редагувань шарів...</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="94"/>
+        <source>Edits remain pending unless saved or discarded in QGIS. A new edit needs a new confirmation.</source>
+        <translation>Редакти залишаються чекаючими, якщо вони не зберігаються або не викидаються в QGIS. Нова редакція потребує нового підтвердження.</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="96"/>
+        <source>Saved edits can no longer be undone from the agent chat.</source>
+        <translation>Збережені зміни більше не можна скасувати з чату агента.</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="97"/>
+        <source>Save all pending changes to the data source, including any manual edits on the listed layers?</source>
+        <translation>Зберегти у джерело даних усі незбережені зміни, зокрема ручні зміни перелічених шарів?</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="99"/>
+        <source>These layers share a QGIS transaction. They are saved together.</source>
+        <translation>Ці шари поділяють транзакцію QGIS. Вони врятовані разом.</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="130"/>
+        <source>The conversation changed or a request is running. Ask for a new confirmation.</source>
+        <translation>Переговори змінилися або запит працює. Запитайте нову підтвердження.</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="133"/>
+        <source>The layers changed since this confirmation. Review them and ask again.</source>
+        <translation>Склади змінилися після цього підтвердження. Проверяйте їх і запитайте ще раз.</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="136"/>
+        <source>A listed layer is protected from the agent. Save its edits directly in QGIS.</source>
+        <translation>Список слоїв захищений від агента. Зберігайте його редагування безпосередньо в QGIS.</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="147"/>
+        <source>QGIS refused to save the edits.</source>
+        <translation>QGIS відмовилася зберегти редагування.</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="163"/>
+        <source>Layer edits saved: {}</source>
+        <translation>Зміни шарів збережено: {}</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="152"/>
+        <source>The layer edits were not fully saved. Review their state in QGIS.</source>
+        <translation>Зміни шарів збережено не повністю. Перевірте їхній стан у QGIS.</translation>
+    </message>
+</context>
+<context>
+    <name>AgentExports</name>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_exports.py" line="13"/>
+        <source>Choose the default agent export folder</source>
+        <translation>Виберіть папку експортного агента за замовчуванням</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_exports.py" line="20"/>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_exports.py" line="22"/>
+        <source>Choose an existing folder outside the QGIS profiles.</source>
+        <translation>Виберіть існуючу папку поза профілями QGIS.</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_exports.py" line="22"/>
+        <source>Export folder</source>
+        <translation>Папка експорту</translation>
+    </message>
+</context>
+<context>
+    <name>AgentActivity</name>
+    <message>
+        <source>Ready for a message</source>
+        <translation>Готовий до повідомлення</translation>
+    </message>
+    <message>
+        <source>Finished — ready for a message</source>
+        <translation>Завершено  ⁇  готовий до повідомлення</translation>
+    </message>
+    <message>
+        <source>Thinking</source>
+        <translation>Думка</translation>
+    </message>
+    <message>
+        <source>Reading data</source>
+        <translation>Читання даних</translation>
+    </message>
+    <message>
+        <source>Working</source>
+        <translation>Працюючи</translation>
+    </message>
+    <message>
+        <source>Fetching data</source>
+        <translation>Виведення даних</translation>
+    </message>
+    <message>
+        <source>Writing the response</source>
+        <translation>Написати відповідь</translation>
+    </message>
+    <message>
+        <source>Waiting</source>
+        <translation>Очікуючи</translation>
+    </message>
+    <message>
+        <source>Retrying</source>
+        <translation>Повторний спроб</translation>
+    </message>
+    <message>
+        <source>Stopped or stopping</source>
+        <translation>Припинка або припинення</translation>
+    </message>
+    <message>
+        <source>You are writing a message</source>
+        <translation>Ви пишете повідомлення.</translation>
+    </message>
+    <message>
+        <source>Messages are queued</source>
+        <translation>Повідомлення в черзі</translation>
+    </message>
+    <message>
+        <source>The request needs your attention</source>
+        <translation>Прохання потребує вашої уваги</translation>
+    </message>
+    <message>
+        <source>Searching for data</source>
+        <translation>Пошук даних</translation>
+    </message>
+    <message>
+        <source>Processing data</source>
+        <translation>Переробка даних</translation>
+    </message>
+    <message>
+        <source>Editing a layer</source>
+        <translation>Редагування шару</translation>
+    </message>
+    <message>
+        <source>Exporting files</source>
+        <translation>Експорт файлів</translation>
+    </message>
+    <message>
+        <source>Designing the map</source>
+        <translation>Розробка карти</translation>
+    </message>
+    <message>
+        <source>Navigating in QGIS</source>
+        <translation>Навігація в QGIS</translation>
+    </message>
+    <message>
+        <source>Waiting for your confirmation</source>
+        <translation>Очікуючи вашої підтвердження</translation>
+    </message>
+    <message>
+        <source>Recording your voice</source>
+        <translation>Записуючи голос</translation>
+    </message>
+    <message>
+        <source>Transcribing your recording</source>
+        <translation>Перепис записи</translation>
     </message>
 </context>
 </TS>

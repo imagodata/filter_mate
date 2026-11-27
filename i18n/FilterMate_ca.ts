@@ -1854,6 +1854,108 @@ Hi esteu d'acord amb totes? No: no se n'executa cap.</translation>
         <source>Opening the Processing model designer</source>
         <translation>S'està obrint el modelador de processament</translation>
     </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1283"/>
+        <source>Review and add source: {}</source>
+        <translation>Revisa i afegeix la font: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1312"/>
+        <source>Open this search in the browser</source>
+        <translation>Obre aquesta cerca en el navegador</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1653"/>
+        <source>sends the search query to DuckDuckGo; result sites are not visited</source>
+        <translation>Envia la consulta de cerca a DuckDuckGo; llocs de resultats no són visitats</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1500"/>
+        <source>Wait for the current request to finish before changing the export folder.</source>
+        <translation>Esperar que la petició actual s'acabi abans de canviar la carpeta d'exportació.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1506"/>
+        <source>Default export folder: {}</source>
+        <translation>Carregador d'exportació per defecte: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1519"/>
+        <source>Export cancelled. Choose a default export folder from the agent menu to export.</source>
+        <translation>L'exportació cancel·lada. Seleccioneu una carpeta d'exportació predeterminada del menú de l'agent per exportar.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3461"/>
+        <source>Message sent to the running agent; applied at its next step.</source>
+        <translation>Mensaig enviat a l'agent en curs; aplicat en el seu següent pas.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="540"/>
+        <source>Wait for the current request to finish before changing the Designer workspace.</source>
+        <translation>Esperar que la petició actual s'acabi abans de canviar l'espai de treball del dissenyador.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="549"/>
+        <source>Advanced Designer workspace enabled: styles, layouts and QGIS map themes.</source>
+        <translation>L'espai de treball d'Advanced Designer habilitat: estils, disposicions i temes de mapa QGIS.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="550"/>
+        <source>Standard conversation workspace enabled.</source>
+        <translation>L'espai de treball de conversa estàndard habilitat.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3829"/>
+        <source>Available QGIS interfaces</source>
+        <translation>Interfícies de QGIS disponibles</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="966"/>
+        <source>Conversation from another project</source>
+        <translation>Conversació d'un altre projecte</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3450"/>
+        <source>Message queued with the selected mode; the running request keeps its permissions.</source>
+        <translation>Mensaig en fila amb el mode seleccionat; la petició en curs conserva els seus permisos.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="970"/>
+        <source>Project path unavailable</source>
+        <translation>Path del projecte no està disponible</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3830"/>
+        <source>QGIS interface: {}</source>
+        <translation>Interfície QGIS: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="4931"/>
+        <source>The QGIS interface could not be opened: {}</source>
+        <translation>L'interfície QGIS no es va poder obrir: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3359"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3372"/>
+        <source>The conversation could not be archived. It has been kept open.</source>
+        <translation>La conversa no va poder ser archivada. Ha sigut oberta.</translation>
+    </message>
+    <message>
+        <source>Custom skill; review and permissions still apply</source>
+        <translation>Habilitat personalitzada; revisió i permisos encara s'apliquen</translation>
+    </message>
+    <message>
+        <source>External connector; permissions still apply</source>
+        <translation>Connector extern; encara s'apliquen els permisos</translation>
+    </message>
+    <message>
+        <source>Skill request queued; it will load before the next request.</source>
+        <translation>Demanda de competències en fila; es carregarà abans de la següent petició.</translation>
+    </message>
+    <message>
+        <source>Skill /{} is unavailable. Type / to see the available skills.</source>
+        <translation>L’habilitat /{} no està disponible. Escriu / per veure les habilitats disponibles.</translation>
+    </message>
 </context>
 <context>
     <name>AgentData</name>
@@ -1948,6 +2050,22 @@ Si trieu No, aquestes dades es mantenen en memòria i es perdran en tancar el pr
         <location filename="../ui/controllers/agent_data.py" line="70"/>
         <source>Wait for the current request to finish before saving its data.</source>
         <translation>Espereu que acabi la sol·licitud actual abans de desar-ne les dades.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_data.py" line="91"/>
+        <location filename="../ui/controllers/agent_data.py" line="121"/>
+        <source>Do not offer again this session</source>
+        <translation>No tornes a oferir aquesta sessió.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_data.py" line="92"/>
+        <source>Hide save suggestions until QGIS restarts. You can still save from the agent menu.</source>
+        <translation>Escondir suggeriments fins que QGIS reinicie. Encara pots guardar del menú de l'agent.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_data.py" line="93"/>
+        <source>Save suggestions are hidden for this QGIS session. The data stay in memory.</source>
+        <translation>Les suggestions de guardar estan amagades per a aquesta sessió QGIS. Les dades queden en memòria.</translation>
     </message>
 </context>
 <context>
@@ -3703,6 +3821,236 @@ Si trieu No, aquestes dades es mantenen en memòria i es perdran en tancar el pr
         <location filename="../ui/widgets/agent_panel.py" line="727"/>
         <source>Processing model designer…</source>
         <translation>Modelador de processament…</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="3263"/>
+        <source>Detect service type</source>
+        <translation>Tip de servei de detecció</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="3275"/>
+        <source>Source name (optional)</source>
+        <translation>Nom de font (opcional)</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="3277"/>
+        <source>Enable after adding</source>
+        <translation>Activa després d’afegir</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="3392"/>
+        <source>Source added to this form. Save these settings to keep it.</source>
+        <translation>Fonte afegida a aquest formulari. Conservar aquestes configuracions per mantenir-la.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="3409"/>
+        <source>Unverified suggestion. Review the address and type, then test or add it yourself.</source>
+        <translation>Sugerencia no verificada. Revisar l'adreça i la tipografia, després provar o afegir-la tu mateix.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="3371"/>
+        <source>Choose the service type if it cannot be detected from the address.</source>
+        <translation>Seleccioneu el tipus de servei si no es pot detectar a partir de l'adreça.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="798"/>
+        <source>Default export folder…</source>
+        <translation>La carpeta d'exportació per defecte...</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="749"/>
+        <source>Push</source>
+        <translation>Push</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="742"/>
+        <source>Send now</source>
+        <translation>Envia ara.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="746"/>
+        <source>Send the first waiting message to the running agent</source>
+        <translation>Enviar el primer missatge d'espera a l'agent en curs</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="911"/>
+        <source>Messages sent while the agent works</source>
+        <translation>Els missatges enviats mentre l'agent treballa</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="914"/>
+        <location filename="../ui/widgets/agent_panel.py" line="2209"/>
+        <source>Push: guide the running request</source>
+        <translation>Push: guia la petició en curs</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="915"/>
+        <location filename="../ui/widgets/agent_panel.py" line="2210"/>
+        <source>Queue: wait for the current request to finish</source>
+        <translation>Cua: esperar que la petició actual s'acabi</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="2040"/>
+        <source>Queue</source>
+        <translation>Cua</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="2211"/>
+        <source>Messages during a run: Push or Queue. Ctrl+Shift+Enter uses the other mode.</source>
+        <translation>Mensajos durant una cursa: empujar o fila. Ctrl+Shift+Enter utilitza l'altre mode.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="2222"/>
+        <source>Enter guides the running request. Ctrl+Shift+Enter queues a follow-up.</source>
+        <translation>Intrar guides la petició en curs. Ctrl+Shift+Enter filas de seguiment.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="2224"/>
+        <source>Enter queues a follow-up. Ctrl+Shift+Enter guides the running request.</source>
+        <translation>Introdueix les files de seguiment. Ctrl+Shift+Enter guia la petició en curs.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="2231"/>
+        <source>Send to the running agent (Enter)</source>
+        <translation>Enviar a l'agent en curs (Entrar)</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="2232"/>
+        <source>Queue the request (Enter)</source>
+        <translation>La fila de la sol·licitud (Entrar)</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1038"/>
+        <source>Enter sends in the selected mode. Esc stops. Ctrl+Shift+Enter uses the other mode.</source>
+        <translation>Entrar envia en el mode seleccionat. Es detingui l'esc. Ctrl+Shift+Enter utilitza l'altre mode.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="780"/>
+        <location filename="../ui/widgets/agent_panel.py" line="781"/>
+        <location filename="../ui/widgets/agent_panel.py" line="2086"/>
+        <source>Dictate with the microphone</source>
+        <translation>Dictar amb el microfònic</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="824"/>
+        <source>Microphone settings…</source>
+        <translation>La configuració del micròfon...</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="854"/>
+        <source>Cancel dictation</source>
+        <translation>Cancellar el dictat</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="2085"/>
+        <source>Stop recording and transcribe</source>
+        <translation>Deixar d'enregistrar i transcriure</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="2086"/>
+        <source>Cancel transcription</source>
+        <translation>Cancel·lar la transcripció</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="800"/>
+        <source>Advanced Designer workspace</source>
+        <translation>Espaci de treball d'Advanced Designer</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="803"/>
+        <source>Brainstorm a solution…</source>
+        <translation>Una tempesta de pensaments per a una solució...</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="995"/>
+        <source>Designer</source>
+        <translation>Dissenyador</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="999"/>
+        <source>Ideas</source>
+        <translation>Idees</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="999"/>
+        <source>Styles</source>
+        <translation>Estils</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1000"/>
+        <source>Print layout</source>
+        <translation>Impressió de la disposició</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1000"/>
+        <source>Map themes</source>
+        <translation>Temàtiques del mapa</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1005"/>
+        <source>Insert an editable request: {}</source>
+        <translation>Insertar una petició editable: {}</translation>
+    </message>
+    <message>
+        <source>Help me brainstorm and refine a solution from the current context. Propose two or three options and ask only questions that change the choice. Do not change the project yet.</source>
+        <translation>Ajuda-me a pensar i refinar una solució del context actual. Proposa dues o tres opcions i posa només preguntes que modifiquin la decisió. No canvis el projecte encara.</translation>
+    </message>
+    <message>
+        <source>In the advanced Designer workspace, propose refined layer styles and labels for this project. Compare two directions with readable colors and hierarchy. Do not apply them yet.</source>
+        <translation>En l'espai de treball avançat Designer, proposa estils i etiquetes de capes refinats per a aquest projecte. Compara dues direccions amb colors legibles i jerarquia. No els apliques encara.</translation>
+    </message>
+    <message>
+        <source>In the advanced Designer workspace, propose a print layout: purpose, page format, map, legend, scale and typography. Refine the proposal with me before creating or changing anything.</source>
+        <translation>En l'espai de treball avançat del dissenyador, proposa una disposició impressa: finalitat, format de pàgina, mapa, llegenda, escala i tipografia. Refinar la proposta amb mi abans de crear o canviar res.</translation>
+    </message>
+    <message>
+        <source>In the advanced Designer workspace, inspect existing QGIS map themes and propose how to organize them for different views and layouts. Do not save, replace, apply or remove a theme yet.</source>
+        <translation>En l'espai de treball avançat Designer, inspeccionar els temes de mapa QGIS existents i proposar com organitzar-los per a diferents vistes i disposicions. No emmagatzemar, substituir, aplicar o eliminar un tema encara.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1121"/>
+        <source>Conversations</source>
+        <translation>Conversacions</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="2220"/>
+        <source>Current request: {}. Next message: {}. It will wait for the current request.</source>
+        <translation>Solicitud actual: {}- Sí . Posteriorment: {}- Sí . Esperarà la petició actual.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1174"/>
+        <location filename="../ui/widgets/agent_panel.py" line="1366"/>
+        <source>Open conversation</source>
+        <translation>Conversació oberta</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1236"/>
+        <source>Project path unavailable</source>
+        <translation>Path del projecte no està disponible</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1367"/>
+        <source>Read conversation</source>
+        <translation>Llegeix conversa</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1122"/>
+        <source>Up to 200 recent conversations on this computer. Other projects open for reading only.</source>
+        <translation>Fins a 200 converses recents en aquest ordinador. Altres projectes oberts només per a lectura.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1237"/>
+        <source>current</source>
+        <translation>actual</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1241"/>
+        <source>{} conversation(s)</source>
+        <translation>{} conversa(s)</translation>
+    </message>
+    <message>
+        <source>Type / for skills or @ for project layers. Enter/Tab chooses a skill; Enter sends the edited request.</source>
+        <translation>Escriure / per a habilitats o @ per a capes de projecte. Enter/Tab selecciona una habilitat; Enter envia la petició editada.</translation>
     </message>
 </context>
 <context>
@@ -14991,6 +15339,502 @@ Carpeta: {6}</translation>
         <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
         <source>Kept points</source>
         <translation type="obsolete">Punts conservats</translation>
+    </message>
+</context>
+<context>
+    <name>AgentSpeech</name>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="279"/>
+        <source>Audio stays in memory and is discarded after transcription. The text is inserted in the draft; you review it and press Send yourself.</source>
+        <translation>L’àudio es manté a la memòria i s’elimina després de la transcripció. El text s’insereix a l’esborrany; revisa’l i prem Envia tu mateix.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="41"/>
+        <source>Automatic, or a language code: fr, en…</source>
+        <translation>Automàtic, o un codi lingüístic: fr, en...</translation>
+    </message>
+    <message>
+        <source>Choose a transcription model (at most 200 characters).</source>
+        <translation>Escollir un model de transcripció (al màxim 200 caràcters).</translation>
+    </message>
+    <message>
+        <source>Choose a transcription service.</source>
+        <translation>Elegir un servei de transcripció.</translation>
+    </message>
+    <message>
+        <source>Choose whether to send recorded audio to this transcription service.</source>
+        <translation>Seleccioneu si enviareu audio gravat a aquest servei de transcripció.</translation>
+    </message>
+    <message>
+        <source>Configure the microphone service before recording.</source>
+        <translation>Configureu el servei de micròfon abans d'enregistrar.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_speech.py" line="134"/>
+        <source>Dictation added to the draft. Review it, then press Send.</source>
+        <translation>Dictació afegida al esborrany. Revisar-la, i després premeu Enviar.</translation>
+    </message>
+    <message>
+        <source>Language is an ISO code such as fr or en, or empty for automatic detection.</source>
+        <translation>El llenguatge és un codi ISO com fr o en, o buit per a la detecció automàtica.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_speech.py" line="94"/>
+        <source>Local service</source>
+        <translation>Servei local</translation>
+    </message>
+    <message>
+        <source>Microphone access was denied. Enable it in system privacy settings.</source>
+        <translation>L'accés al micròfon va ser negat. L'habilitar en la configuració de privacitat del sistema.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_speech.py" line="39"/>
+        <source>Microphone configured. Click the microphone to dictate.</source>
+        <translation>Micrófon configurat. Clica en el micròfon per dictar.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="21"/>
+        <source>Microphone settings</source>
+        <translation>Configuracions de micròfon</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_speech.py" line="140"/>
+        <source>Microphone: {}</source>
+        <translation>Micrófon: {}</translation>
+    </message>
+    <message>
+        <source>No audio was recorded. Check the microphone and try again.</source>
+        <translation>No s'ha gravat cap àudio. Vegeu el micròfon i intenteu de nou.</translation>
+    </message>
+    <message>
+        <source>No microphone is available. Check the device in Microphone settings.</source>
+        <translation>No hi ha micròfon disponible. Verifica el dispositiu en la configuració del micròfon.</translation>
+    </message>
+    <message>
+        <source>No speech was recognized. Try recording again.</source>
+        <translation>No es va reconèixer cap discurs. Intenta gravar-ho una altra vegada.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="51"/>
+        <source>Previously selected microphone (unavailable)</source>
+        <translation>Micró seleccionat prèviament (no disponible)</translation>
+    </message>
+    <message>
+        <source>Qt Multimedia is unavailable in this QGIS installation.</source>
+        <translation>Qt Multimedia no està disponible en aquesta instal·lació de QGIS.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_speech.py" line="95"/>
+        <source>Recording… {} · {}</source>
+        <translation>Gravar... {} · {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="58"/>
+        <source>Remove stored transcription key</source>
+        <translation>Eliminar la clau de transcripció emmagatzemada</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_speech.py" line="75"/>
+        <location filename="../ui/widgets/agent_speech.py" line="170"/>
+        <source>Requesting microphone access…</source>
+        <translation>Solicitant l'accés al microfó...</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="61"/>
+        <source>Send recorded audio to this service for transcription</source>
+        <translation>Enviar l'àudio gravat a aquest servei per a la transcripció</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="281"/>
+        <source>Start your local OpenAI-compatible transcription server first. No audio leaves this computer.</source>
+        <translation>Comença el teu local OpenAI-compatible primer el servidor de transcripció. Ningú deixa l'àudio d'aquest ordinador.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="55"/>
+        <source>Stored key</source>
+        <translation>clau emmagatzemada</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="43"/>
+        <source>System default microphone</source>
+        <translation>Micrófon per defecte del sistema</translation>
+    </message>
+    <message>
+        <source>The API key contains an invalid character.</source>
+        <translation>La clau API conté un caràcter inváli.</translation>
+    </message>
+    <message>
+        <source>The chat provider has no stored key for this transcription address.</source>
+        <translation>El proveïdor de chat no té clau emmagatzemada per a aquesta adreça de transcripció.</translation>
+    </message>
+    <message>
+        <source>The local transcription service must run on this computer (localhost).</source>
+        <translation>El servei de transcripció local ha de funcionar en aquest ordinador (localhost).</translation>
+    </message>
+    <message>
+        <source>The microphone audio format is not supported.</source>
+        <translation>El format d'àudio del micròfon no és suportat.</translation>
+    </message>
+    <message>
+        <source>The microphone could not be started. Check permissions and audio input settings.</source>
+        <translation>El micròfon no va poder començar. Vegeu els permisos i les configuracions d'entrada d'àudio.</translation>
+    </message>
+    <message>
+        <source>The microphone stopped unexpectedly. Check the selected input device.</source>
+        <translation>El micròfon s'ha aturat inesperadament. Verifica el dispositiu d'entrada seleccionat.</translation>
+    </message>
+    <message>
+        <source>The recorded audio is empty or exceeds the dictation limit.</source>
+        <translation>L'àudio gravat és buit o supera el límit de dictada.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="282"/>
+        <source>The selected service receives the recorded audio and may charge for transcription. Keys are stored in the QGIS authentication database.</source>
+        <translation>El servei seleccionat rebia l'àudio gravat i pot cobrar la transcripció. Les claus s'emmagatzemen en la base de dades d'autenticació QGIS.</translation>
+    </message>
+    <message>
+        <source>The stored transcription key belongs to another service address.</source>
+        <translation>La clau de transcripció emmagatzemada pertany a una altra adreça de servei.</translation>
+    </message>
+    <message>
+        <source>The transcript is too long for a dictation.</source>
+        <translation>La transcripció és massa llarga per a una dictada.</translation>
+    </message>
+    <message>
+        <source>The transcription response is too large.</source>
+        <translation>La resposta a la transcripció és massa gran.</translation>
+    </message>
+    <message>
+        <source>The transcription service could not be reached. Check its address and connection.</source>
+        <translation>El servei de transcripció no es va aconseguir. Vegeu l'adreça i la connexió.</translation>
+    </message>
+    <message>
+        <source>The transcription service did not return a JSON transcript.</source>
+        <translation>El servei de transcripció no va retornar una transcripció JSON.</translation>
+    </message>
+    <message>
+        <source>The transcription service redirected the request. Check its address in Microphone settings.</source>
+        <translation>El servei de transcripció va redirigir la petició. Vegeu l'adreça en la configuració del micròfon.</translation>
+    </message>
+    <message>
+        <source>The transcription service took too long to answer.</source>
+        <translation>El servei de transcripció va tardar massa en respondre.</translation>
+    </message>
+    <message>
+        <source>This transcription service needs an API key.</source>
+        <translation>Aquest servei de transcripció necessita una clau API.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_speech.py" line="112"/>
+        <location filename="../ui/widgets/agent_speech.py" line="233"/>
+        <source>Transcribing…</source>
+        <translation>La transcripció...</translation>
+    </message>
+    <message>
+        <source>Use a service address without credentials, query or fragment.</source>
+        <translation>Utilitzar una adreça de servei sense credencials, consulta o fragment.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="56"/>
+        <source>Use the chat provider's key for this same address</source>
+        <translation>Utilitzeu la clau del proveïdor de chat per aquesta mateixa adreça</translation>
+    </message>
+    <message>
+        <source>Local server (OpenAI-compatible)</source>
+        <translation>Servidors locals (OpenAI-compatible)</translation>
+    </message>
+    <message>
+        <source>Transcription service</source>
+        <translation>Servei de transcripció</translation>
+    </message>
+    <message>
+        <source>Service address</source>
+        <translation>Direcció del servei</translation>
+    </message>
+    <message>
+        <source>Transcription model</source>
+        <translation>Modèl de transcripció</translation>
+    </message>
+    <message>
+        <source>Language</source>
+        <translation>Llengua</translation>
+    </message>
+    <message>
+        <source>Microphone</source>
+        <translation>Micrófon</translation>
+    </message>
+    <message>
+        <source>API key</source>
+        <translation>Clau d'API</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="68"/>
+        <location filename="../ui/widgets/agent_speech.py" line="139"/>
+        <source>Test microphone</source>
+        <translation>Prova el micròfon</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="70"/>
+        <source>Test transcription</source>
+        <translation>Prova la transcripció</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="76"/>
+        <source>Microphone level: %p%</source>
+        <translation>Nivell de micròfon: %p%</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="77"/>
+        <source>Record up to 10 seconds, then test transcription with the settings above.</source>
+        <translation>Gravar fins a 10 segons, i després provar la transcripció amb les configuracions anteriorment.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="122"/>
+        <source>Settings changed. Test transcription again.</source>
+        <translation>Les configuracions han canviat. Torna a fer la transcripció.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="154"/>
+        <source>Test cancelled.</source>
+        <translation>La prova cancel·lada.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="169"/>
+        <source>Stop microphone test</source>
+        <translation>Provació de micròfon d'arresta</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="190"/>
+        <source>Speak into the microphone… {} / 10 s</source>
+        <translation>Parla al microfó... {} / 10 s</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="203"/>
+        <source>Recording ready. Click Test transcription to check the service.</source>
+        <translation>Gravació preparada. Clica a Test transcripció per comprovar el servei.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="232"/>
+        <source>Cancel transcription</source>
+        <translation>Cancel·lar la transcripció</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="246"/>
+        <source>Transcription test succeeded.</source>
+        <translation>La prova de transcripció va tenir èxit.</translation>
+    </message>
+    <message>
+        <source>Mistral requires a two-letter language code such as fr or en, or empty for automatic detection.</source>
+        <translation>Mistral requereix un codi de llengua de dues lletres com fr o en, o buit per a la detecció automàtica.</translation>
+    </message>
+</context>
+<context>
+    <name>AgentEditCommits</name>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="101"/>
+        <source>A memory layer stays in memory after saving its edits. Save project and layers to keep it after closing QGIS.</source>
+        <translation>Una capa de memòria es manté en la memòria després de guardar les seves edicions. Conservar el projecte i les capes per mantenir-lo després de tancar QGIS.</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="24"/>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="27"/>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="30"/>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="41"/>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="45"/>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="47"/>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="50"/>
+        <source>The transaction group could not be verified. Use QGIS to save these edits.</source>
+        <translation>El grup de transaccions no va poder ser verificat. Utilitza QGIS per guardar aquestes edicions.</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="85"/>
+        <source>Layer edits are still pending.</source>
+        <translation>Les modificacions de capes encara estan pendents.</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="91"/>
+        <source>Layer edits</source>
+        <translation>Edicions de capes</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="91"/>
+        <source>Save the layer edits?</source>
+        <translation>Vols desar les edicions de les capes?</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="92"/>
+        <source>Save layer edits</source>
+        <translation>Desa les edicions de les capes</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="92"/>
+        <source>Keep pending</source>
+        <translation>Mantén els canvis pendents</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="93"/>
+        <source>Checking and saving the layer edits…</source>
+        <translation>Verificar i guardar les modificacions de capes...</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="94"/>
+        <source>Edits remain pending unless saved or discarded in QGIS. A new edit needs a new confirmation.</source>
+        <translation>Les edicions segueixen pendents a menys que es guardin o es descartin en QGIS. Una nova edició necessita una nova confirmació.</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="96"/>
+        <source>Saved edits can no longer be undone from the agent chat.</source>
+        <translation>Les edicions desades ja no es poden desfer des del xat de l’agent.</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="97"/>
+        <source>Save all pending changes to the data source, including any manual edits on the listed layers?</source>
+        <translation>Vols desar tots els canvis pendents a la font de dades, incloses les edicions manuals de les capes indicades?</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="99"/>
+        <source>These layers share a QGIS transaction. They are saved together.</source>
+        <translation>Aquestes capes comparteixen una transacció QGIS. Són salvats junts.</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="130"/>
+        <source>The conversation changed or a request is running. Ask for a new confirmation.</source>
+        <translation>La conversa ha canviat o s'està executant una petició. Demana una nova confirmació.</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="133"/>
+        <source>The layers changed since this confirmation. Review them and ask again.</source>
+        <translation>Les capes han canviat des d'aquesta confirmació. Revisar-los i preguntar-ho de nou.</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="136"/>
+        <source>A listed layer is protected from the agent. Save its edits directly in QGIS.</source>
+        <translation>Una capa enlistat està protegida de l'agent. Salvar les seves edicions directament en QGIS.</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="147"/>
+        <source>QGIS refused to save the edits.</source>
+        <translation>QGIS es va negar a guardar les edicions.</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="163"/>
+        <source>Layer edits saved: {}</source>
+        <translation>Edicions de les capes desades: {}</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="152"/>
+        <source>The layer edits were not fully saved. Review their state in QGIS.</source>
+        <translation>Les edicions de les capes no s’han desat completament. Revisa’n l’estat al QGIS.</translation>
+    </message>
+</context>
+<context>
+    <name>AgentExports</name>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_exports.py" line="13"/>
+        <source>Choose the default agent export folder</source>
+        <translation>Seleccioneu la carpeta d'exportació d'agents per defecte</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_exports.py" line="20"/>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_exports.py" line="22"/>
+        <source>Choose an existing folder outside the QGIS profiles.</source>
+        <translation>Seleccioneu una carpeta existent fora dels perfils QGIS.</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_exports.py" line="22"/>
+        <source>Export folder</source>
+        <translation>Carpeta d'exportació</translation>
+    </message>
+</context>
+<context>
+    <name>AgentActivity</name>
+    <message>
+        <source>Ready for a message</source>
+        <translation>Preparats per un missatge .</translation>
+    </message>
+    <message>
+        <source>Finished — ready for a message</source>
+        <translation>Finit  ⁇  preparat per un missatge</translation>
+    </message>
+    <message>
+        <source>Thinking</source>
+        <translation>Pensar</translation>
+    </message>
+    <message>
+        <source>Reading data</source>
+        <translation>Les dades de lectura</translation>
+    </message>
+    <message>
+        <source>Working</source>
+        <translation>Traballar</translation>
+    </message>
+    <message>
+        <source>Fetching data</source>
+        <translation>Recuperar dades</translation>
+    </message>
+    <message>
+        <source>Writing the response</source>
+        <translation>Escriure la resposta</translation>
+    </message>
+    <message>
+        <source>Waiting</source>
+        <translation>Esperant</translation>
+    </message>
+    <message>
+        <source>Retrying</source>
+        <translation>Tornar a intentar</translation>
+    </message>
+    <message>
+        <source>Stopped or stopping</source>
+        <translation>Parat o parat</translation>
+    </message>
+    <message>
+        <source>You are writing a message</source>
+        <translation>Estàs escrivint un missatge</translation>
+    </message>
+    <message>
+        <source>Messages are queued</source>
+        <translation>Els missatges estan en fila</translation>
+    </message>
+    <message>
+        <source>The request needs your attention</source>
+        <translation>La petició necessita la seva atenció</translation>
+    </message>
+    <message>
+        <source>Searching for data</source>
+        <translation>Buscar dades</translation>
+    </message>
+    <message>
+        <source>Processing data</source>
+        <translation>Processament de dades</translation>
+    </message>
+    <message>
+        <source>Editing a layer</source>
+        <translation>Edició d'una capa</translation>
+    </message>
+    <message>
+        <source>Exporting files</source>
+        <translation>Exportació de fitxers</translation>
+    </message>
+    <message>
+        <source>Designing the map</source>
+        <translation>Dissenyant el mapa</translation>
+    </message>
+    <message>
+        <source>Navigating in QGIS</source>
+        <translation>Navegació en QGIS</translation>
+    </message>
+    <message>
+        <source>Waiting for your confirmation</source>
+        <translation>Esperant la seva confirmació</translation>
+    </message>
+    <message>
+        <source>Recording your voice</source>
+        <translation>Gravar la teva veu</translation>
+    </message>
+    <message>
+        <source>Transcribing your recording</source>
+        <translation>Transcriure la seva gravació</translation>
     </message>
 </context>
 </TS>

@@ -7,8 +7,10 @@ pylupdate5 misses ``_tr('...')`` (a module helper around QCoreApplication.transl
 plugin looks them up under the helper's context or the dock's class: such strings were never
 translated (lots A to E of the streaming sources, October 2026).
 """
+from collections import Counter
 import importlib.util
 from pathlib import Path
+from string import Formatter
 import textwrap
 import xml.etree.ElementTree as ET
 
@@ -213,10 +215,54 @@ def test_real_catalogs_translate_every_helper_string():
     root = Path(__file__).resolve().parents[2]
     strings = {(context, text) for context, text, _, _ in module.collect(str(root / "i18n" / "FilterMate.pro"))}
     assert len(strings) > 100
-    messages = _messages(root / "i18n" / "FilterMate_fr.ts")
-    missing = sorted(key for key in strings if messages.get(key, ("missing",))[0] is not None
-                     or not (messages[key][1] or "").strip())
-    assert not missing, f"run scripts/i18n_runtime_contexts.py after pylupdate5, then translate: {missing[:5]}"
+    failures = {}
+    for path in sorted((root / "i18n").glob("FilterMate_*.ts")):
+        messages = _messages(path)
+        missing = sorted(key for key in strings if messages.get(key, ("missing",))[0] is not None
+                         or not (messages[key][1] or "").strip())
+        if missing:
+            failures[path.name] = missing[:5]
+    assert not failures, f"run scripts/i18n_runtime_contexts.py after pylupdate5, then translate: {failures}"
+
+
+def test_catalogs_cover_the_same_active_messages():
+    """Also cover runtime-selected labels and errors that Qt cannot extract from a literal call."""
+    folder = Path(__file__).resolve().parents[2] / "i18n"
+    catalogs = {path.name: {key for key, (kind, text, _) in _messages(path).items()
+                            if kind not in ("obsolete", "vanished", "unfinished") and (text or "").strip()}
+                for path in folder.glob("FilterMate_*.ts")}
+    all_keys = set().union(*catalogs.values())
+    missing = {name: sorted(all_keys - keys)[:5] for name, keys in catalogs.items() if all_keys - keys}
+    assert not missing, f"catalogs are missing active messages: {missing}"
+
+
+def test_active_translations_preserve_format_fields_and_command_tokens():
+    """A truncated translation must not drop a count, a layer name or another formatted value."""
+    formatter = Formatter()
+    problems = []
+    folder = Path(__file__).resolve().parents[2] / "i18n"
+    for path in folder.glob("FilterMate_*.ts"):
+        for (context, source), (kind, text, _) in _messages(path).items():
+            if kind in ("obsolete", "vanished", "unfinished") or not (text or "").strip():
+                continue
+            for token in ("%p%", "/{}"):
+                if token in source and source.count(token) != text.count(token):
+                    problems.append((path.name, context, source, token))
+            if source.startswith('Type / for skills') and not all(token in text for token in ('/', '@')):
+                problems.append((path.name, context, source, 'command markers'))
+            try:
+                expected = Counter(field for _, field, _, _ in formatter.parse(source) if field is not None)
+            except ValueError:
+                continue  # literal braces, not a format string
+            if not expected:
+                continue
+            try:
+                actual = Counter(field for _, field, _, _ in formatter.parse(text) if field is not None)
+            except ValueError:
+                actual = None
+            if actual != expected:
+                problems.append((path.name, context, source))
+    assert not problems, f"translations have lost format fields: {problems}"
 
 
 def test_second_run_changes_nothing(tree):

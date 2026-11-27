@@ -1854,6 +1854,108 @@ Godkänner du alla? Nej kör ingen av dem.</translation>
         <source>Opening the Processing model designer</source>
         <translation>Öppnar modellbyggaren för Processing</translation>
     </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1283"/>
+        <source>Review and add source: {}</source>
+        <translation>Granska och lägg till källa: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1312"/>
+        <source>Open this search in the browser</source>
+        <translation>Öppna sökningen i webbläsaren</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1653"/>
+        <source>sends the search query to DuckDuckGo; result sites are not visited</source>
+        <translation>skickar sökfrågan till DuckDuckGo; resultatsajter besöks inte</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1500"/>
+        <source>Wait for the current request to finish before changing the export folder.</source>
+        <translation>Vänta tills den aktuella begäran är klar innan du ändrar exportmappen.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1506"/>
+        <source>Default export folder: {}</source>
+        <translation>Standard export mapp: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1519"/>
+        <source>Export cancelled. Choose a default export folder from the agent menu to export.</source>
+        <translation>Export avbokad. Välj en standard export mapp från agentenmenyn för att exportera.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3461"/>
+        <source>Message sent to the running agent; applied at its next step.</source>
+        <translation>Meddelande skickat till den löpande agenten, tillämpats vid nästa steg.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="540"/>
+        <source>Wait for the current request to finish before changing the Designer workspace.</source>
+        <translation>Vänta tills den aktuella begäran är klar innan du byter Designer- arbetsplatsen.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="549"/>
+        <source>Advanced Designer workspace enabled: styles, layouts and QGIS map themes.</source>
+        <translation>Advanced Designer arbetsutrymme aktiverat: stilar, layouter och QGIS-karta teman.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="550"/>
+        <source>Standard conversation workspace enabled.</source>
+        <translation>Standard konversationsarbetsrum aktiverat.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3829"/>
+        <source>Available QGIS interfaces</source>
+        <translation>Tillgängliga QGIS-gränssnitt</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="966"/>
+        <source>Conversation from another project</source>
+        <translation>Samtal från ett annat projekt</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3450"/>
+        <source>Message queued with the selected mode; the running request keeps its permissions.</source>
+        <translation>Meddelande står i kö med det valda läget; den körda begäran behåller sina behörigheter.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="970"/>
+        <source>Project path unavailable</source>
+        <translation>Projektväg inte tillgänglig</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3830"/>
+        <source>QGIS interface: {}</source>
+        <translation>QGIS-gränssnitt: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="4931"/>
+        <source>The QGIS interface could not be opened: {}</source>
+        <translation>QGIS-gränssnittet kunde inte öppnas: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3359"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3372"/>
+        <source>The conversation could not be archived. It has been kept open.</source>
+        <translation>Samtalet kunde inte arkiveras. Den har hållits öppen.</translation>
+    </message>
+    <message>
+        <source>Custom skill; review and permissions still apply</source>
+        <translation>Anpassade färdigheter; översyn och behörigheter gäller fortfarande</translation>
+    </message>
+    <message>
+        <source>External connector; permissions still apply</source>
+        <translation>Extern anslutning; behörigheter gäller fortfarande</translation>
+    </message>
+    <message>
+        <source>Skill request queued; it will load before the next request.</source>
+        <translation>Skillförfrågan står i kö; den laddas innan nästa förfrågan.</translation>
+    </message>
+    <message>
+        <source>Skill /{} is unavailable. Type / to see the available skills.</source>
+        <translation>Färdigheten /{} är inte tillgänglig. Skriv / för att se tillgängliga färdigheter.</translation>
+    </message>
 </context>
 <context>
     <name>AgentData</name>
@@ -1948,6 +2050,22 @@ Om du väljer Nej ligger dessa data kvar i minnet och försvinner när projektet
         <location filename="../ui/controllers/agent_data.py" line="70"/>
         <source>Wait for the current request to finish before saving its data.</source>
         <translation>Vänta tills den aktuella förfrågan är klar innan du sparar dess data.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_data.py" line="91"/>
+        <location filename="../ui/controllers/agent_data.py" line="121"/>
+        <source>Do not offer again this session</source>
+        <translation>Blir inte på sessionen igen.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_data.py" line="92"/>
+        <source>Hide save suggestions until QGIS restarts. You can still save from the agent menu.</source>
+        <translation>Hybda förslag tills QGIS startar igen. Du kan fortfarande spara från agentmenyn.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_data.py" line="93"/>
+        <source>Save suggestions are hidden for this QGIS session. The data stay in memory.</source>
+        <translation>Spara förslag är dolda för denna QGIS-session. Data stannar i minnet.</translation>
     </message>
 </context>
 <context>
@@ -3703,6 +3821,236 @@ Om du väljer Nej ligger dessa data kvar i minnet och försvinner när projektet
         <location filename="../ui/widgets/agent_panel.py" line="727"/>
         <source>Processing model designer…</source>
         <translation>Modellbyggare för Processing…</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="3263"/>
+        <source>Detect service type</source>
+        <translation>Upptäcktsstjänsttyp</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="3275"/>
+        <source>Source name (optional)</source>
+        <translation>Källnamn (valfri)</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="3277"/>
+        <source>Enable after adding</source>
+        <translation>Aktivera efter tillägg</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="3392"/>
+        <source>Source added to this form. Save these settings to keep it.</source>
+        <translation>Källa läggs till i detta formulär. Spara dessa inställningar för att behålla den.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="3409"/>
+        <source>Unverified suggestion. Review the address and type, then test or add it yourself.</source>
+        <translation>Overifierat förslag. Se över adressen och skriv, test eller lägg till den själv.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="3371"/>
+        <source>Choose the service type if it cannot be detected from the address.</source>
+        <translation>Välj tjänststypen om den inte kan upptäckas från adressen.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="798"/>
+        <source>Default export folder…</source>
+        <translation>Standard export mapp...</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="749"/>
+        <source>Push</source>
+        <translation>Push</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="742"/>
+        <source>Send now</source>
+        <translation>Skicka nu.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="746"/>
+        <source>Send the first waiting message to the running agent</source>
+        <translation>Skicka det första meddelandet till den löpande agenten.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="911"/>
+        <source>Messages sent while the agent works</source>
+        <translation>Meddelanden skickas medan agenten arbetar</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="914"/>
+        <location filename="../ui/widgets/agent_panel.py" line="2209"/>
+        <source>Push: guide the running request</source>
+        <translation>Push: guide den löpande begäran</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="915"/>
+        <location filename="../ui/widgets/agent_panel.py" line="2210"/>
+        <source>Queue: wait for the current request to finish</source>
+        <translation>Kö: vänta på att den aktuella begäran avslutas</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="2040"/>
+        <source>Queue</source>
+        <translation>Kö</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="2211"/>
+        <source>Messages during a run: Push or Queue. Ctrl+Shift+Enter uses the other mode.</source>
+        <translation>Meddelanden under en körning: trycka eller köra. Ctrl+Shift+Enter använder det andra läget.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="2222"/>
+        <source>Enter guides the running request. Ctrl+Shift+Enter queues a follow-up.</source>
+        <translation>Inlätta guider den löpande begäran. Ctrl+Shift+Enter är en uppföljning.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="2224"/>
+        <source>Enter queues a follow-up. Ctrl+Shift+Enter guides the running request.</source>
+        <translation>Ange en uppföljning av köerna. Ctrl+Shift+Enter styr den körda begäran.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="2231"/>
+        <source>Send to the running agent (Enter)</source>
+        <translation>Skicka till den löpande agenten (Enter)</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="2232"/>
+        <source>Queue the request (Enter)</source>
+        <translation>Låda in begäran (inlätta)</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1038"/>
+        <source>Enter sends in the selected mode. Esc stops. Ctrl+Shift+Enter uses the other mode.</source>
+        <translation>Enter skickar i det valda läget. Esc stannar. Ctrl+Shift+Enter använder det andra läget.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="780"/>
+        <location filename="../ui/widgets/agent_panel.py" line="781"/>
+        <location filename="../ui/widgets/agent_panel.py" line="2086"/>
+        <source>Dictate with the microphone</source>
+        <translation>Diktera med mikrofonen</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="824"/>
+        <source>Microphone settings…</source>
+        <translation>Mikrofon inställningar...</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="854"/>
+        <source>Cancel dictation</source>
+        <translation>Avbryta dikteringen</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="2085"/>
+        <source>Stop recording and transcribe</source>
+        <translation>Sluta spela in och skicka.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="2086"/>
+        <source>Cancel transcription</source>
+        <translation>Avbryta transkription</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="800"/>
+        <source>Advanced Designer workspace</source>
+        <translation>Avancerad Designer-arbetsrum</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="803"/>
+        <source>Brainstorm a solution…</source>
+        <translation>Brainstorm en lösning...</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="995"/>
+        <source>Designer</source>
+        <translation>Designer</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="999"/>
+        <source>Ideas</source>
+        <translation>Idéer</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="999"/>
+        <source>Styles</source>
+        <translation>Styler</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1000"/>
+        <source>Print layout</source>
+        <translation>Utställning av tryck</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1000"/>
+        <source>Map themes</source>
+        <translation>Karttemat</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1005"/>
+        <source>Insert an editable request: {}</source>
+        <translation>Lägg in en redigerbar begäran: {}</translation>
+    </message>
+    <message>
+        <source>Help me brainstorm and refine a solution from the current context. Propose two or three options and ask only questions that change the choice. Do not change the project yet.</source>
+        <translation>Hjälp mig att tänka på en lösning. Förslå två eller tre alternativ och ställa bara frågor som ändrar val. Ändra inte projektet ännu.</translation>
+    </message>
+    <message>
+        <source>In the advanced Designer workspace, propose refined layer styles and labels for this project. Compare two directions with readable colors and hierarchy. Do not apply them yet.</source>
+        <translation>I det avancerade Designer-arbetsrummet föreslår du raffinerade lagerstilar och etiketter för detta projekt. Jämför två riktningar med läsbara färger och hierarki. Använd dem inte ännu.</translation>
+    </message>
+    <message>
+        <source>In the advanced Designer workspace, propose a print layout: purpose, page format, map, legend, scale and typography. Refine the proposal with me before creating or changing anything.</source>
+        <translation>I det avancerade Designer-arbetsrummet föreslå en trycklayout: syfte, sidformat, karta, legend, skala och typografi. Förfina förslaget med mig innan du skapar eller ändrar något.</translation>
+    </message>
+    <message>
+        <source>In the advanced Designer workspace, inspect existing QGIS map themes and propose how to organize them for different views and layouts. Do not save, replace, apply or remove a theme yet.</source>
+        <translation>I det avancerade Designer-arbetsrummet kan du undersöka befintliga QGIS-kartthem och föreslå hur man organiserar dem för olika vyer och layouter. Spara inte, ersätta, tillämpa eller ta bort ett tema ännu.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1121"/>
+        <source>Conversations</source>
+        <translation>Samtal</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="2220"/>
+        <source>Current request: {}. Next message: {}. It will wait for the current request.</source>
+        <translation>Nuvarande begäran: {}- Det är inte så. Nästa meddelande: {}- Det är inte så. Den väntar på den aktuella begäran.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1174"/>
+        <location filename="../ui/widgets/agent_panel.py" line="1366"/>
+        <source>Open conversation</source>
+        <translation>Öppen samtal</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1236"/>
+        <source>Project path unavailable</source>
+        <translation>Projektväg inte tillgänglig</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1367"/>
+        <source>Read conversation</source>
+        <translation>Läs samtal</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1122"/>
+        <source>Up to 200 recent conversations on this computer. Other projects open for reading only.</source>
+        <translation>Upp till 200 senaste samtal på den här datorn. Andra projekt är endast öppna för läsning.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1237"/>
+        <source>current</source>
+        <translation>aktuell</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1241"/>
+        <source>{} conversation(s)</source>
+        <translation>{} samtal (s)</translation>
+    </message>
+    <message>
+        <source>Type / for skills or @ for project layers. Enter/Tab chooses a skill; Enter sends the edited request.</source>
+        <translation>Typera / för färdigheter eller @ för projektlagor. Enter/Tab väljer en färdighet; Enter skickar den redigerade begäran.</translation>
     </message>
 </context>
 <context>
@@ -14991,6 +15339,502 @@ Mapp: {6}</translation>
         <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
         <source>Kept points</source>
         <translation type="obsolete">Behållna punkter</translation>
+    </message>
+</context>
+<context>
+    <name>AgentSpeech</name>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="279"/>
+        <source>Audio stays in memory and is discarded after transcription. The text is inserted in the draft; you review it and press Send yourself.</source>
+        <translation>Ljudet stannar i minnet och tas bort efter transkriberingen. Texten infogas i utkastet; granska den och tryck själv på Skicka.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="41"/>
+        <source>Automatic, or a language code: fr, en…</source>
+        <translation>Automatiskt, eller ett språkkod: fr, en...</translation>
+    </message>
+    <message>
+        <source>Choose a transcription model (at most 200 characters).</source>
+        <translation>Välj en transkriptionsmodell (maksimal 200 tecken).</translation>
+    </message>
+    <message>
+        <source>Choose a transcription service.</source>
+        <translation>Välj en transkriptionstjänst.</translation>
+    </message>
+    <message>
+        <source>Choose whether to send recorded audio to this transcription service.</source>
+        <translation>Välj om du vill skicka in inspelningsljud till den här transkriptionstjänsten.</translation>
+    </message>
+    <message>
+        <source>Configure the microphone service before recording.</source>
+        <translation>Konfigurera mikrofonen innan du spelar in.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_speech.py" line="134"/>
+        <source>Dictation added to the draft. Review it, then press Send.</source>
+        <translation>Det är en diktation som läggs till. Se över den och tryck på Sänd.</translation>
+    </message>
+    <message>
+        <source>Language is an ISO code such as fr or en, or empty for automatic detection.</source>
+        <translation>Språk är en ISO-kod som fr eller en, eller tom för automatisk upptäckt.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_speech.py" line="94"/>
+        <source>Local service</source>
+        <translation>Lokal service</translation>
+    </message>
+    <message>
+        <source>Microphone access was denied. Enable it in system privacy settings.</source>
+        <translation>Mikrofon åtkomst avvisades. Aktivera det i systemets integritetsinställningar.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_speech.py" line="39"/>
+        <source>Microphone configured. Click the microphone to dictate.</source>
+        <translation>Mikrofon konfigurerad. Klicka på mikrofonen för att diktera.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="21"/>
+        <source>Microphone settings</source>
+        <translation>Mikrofoninställningar</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_speech.py" line="140"/>
+        <source>Microphone: {}</source>
+        <translation>Mikrofon: {}</translation>
+    </message>
+    <message>
+        <source>No audio was recorded. Check the microphone and try again.</source>
+        <translation>Inget ljud spelades in. Kolla mikrofonen och försök igen.</translation>
+    </message>
+    <message>
+        <source>No microphone is available. Check the device in Microphone settings.</source>
+        <translation>Det finns ingen mikrofon. Kontrollera enheten i mikrofoninställningarna.</translation>
+    </message>
+    <message>
+        <source>No speech was recognized. Try recording again.</source>
+        <translation>Inget tal upptäcktes. Försök att spela in igen.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="51"/>
+        <source>Previously selected microphone (unavailable)</source>
+        <translation>Tidigare vald mikrofon (inte tillgänglig)</translation>
+    </message>
+    <message>
+        <source>Qt Multimedia is unavailable in this QGIS installation.</source>
+        <translation>Qt Multimedia är inte tillgänglig i denna QGIS-installation.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_speech.py" line="95"/>
+        <source>Recording… {} · {}</source>
+        <translation>- Jag spelar in... {} · {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="58"/>
+        <source>Remove stored transcription key</source>
+        <translation>Ta bort den lagra transkripstionsnyckeln</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_speech.py" line="75"/>
+        <location filename="../ui/widgets/agent_speech.py" line="170"/>
+        <source>Requesting microphone access…</source>
+        <translation>Jag begär mikrofonanslutning...</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="61"/>
+        <source>Send recorded audio to this service for transcription</source>
+        <translation>Skicka in inspelning av ljud till denna tjänst för transkription</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="281"/>
+        <source>Start your local OpenAI-compatible transcription server first. No audio leaves this computer.</source>
+        <translation>Börja din lokala OpenAI-compatible Transkriptionsservern först. Inget ljud lämnar den här datorn.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="55"/>
+        <source>Stored key</source>
+        <translation>Lagrat nyckel</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="43"/>
+        <source>System default microphone</source>
+        <translation>Systemets standardmikrofon</translation>
+    </message>
+    <message>
+        <source>The API key contains an invalid character.</source>
+        <translation>API-nyckeln innehåller ett ogiltigt tecken.</translation>
+    </message>
+    <message>
+        <source>The chat provider has no stored key for this transcription address.</source>
+        <translation>Chatleverantören har ingen lagrad nyckel till den här adressen.</translation>
+    </message>
+    <message>
+        <source>The local transcription service must run on this computer (localhost).</source>
+        <translation>Den lokala transkriptionstjänsten måste köras på den här datorn (localhost).</translation>
+    </message>
+    <message>
+        <source>The microphone audio format is not supported.</source>
+        <translation>Mikrofonens ljudformat stöds inte.</translation>
+    </message>
+    <message>
+        <source>The microphone could not be started. Check permissions and audio input settings.</source>
+        <translation>Mikrofonen kunde inte startas. Kontrollera behörigheter och inställningar för ljudinmatning.</translation>
+    </message>
+    <message>
+        <source>The microphone stopped unexpectedly. Check the selected input device.</source>
+        <translation>Mikrofonet stannade oväntat. Kontrollera den valda ingångsenheten.</translation>
+    </message>
+    <message>
+        <source>The recorded audio is empty or exceeds the dictation limit.</source>
+        <translation>Den upptagna ljudljuden är tom eller överstiger dikteringsgränsen.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="282"/>
+        <source>The selected service receives the recorded audio and may charge for transcription. Keys are stored in the QGIS authentication database.</source>
+        <translation>Den valda tjänsten tar emot den inspelning som är registrerad och kan ta ut en avgift för transkription. Nycklarna lagras i QGIS-authentifieringsdatabasen.</translation>
+    </message>
+    <message>
+        <source>The stored transcription key belongs to another service address.</source>
+        <translation>Den lagrade transkripstionsnyckeln tillhör en annan tjänstekälla.</translation>
+    </message>
+    <message>
+        <source>The transcript is too long for a dictation.</source>
+        <translation>Transkriptet är för långt för att diktera.</translation>
+    </message>
+    <message>
+        <source>The transcription response is too large.</source>
+        <translation>Transkriptionsresponsen är för stor.</translation>
+    </message>
+    <message>
+        <source>The transcription service could not be reached. Check its address and connection.</source>
+        <translation>Transkriptionstjänsten kunde inte nås. Kolla adressen och anslutningen.</translation>
+    </message>
+    <message>
+        <source>The transcription service did not return a JSON transcript.</source>
+        <translation>Transkriptionstjänsten returnerade inte ett JSON-transkript.</translation>
+    </message>
+    <message>
+        <source>The transcription service redirected the request. Check its address in Microphone settings.</source>
+        <translation>Transkriptionstjänsten omdirigerade begäran. Kolla adressen i mikrofoninställningarna.</translation>
+    </message>
+    <message>
+        <source>The transcription service took too long to answer.</source>
+        <translation>Transkriptionstjänsten tog för lång tid att svara.</translation>
+    </message>
+    <message>
+        <source>This transcription service needs an API key.</source>
+        <translation>Den här transkriptionstjänsten behöver en API-nyckel.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_speech.py" line="112"/>
+        <location filename="../ui/widgets/agent_speech.py" line="233"/>
+        <source>Transcribing…</source>
+        <translation>Transkriberar...</translation>
+    </message>
+    <message>
+        <source>Use a service address without credentials, query or fragment.</source>
+        <translation>Använd en tjänstadress utan behörighet, fråga eller fragment.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="56"/>
+        <source>Use the chat provider's key for this same address</source>
+        <translation>Använd chatleverantörens nyckel för samma adress</translation>
+    </message>
+    <message>
+        <source>Local server (OpenAI-compatible)</source>
+        <translation>Lokal server (OpenAI-compatible)</translation>
+    </message>
+    <message>
+        <source>Transcription service</source>
+        <translation>Transkriptionstjänst</translation>
+    </message>
+    <message>
+        <source>Service address</source>
+        <translation>Tjänstadress</translation>
+    </message>
+    <message>
+        <source>Transcription model</source>
+        <translation>Modell för transkription</translation>
+    </message>
+    <message>
+        <source>Language</source>
+        <translation>Språk</translation>
+    </message>
+    <message>
+        <source>Microphone</source>
+        <translation>Mikrofon</translation>
+    </message>
+    <message>
+        <source>API key</source>
+        <translation>API-nyckel</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="68"/>
+        <location filename="../ui/widgets/agent_speech.py" line="139"/>
+        <source>Test microphone</source>
+        <translation>Testa mikrofon</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="70"/>
+        <source>Test transcription</source>
+        <translation>Testa transkribering</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="76"/>
+        <source>Microphone level: %p%</source>
+        <translation>Mikrofonnivå: %p%</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="77"/>
+        <source>Record up to 10 seconds, then test transcription with the settings above.</source>
+        <translation>Registrera upp till 10 sekunder, och test transkription med ovanstående inställningar.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="122"/>
+        <source>Settings changed. Test transcription again.</source>
+        <translation>Inställningarna ändrades. Test transkription igen.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="154"/>
+        <source>Test cancelled.</source>
+        <translation>Testet avbokat.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="169"/>
+        <source>Stop microphone test</source>
+        <translation>STOP-mikrofon test</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="190"/>
+        <source>Speak into the microphone… {} / 10 s</source>
+        <translation>Ta det i mikrofonen... {} 10 sekunder.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="203"/>
+        <source>Recording ready. Click Test transcription to check the service.</source>
+        <translation>Innehållande redo. Klicka på Test transkription för att kontrollera tjänsten.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="232"/>
+        <source>Cancel transcription</source>
+        <translation>Avbryta transkription</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="246"/>
+        <source>Transcription test succeeded.</source>
+        <translation>Transkriptionstestet lyckades.</translation>
+    </message>
+    <message>
+        <source>Mistral requires a two-letter language code such as fr or en, or empty for automatic detection.</source>
+        <translation>Mistral kräver en två bokstäver språkkod som fr eller en, eller tom för automatisk upptäckt.</translation>
+    </message>
+</context>
+<context>
+    <name>AgentEditCommits</name>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="101"/>
+        <source>A memory layer stays in memory after saving its edits. Save project and layers to keep it after closing QGIS.</source>
+        <translation>Ett minneslag förblir i minnet efter att de har lagrat sina redigeringar. Spara projekt och lager för att behålla det efter att QGIS har stängts.</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="24"/>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="27"/>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="30"/>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="41"/>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="45"/>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="47"/>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="50"/>
+        <source>The transaction group could not be verified. Use QGIS to save these edits.</source>
+        <translation>Transaktionsgruppen kunde inte verifieras. Använd QGIS för att spara dessa redigeringar.</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="85"/>
+        <source>Layer edits are still pending.</source>
+        <translation>Lagrediteringar väntar fortfarande.</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="91"/>
+        <source>Layer edits</source>
+        <translation>Lagerändringar</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="91"/>
+        <source>Save the layer edits?</source>
+        <translation>Spara lagerändringarna?</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="92"/>
+        <source>Save layer edits</source>
+        <translation>Spara lagerändringar</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="92"/>
+        <source>Keep pending</source>
+        <translation>Behåll väntande ändringar</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="93"/>
+        <source>Checking and saving the layer edits…</source>
+        <translation>Att kontrollera och spara lagrediteringen...</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="94"/>
+        <source>Edits remain pending unless saved or discarded in QGIS. A new edit needs a new confirmation.</source>
+        <translation>Ändringar kvarstår pågående om de inte sparas eller kastas i QGIS. En ny redigering behöver en ny bekräftelse.</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="96"/>
+        <source>Saved edits can no longer be undone from the agent chat.</source>
+        <translation>Sparade ändringar kan inte längre ångras från agentens chatt.</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="97"/>
+        <source>Save all pending changes to the data source, including any manual edits on the listed layers?</source>
+        <translation>Spara alla väntande ändringar i datakällan, inklusive manuella ändringar av de angivna lagren?</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="99"/>
+        <source>These layers share a QGIS transaction. They are saved together.</source>
+        <translation>Dessa lager delar en QGIS-transaktion. De räddas tillsammans.</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="130"/>
+        <source>The conversation changed or a request is running. Ask for a new confirmation.</source>
+        <translation>Konversationen har ändrats eller en begäran är på gång. Be om en ny bekräftelse.</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="133"/>
+        <source>The layers changed since this confirmation. Review them and ask again.</source>
+        <translation>Lagarna har förändrats sedan bekräftelsen. Granska dem och fråga igen.</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="136"/>
+        <source>A listed layer is protected from the agent. Save its edits directly in QGIS.</source>
+        <translation>Ett listat lager är skyddat mot agenten. Spara dess redigeringar direkt i QGIS.</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="147"/>
+        <source>QGIS refused to save the edits.</source>
+        <translation>QGIS vägrade att spara redigeringarna.</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="163"/>
+        <source>Layer edits saved: {}</source>
+        <translation>Lagerändringar sparade: {}</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="152"/>
+        <source>The layer edits were not fully saved. Review their state in QGIS.</source>
+        <translation>Lagerändringarna sparades inte fullständigt. Kontrollera deras status i QGIS.</translation>
+    </message>
+</context>
+<context>
+    <name>AgentExports</name>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_exports.py" line="13"/>
+        <source>Choose the default agent export folder</source>
+        <translation>Välj standard agenten export mapp</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_exports.py" line="20"/>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_exports.py" line="22"/>
+        <source>Choose an existing folder outside the QGIS profiles.</source>
+        <translation>Välj en befintlig mapp utanför QGIS-profilerna.</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_exports.py" line="22"/>
+        <source>Export folder</source>
+        <translation>Exportmapp</translation>
+    </message>
+</context>
+<context>
+    <name>AgentActivity</name>
+    <message>
+        <source>Ready for a message</source>
+        <translation>Redo för ett meddelande.</translation>
+    </message>
+    <message>
+        <source>Finished — ready for a message</source>
+        <translation>Redo för ett meddelande</translation>
+    </message>
+    <message>
+        <source>Thinking</source>
+        <translation>Att tänka</translation>
+    </message>
+    <message>
+        <source>Reading data</source>
+        <translation>Läsdata</translation>
+    </message>
+    <message>
+        <source>Working</source>
+        <translation>Arbetar</translation>
+    </message>
+    <message>
+        <source>Fetching data</source>
+        <translation>Att hämta data</translation>
+    </message>
+    <message>
+        <source>Writing the response</source>
+        <translation>Att skriva svaret</translation>
+    </message>
+    <message>
+        <source>Waiting</source>
+        <translation>Vänta</translation>
+    </message>
+    <message>
+        <source>Retrying</source>
+        <translation>Återförsök</translation>
+    </message>
+    <message>
+        <source>Stopped or stopping</source>
+        <translation>Stängd eller stängd</translation>
+    </message>
+    <message>
+        <source>You are writing a message</source>
+        <translation>Du skriver ett meddelande.</translation>
+    </message>
+    <message>
+        <source>Messages are queued</source>
+        <translation>Meddelanden står i kö</translation>
+    </message>
+    <message>
+        <source>The request needs your attention</source>
+        <translation>Förfrågan behöver din uppmärksamhet.</translation>
+    </message>
+    <message>
+        <source>Searching for data</source>
+        <translation>Att söka efter data</translation>
+    </message>
+    <message>
+        <source>Processing data</source>
+        <translation>Behandling av uppgifter</translation>
+    </message>
+    <message>
+        <source>Editing a layer</source>
+        <translation>Redigering av ett lager</translation>
+    </message>
+    <message>
+        <source>Exporting files</source>
+        <translation>Exporterande filer</translation>
+    </message>
+    <message>
+        <source>Designing the map</source>
+        <translation>Att utforma kartan</translation>
+    </message>
+    <message>
+        <source>Navigating in QGIS</source>
+        <translation>Navigering i QGIS</translation>
+    </message>
+    <message>
+        <source>Waiting for your confirmation</source>
+        <translation>Väntar på din bekräftelse.</translation>
+    </message>
+    <message>
+        <source>Recording your voice</source>
+        <translation>Jag spelar in din röst.</translation>
+    </message>
+    <message>
+        <source>Transcribing your recording</source>
+        <translation>Att skicka in din inspelning</translation>
     </message>
 </context>
 </TS>

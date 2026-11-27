@@ -1854,6 +1854,108 @@ Czy zgadzasz się na wszystkie? Nie: żadne nie zostanie wykonane.</translation>
         <source>Opening the Processing model designer</source>
         <translation>Otwieranie projektanta modeli Processing</translation>
     </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1283"/>
+        <source>Review and add source: {}</source>
+        <translation>Sprawdź i dodaj źródło: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1312"/>
+        <source>Open this search in the browser</source>
+        <translation>Otwórz wyszukiwanie w przeglądarce</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1653"/>
+        <source>sends the search query to DuckDuckGo; result sites are not visited</source>
+        <translation>wysyła zapytanie o wyszukiwanie do DuckDuckGo; witryny wyników nie są odwiedzane</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1500"/>
+        <source>Wait for the current request to finish before changing the export folder.</source>
+        <translation>Poczekaj na zakończenie bieżącego żądania przed zmianą folderu wywozu.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1506"/>
+        <source>Default export folder: {}</source>
+        <translation>Domyślny folder wywozu: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1519"/>
+        <source>Export cancelled. Choose a default export folder from the agent menu to export.</source>
+        <translation>Eksport odwołany. Wybierz domyślny folder eksportowy z menu agenta do eksportu.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3461"/>
+        <source>Message sent to the running agent; applied at its next step.</source>
+        <translation>Wiadomość wysyłana do agenta; stosowana w następnym kroku.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="540"/>
+        <source>Wait for the current request to finish before changing the Designer workspace.</source>
+        <translation>Poczekaj na zakończenie bieżącego żądania przed zmianą przestrzeni roboczej Projektor.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="549"/>
+        <source>Advanced Designer workspace enabled: styles, layouts and QGIS map themes.</source>
+        <translation>Umożliwiono przestrzeń roboczą Advanced Designer: style, układy i tematy mapy QGIS.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="550"/>
+        <source>Standard conversation workspace enabled.</source>
+        <translation>Włączone standardowe miejsce pracy rozmowy.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3829"/>
+        <source>Available QGIS interfaces</source>
+        <translation>Dostępne interfejsy QGIS</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="966"/>
+        <source>Conversation from another project</source>
+        <translation>Rozmowa z innego projektu</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3450"/>
+        <source>Message queued with the selected mode; the running request keeps its permissions.</source>
+        <translation>Wiadomość w kolejce z wybranym trybem; uruchomiony wniosek zachowuje swoje uprawnienia.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="970"/>
+        <source>Project path unavailable</source>
+        <translation>Ścieżka projektu nie jest dostępna</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3830"/>
+        <source>QGIS interface: {}</source>
+        <translation>QGIS Interfejs: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="4931"/>
+        <source>The QGIS interface could not be opened: {}</source>
+        <translation>Interfejs QGIS nie został otwarty: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3359"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3372"/>
+        <source>The conversation could not be archived. It has been kept open.</source>
+        <translation>Rozmowy nie mogły być archiwowane. Została otwarta.</translation>
+    </message>
+    <message>
+        <source>Custom skill; review and permissions still apply</source>
+        <translation>Ustawione umiejętności; przegląd i uprawnienia nadal obowiązują</translation>
+    </message>
+    <message>
+        <source>External connector; permissions still apply</source>
+        <translation>łącze zewnętrzne; uprawnienia nadal obowiązują</translation>
+    </message>
+    <message>
+        <source>Skill request queued; it will load before the next request.</source>
+        <translation>Wymaganie umiejętności w kolejce; będzie ładowane przed następnym wnioskiem.</translation>
+    </message>
+    <message>
+        <source>Skill /{} is unavailable. Type / to see the available skills.</source>
+        <translation>Umiejętność /{} jest niedostępna. Wpisz /, aby zobaczyć dostępne umiejętności.</translation>
+    </message>
 </context>
 <context>
     <name>AgentData</name>
@@ -1948,6 +2050,22 @@ Jeśli wybierzesz Nie, dane pozostaną w pamięci i zostaną utracone po zamkni�
         <location filename="../ui/controllers/agent_data.py" line="70"/>
         <source>Wait for the current request to finish before saving its data.</source>
         <translation>Przed zapisaniem danych poczekaj na zakończenie bieżącego żądania.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_data.py" line="91"/>
+        <location filename="../ui/controllers/agent_data.py" line="121"/>
+        <source>Do not offer again this session</source>
+        <translation>Nie powtarzaj tej sesji.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_data.py" line="92"/>
+        <source>Hide save suggestions until QGIS restarts. You can still save from the agent menu.</source>
+        <translation>Ukryj sugestie, dopóki QGIS nie uruchomi się ponownie. Nadal możesz zaoszczędzić z menu agenta.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_data.py" line="93"/>
+        <source>Save suggestions are hidden for this QGIS session. The data stay in memory.</source>
+        <translation>Zapisywanie sugestii jest ukryte w tej sesji QGIS. Dane pozostają w pamięci.</translation>
     </message>
 </context>
 <context>
@@ -3703,6 +3821,236 @@ Jeśli wybierzesz Nie, dane pozostaną w pamięci i zostaną utracone po zamkni�
         <location filename="../ui/widgets/agent_panel.py" line="727"/>
         <source>Processing model designer…</source>
         <translation>Projektant modeli Processing…</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="3263"/>
+        <source>Detect service type</source>
+        <translation>Typ usługi wykrywania</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="3275"/>
+        <source>Source name (optional)</source>
+        <translation>Nazwa źródła (opcjonalna)</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="3277"/>
+        <source>Enable after adding</source>
+        <translation>Włącz po dodaniu</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="3392"/>
+        <source>Source added to this form. Save these settings to keep it.</source>
+        <translation>Źródło dodane do formularza. Zachowaj te ustawienia, aby je zachować.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="3409"/>
+        <source>Unverified suggestion. Review the address and type, then test or add it yourself.</source>
+        <translation>Niepotwierdzone sugestie. Sprawdź adres i typ, a następnie sprawdź lub dodaj sam.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="3371"/>
+        <source>Choose the service type if it cannot be detected from the address.</source>
+        <translation>Wybierz typ usługi, jeśli nie można go wykryć z adresu.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="798"/>
+        <source>Default export folder…</source>
+        <translation>Domyślny folder eksportowy...</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="749"/>
+        <source>Push</source>
+        <translation>Push</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="742"/>
+        <source>Send now</source>
+        <translation>Wysyłaj teraz.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="746"/>
+        <source>Send the first waiting message to the running agent</source>
+        <translation>Wyślij pierwszą wiadomość do agenta .</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="911"/>
+        <source>Messages sent while the agent works</source>
+        <translation>Wiadomości wysyłane podczas pracy agenta</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="914"/>
+        <location filename="../ui/widgets/agent_panel.py" line="2209"/>
+        <source>Push: guide the running request</source>
+        <translation>Push: przewodnik uruchomionego wniosku</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="915"/>
+        <location filename="../ui/widgets/agent_panel.py" line="2210"/>
+        <source>Queue: wait for the current request to finish</source>
+        <translation>Kolejka: poczekaj na zakończenie bieżącej prośby</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="2040"/>
+        <source>Queue</source>
+        <translation>Kolejka</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="2211"/>
+        <source>Messages during a run: Push or Queue. Ctrl+Shift+Enter uses the other mode.</source>
+        <translation>Wiadomości w trakcie biegu: &quot;Push&quot; lub &quot;Queue&quot;. Ctrl+Shift+Enter używa innego trybu.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="2222"/>
+        <source>Enter guides the running request. Ctrl+Shift+Enter queues a follow-up.</source>
+        <translation>Wprowadź wprowadzający żądanie. Ctrl+Shift+Enter kolejki kontynuacja.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="2224"/>
+        <source>Enter queues a follow-up. Ctrl+Shift+Enter guides the running request.</source>
+        <translation>Wprowadź kolejki. Ctrl+Shift+Enter prowadzi uruchomione żądanie.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="2231"/>
+        <source>Send to the running agent (Enter)</source>
+        <translation>Wyślij do agenta bieżącego (Wstąpienie)</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="2232"/>
+        <source>Queue the request (Enter)</source>
+        <translation>W kolejce z wnioskiem (wprowadzenie)</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1038"/>
+        <source>Enter sends in the selected mode. Esc stops. Ctrl+Shift+Enter uses the other mode.</source>
+        <translation>Wprowadź w wybranym trybie. Esc zatrzymuje. Ctrl+Shift+Enter używa innego trybu.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="780"/>
+        <location filename="../ui/widgets/agent_panel.py" line="781"/>
+        <location filename="../ui/widgets/agent_panel.py" line="2086"/>
+        <source>Dictate with the microphone</source>
+        <translation>Dyktuj z mikrofonem</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="824"/>
+        <source>Microphone settings…</source>
+        <translation>Ustawienia mikrofonu...</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="854"/>
+        <source>Cancel dictation</source>
+        <translation>Odwołanie dyktacji</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="2085"/>
+        <source>Stop recording and transcribe</source>
+        <translation>Przestań nagrywać i przepisać</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="2086"/>
+        <source>Cancel transcription</source>
+        <translation>Odwołanie transkrypcji</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="800"/>
+        <source>Advanced Designer workspace</source>
+        <translation>Przestrzeń robocza zaawansowanego projektanta</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="803"/>
+        <source>Brainstorm a solution…</source>
+        <translation>Brainstorm rozwiązanie...</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="995"/>
+        <source>Designer</source>
+        <translation>Projektant</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="999"/>
+        <source>Ideas</source>
+        <translation>Pomysły</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="999"/>
+        <source>Styles</source>
+        <translation>Styły</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1000"/>
+        <source>Print layout</source>
+        <translation>Wydawnictwo</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1000"/>
+        <source>Map themes</source>
+        <translation>Tematy mapy</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1005"/>
+        <source>Insert an editable request: {}</source>
+        <translation>Wkładać żądanie do edycji: {}</translation>
+    </message>
+    <message>
+        <source>Help me brainstorm and refine a solution from the current context. Propose two or three options and ask only questions that change the choice. Do not change the project yet.</source>
+        <translation>Pomóż mi brainstorming i wyrafinowanie rozwiązania z aktualnego kontekstu. Proponuj dwa lub trzy możliwości i zadaj tylko pytania, które zmieniają wybór. Nie zmieniaj jeszcze projektu.</translation>
+    </message>
+    <message>
+        <source>In the advanced Designer workspace, propose refined layer styles and labels for this project. Compare two directions with readable colors and hierarchy. Do not apply them yet.</source>
+        <translation>W zaawansowanej przestrzeni roboczej Designer, zaproponować wyrafinowane style warstwy i etykiety dla tego projektu. Porównaj dwa kierunki z czytelnymi kolorami i hierarchią. Nie stosuj ich jeszcze.</translation>
+    </message>
+    <message>
+        <source>In the advanced Designer workspace, propose a print layout: purpose, page format, map, legend, scale and typography. Refine the proposal with me before creating or changing anything.</source>
+        <translation>W zaawansowanej przestrzeni roboczej Designera zaproponować układ druku: cel, format strony, mapę, legendę, skalę i typografię. Popraw propozycję ze mną, zanim coś stworzysz.</translation>
+    </message>
+    <message>
+        <source>In the advanced Designer workspace, inspect existing QGIS map themes and propose how to organize them for different views and layouts. Do not save, replace, apply or remove a theme yet.</source>
+        <translation>W zaawansowanej przestrzeni roboczej Designer, sprawdź istniejące tematy map QGIS i zaproponować, jak je zorganizować dla różnych widoków i układów. Nie zapisaj, nie zastępuj, nie stosuj ani nie usuwaj jeszcze tematu.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1121"/>
+        <source>Conversations</source>
+        <translation>Rozmowy</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="2220"/>
+        <source>Current request: {}. Next message: {}. It will wait for the current request.</source>
+        <translation>Obecna prośba: {}. Następna wiadomość: {}. Będzie czekał na obecną prośbę.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1174"/>
+        <location filename="../ui/widgets/agent_panel.py" line="1366"/>
+        <source>Open conversation</source>
+        <translation>Otwarta rozmowa</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1236"/>
+        <source>Project path unavailable</source>
+        <translation>Ścieżka projektu nie jest dostępna</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1367"/>
+        <source>Read conversation</source>
+        <translation>Czytaj rozmowę</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1122"/>
+        <source>Up to 200 recent conversations on this computer. Other projects open for reading only.</source>
+        <translation>Do 200 ostatnich rozmów na tym komputerze. Inne projekty otwarte wyłącznie na czytanie.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1237"/>
+        <source>current</source>
+        <translation>bieżący</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1241"/>
+        <source>{} conversation(s)</source>
+        <translation>{} rozmowa</translation>
+    </message>
+    <message>
+        <source>Type / for skills or @ for project layers. Enter/Tab chooses a skill; Enter sends the edited request.</source>
+        <translation>Wpis / dla umiejętności lub @ dla warstw projektu. Enter/Tab wybiera umiejętność; Enter wysyła edytowane żądanie.</translation>
     </message>
 </context>
 <context>
@@ -14991,6 +15339,502 @@ Folder: {6}</translation>
         <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
         <source>Kept points</source>
         <translation type="obsolete">Zachowane punkty</translation>
+    </message>
+</context>
+<context>
+    <name>AgentSpeech</name>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="279"/>
+        <source>Audio stays in memory and is discarded after transcription. The text is inserted in the draft; you review it and press Send yourself.</source>
+        <translation>Dźwięk pozostaje w pamięci i jest usuwany po transkrypcji. Tekst trafia do szkicu; sprawdź go i samodzielnie naciśnij Wyślij.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="41"/>
+        <source>Automatic, or a language code: fr, en…</source>
+        <translation>Automatyczny, lub kod językowy: fr, en...</translation>
+    </message>
+    <message>
+        <source>Choose a transcription model (at most 200 characters).</source>
+        <translation>Wybierz model transkrypcji (maksymalnie 200 znaków).</translation>
+    </message>
+    <message>
+        <source>Choose a transcription service.</source>
+        <translation>Wybierz usługę transkrypcji.</translation>
+    </message>
+    <message>
+        <source>Choose whether to send recorded audio to this transcription service.</source>
+        <translation>Wybierz, czy wysyłać nagrane audio do tej usługi transkrypcji.</translation>
+    </message>
+    <message>
+        <source>Configure the microphone service before recording.</source>
+        <translation>Przed nagraniem skonfiguruj usłudze mikrofonu.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_speech.py" line="134"/>
+        <source>Dictation added to the draft. Review it, then press Send.</source>
+        <translation>Dyktacja dodana do projektu. Przejrzyj, a następnie naciśnij wysyłać.</translation>
+    </message>
+    <message>
+        <source>Language is an ISO code such as fr or en, or empty for automatic detection.</source>
+        <translation>Język jest kodem ISO, takim jak fr lub en lub pusty do automatycznego wykrywania.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_speech.py" line="94"/>
+        <source>Local service</source>
+        <translation>Usługa lokalna</translation>
+    </message>
+    <message>
+        <source>Microphone access was denied. Enable it in system privacy settings.</source>
+        <translation>Odmówiono dostępu do mikrofonu. Włącz go w ustawieniach prywatności systemu.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_speech.py" line="39"/>
+        <source>Microphone configured. Click the microphone to dictate.</source>
+        <translation>Mikrofon skonfigurowany. Kliknij mikrofon, aby dyktować.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="21"/>
+        <source>Microphone settings</source>
+        <translation>Ustawienia mikrofonu</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_speech.py" line="140"/>
+        <source>Microphone: {}</source>
+        <translation>Mikrofon: {}</translation>
+    </message>
+    <message>
+        <source>No audio was recorded. Check the microphone and try again.</source>
+        <translation>Nie nagrywano dźwięku. Sprawdź mikrofon i spróbuj jeszcze raz.</translation>
+    </message>
+    <message>
+        <source>No microphone is available. Check the device in Microphone settings.</source>
+        <translation>Nie ma mikrofonu. Sprawdź urządzenie w ustawieniach mikrofonu.</translation>
+    </message>
+    <message>
+        <source>No speech was recognized. Try recording again.</source>
+        <translation>Żaden wyraz nie został rozpoznany. Spróbuj nagrać jeszcze raz.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="51"/>
+        <source>Previously selected microphone (unavailable)</source>
+        <translation>Wybrany wcześniej mikrofon (nie dostępny)</translation>
+    </message>
+    <message>
+        <source>Qt Multimedia is unavailable in this QGIS installation.</source>
+        <translation>Qt Multimedia nie jest dostępny w tej instalacji QGIS.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_speech.py" line="95"/>
+        <source>Recording… {} · {}</source>
+        <translation>Na nagraniu... {} · {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="58"/>
+        <source>Remove stored transcription key</source>
+        <translation>Usunięcie przechowywanego klucza transkrypcji</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_speech.py" line="75"/>
+        <location filename="../ui/widgets/agent_speech.py" line="170"/>
+        <source>Requesting microphone access…</source>
+        <translation>Żądam dostępu do mikrofonu...</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="61"/>
+        <source>Send recorded audio to this service for transcription</source>
+        <translation>Wysyłaj nagrane audio do tej usługi do transkrypcji</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="281"/>
+        <source>Start your local OpenAI-compatible transcription server first. No audio leaves this computer.</source>
+        <translation>Zacznij swoją lokalną OpenAI-compatible Najpierw serwer transkrypcji. Żaden dźwięk nie opuści tego komputera.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="55"/>
+        <source>Stored key</source>
+        <translation>Klucz przechowywany</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="43"/>
+        <source>System default microphone</source>
+        <translation>Standardowy mikrofon systemu</translation>
+    </message>
+    <message>
+        <source>The API key contains an invalid character.</source>
+        <translation>Klucz API zawiera nieważny znak.</translation>
+    </message>
+    <message>
+        <source>The chat provider has no stored key for this transcription address.</source>
+        <translation>Dostawca rozmowy nie ma przechowywanego klucza do tego adresu transkrypcji.</translation>
+    </message>
+    <message>
+        <source>The local transcription service must run on this computer (localhost).</source>
+        <translation>Lokalna usługa transkrypcji musi być uruchomiona na tym komputerze (localhost).</translation>
+    </message>
+    <message>
+        <source>The microphone audio format is not supported.</source>
+        <translation>Format dźwiękowy mikrofonu nie jest obsługiwany.</translation>
+    </message>
+    <message>
+        <source>The microphone could not be started. Check permissions and audio input settings.</source>
+        <translation>Mikrofon nie mógł się uruchomić. Sprawdź uprawnienia i ustawienia wprowadzania dźwięku.</translation>
+    </message>
+    <message>
+        <source>The microphone stopped unexpectedly. Check the selected input device.</source>
+        <translation>Mikrofon przestał nagle. Sprawdź wybrane urządzenie wejściowe.</translation>
+    </message>
+    <message>
+        <source>The recorded audio is empty or exceeds the dictation limit.</source>
+        <translation>Nagrany dźwięk jest pusty lub przekracza limit diktacji.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="282"/>
+        <source>The selected service receives the recorded audio and may charge for transcription. Keys are stored in the QGIS authentication database.</source>
+        <translation>Wybrana usługa otrzymuje nagrany dźwięk i może pobierać opłatę za transkrypcję. Klucze są przechowywane w bazie danych uwierzytelniania QGIS.</translation>
+    </message>
+    <message>
+        <source>The stored transcription key belongs to another service address.</source>
+        <translation>Przechowywany klucz transkrypcji należy do innego adresu serwisowego.</translation>
+    </message>
+    <message>
+        <source>The transcript is too long for a dictation.</source>
+        <translation>Transkrypcja jest za długa na dyktaturę.</translation>
+    </message>
+    <message>
+        <source>The transcription response is too large.</source>
+        <translation>Odpowiedź transkrypcji jest zbyt duża.</translation>
+    </message>
+    <message>
+        <source>The transcription service could not be reached. Check its address and connection.</source>
+        <translation>Nie można było dotrzeć do transkrypcji. Sprawdź jego adres i połączenie.</translation>
+    </message>
+    <message>
+        <source>The transcription service did not return a JSON transcript.</source>
+        <translation>Usługa transkrypcji nie zwróciła wykresu JSON.</translation>
+    </message>
+    <message>
+        <source>The transcription service redirected the request. Check its address in Microphone settings.</source>
+        <translation>Usługa transkrypcji przekierowała wniosek. Sprawdź adres w ustawieniach mikrofonu.</translation>
+    </message>
+    <message>
+        <source>The transcription service took too long to answer.</source>
+        <translation>Odpowiedź na transkrypcję zajęła zbyt długo.</translation>
+    </message>
+    <message>
+        <source>This transcription service needs an API key.</source>
+        <translation>Ta usługa transkrypcji potrzebuje klucza API.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_speech.py" line="112"/>
+        <location filename="../ui/widgets/agent_speech.py" line="233"/>
+        <source>Transcribing…</source>
+        <translation>Transkrypcja...</translation>
+    </message>
+    <message>
+        <source>Use a service address without credentials, query or fragment.</source>
+        <translation>Użyj adresu usługi bez danych uwierzytelniających, zapytania lub fragmentów.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="56"/>
+        <source>Use the chat provider's key for this same address</source>
+        <translation>Użyj klucza dostawcy czatu do tego samego adresu</translation>
+    </message>
+    <message>
+        <source>Local server (OpenAI-compatible)</source>
+        <translation>Serwer lokalny (OpenAI-compatible)</translation>
+    </message>
+    <message>
+        <source>Transcription service</source>
+        <translation>Usługa transkrypcji</translation>
+    </message>
+    <message>
+        <source>Service address</source>
+        <translation>Adres usługi</translation>
+    </message>
+    <message>
+        <source>Transcription model</source>
+        <translation>Model transkrypcji</translation>
+    </message>
+    <message>
+        <source>Language</source>
+        <translation>Język</translation>
+    </message>
+    <message>
+        <source>Microphone</source>
+        <translation>Mikrofon</translation>
+    </message>
+    <message>
+        <source>API key</source>
+        <translation>Klucz API</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="68"/>
+        <location filename="../ui/widgets/agent_speech.py" line="139"/>
+        <source>Test microphone</source>
+        <translation>Test mikrofonu</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="70"/>
+        <source>Test transcription</source>
+        <translation>Test transkrypcji</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="76"/>
+        <source>Microphone level: %p%</source>
+        <translation>Poziom mikrofonu: %p%</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="77"/>
+        <source>Record up to 10 seconds, then test transcription with the settings above.</source>
+        <translation>Nagrywać do 10 sekund, a następnie przetestować transkrypcję w ustawieniach powyżej.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="122"/>
+        <source>Settings changed. Test transcription again.</source>
+        <translation>Ustawienia się zmieniły. Znowu testować transkrypcję.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="154"/>
+        <source>Test cancelled.</source>
+        <translation>Test odwołany.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="169"/>
+        <source>Stop microphone test</source>
+        <translation>Badanie mikrofonu</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="190"/>
+        <source>Speak into the microphone… {} / 10 s</source>
+        <translation>Mów do mikrofonu... {} / 10 s</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="203"/>
+        <source>Recording ready. Click Test transcription to check the service.</source>
+        <translation>Nagrywanie gotowe. Kliknij Test transcription, aby sprawdzić usługę.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="232"/>
+        <source>Cancel transcription</source>
+        <translation>Odwołanie transkrypcji</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="246"/>
+        <source>Transcription test succeeded.</source>
+        <translation>Badanie transkrypcji odniosło sukces.</translation>
+    </message>
+    <message>
+        <source>Mistral requires a two-letter language code such as fr or en, or empty for automatic detection.</source>
+        <translation>Mistral wymaga kodu językowego o dwóch literach, takiego jak fr lub en, lub pusty do automatycznego wykrywania.</translation>
+    </message>
+</context>
+<context>
+    <name>AgentEditCommits</name>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="101"/>
+        <source>A memory layer stays in memory after saving its edits. Save project and layers to keep it after closing QGIS.</source>
+        <translation>Warstwo pamięci pozostaje w pamięci po zapisanie edycji. Zapisz projekt i warstwy, aby zachować je po zamknięciu QGIS.</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="24"/>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="27"/>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="30"/>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="41"/>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="45"/>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="47"/>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="50"/>
+        <source>The transaction group could not be verified. Use QGIS to save these edits.</source>
+        <translation>Grupa transakcyjna nie mogła zostać sprawdzona. Użyj QGIS do zapisania tych edycji.</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="85"/>
+        <source>Layer edits are still pending.</source>
+        <translation>Edytacje warstw są jeszcze w toku.</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="91"/>
+        <source>Layer edits</source>
+        <translation>Zmiany warstw</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="91"/>
+        <source>Save the layer edits?</source>
+        <translation>Zapisać zmiany warstw?</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="92"/>
+        <source>Save layer edits</source>
+        <translation>Zapisz zmiany warstw</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="92"/>
+        <source>Keep pending</source>
+        <translation>Pozostaw zmiany oczekujące</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="93"/>
+        <source>Checking and saving the layer edits…</source>
+        <translation>Sprawdzanie i zapisywanie edycji warstw...</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="94"/>
+        <source>Edits remain pending unless saved or discarded in QGIS. A new edit needs a new confirmation.</source>
+        <translation>Edycje pozostają w toku, chyba że zostaną zapisane lub wyrzucone w QGIS. Nowa edycja potrzebuje nowego potwierdzenia.</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="96"/>
+        <source>Saved edits can no longer be undone from the agent chat.</source>
+        <translation>Zapisanych zmian nie można już cofnąć z poziomu czatu agenta.</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="97"/>
+        <source>Save all pending changes to the data source, including any manual edits on the listed layers?</source>
+        <translation>Zapisać wszystkie oczekujące zmiany w źródle danych, w tym ręczne zmiany wymienionych warstw?</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="99"/>
+        <source>These layers share a QGIS transaction. They are saved together.</source>
+        <translation>Te warstwy łączą transakcję QGIS. Są razem uratowane.</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="130"/>
+        <source>The conversation changed or a request is running. Ask for a new confirmation.</source>
+        <translation>Rozmowa się zmieniła lub jest w toku żądanie. Proszę o nowe potwierdzenie.</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="133"/>
+        <source>The layers changed since this confirmation. Review them and ask again.</source>
+        <translation>Po tym potwierdzeniu warstwa się zmieniły. Przejrzyj je i zapytaj jeszcze raz.</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="136"/>
+        <source>A listed layer is protected from the agent. Save its edits directly in QGIS.</source>
+        <translation>Wyliczona warstwa jest chroniona przed agentem. Przechowuj swoje edycje bezpośrednio w QGIS.</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="147"/>
+        <source>QGIS refused to save the edits.</source>
+        <translation>QGIS odmówiło zapisywania edycji.</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="163"/>
+        <source>Layer edits saved: {}</source>
+        <translation>Zmiany warstw zapisane: {}</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="152"/>
+        <source>The layer edits were not fully saved. Review their state in QGIS.</source>
+        <translation>Zmiany warstw nie zostały w pełni zapisane. Sprawdź ich stan w QGIS.</translation>
+    </message>
+</context>
+<context>
+    <name>AgentExports</name>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_exports.py" line="13"/>
+        <source>Choose the default agent export folder</source>
+        <translation>Wybierz domyślny folder eksportu agenta</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_exports.py" line="20"/>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_exports.py" line="22"/>
+        <source>Choose an existing folder outside the QGIS profiles.</source>
+        <translation>Wybierz istniejący folder poza profili QGIS.</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_exports.py" line="22"/>
+        <source>Export folder</source>
+        <translation>Folder eksportu</translation>
+    </message>
+</context>
+<context>
+    <name>AgentActivity</name>
+    <message>
+        <source>Ready for a message</source>
+        <translation>Gotowy na wiadomość.</translation>
+    </message>
+    <message>
+        <source>Finished — ready for a message</source>
+        <translation>Skończony  ⁇  gotowy na wiadomość</translation>
+    </message>
+    <message>
+        <source>Thinking</source>
+        <translation>Myślenie</translation>
+    </message>
+    <message>
+        <source>Reading data</source>
+        <translation>Dane odczytu</translation>
+    </message>
+    <message>
+        <source>Working</source>
+        <translation>Praca</translation>
+    </message>
+    <message>
+        <source>Fetching data</source>
+        <translation>Przywoływanie danych</translation>
+    </message>
+    <message>
+        <source>Writing the response</source>
+        <translation>Napisanie odpowiedzi</translation>
+    </message>
+    <message>
+        <source>Waiting</source>
+        <translation>Czekam</translation>
+    </message>
+    <message>
+        <source>Retrying</source>
+        <translation>Powtórne próby</translation>
+    </message>
+    <message>
+        <source>Stopped or stopping</source>
+        <translation>Zatrzymane lub zatrzymane</translation>
+    </message>
+    <message>
+        <source>You are writing a message</source>
+        <translation>Piszesz wiadomość.</translation>
+    </message>
+    <message>
+        <source>Messages are queued</source>
+        <translation>Wiadomości są w kolejce</translation>
+    </message>
+    <message>
+        <source>The request needs your attention</source>
+        <translation>Wniosek wymaga twojej uwagi</translation>
+    </message>
+    <message>
+        <source>Searching for data</source>
+        <translation>Szukając danych</translation>
+    </message>
+    <message>
+        <source>Processing data</source>
+        <translation>Dane dotyczące przetwarzania</translation>
+    </message>
+    <message>
+        <source>Editing a layer</source>
+        <translation>Edytacja warstwy</translation>
+    </message>
+    <message>
+        <source>Exporting files</source>
+        <translation>Eksport plików</translation>
+    </message>
+    <message>
+        <source>Designing the map</source>
+        <translation>Projekt mapy</translation>
+    </message>
+    <message>
+        <source>Navigating in QGIS</source>
+        <translation>Nawigacja w QGIS</translation>
+    </message>
+    <message>
+        <source>Waiting for your confirmation</source>
+        <translation>Czekam na twoje potwierdzenie.</translation>
+    </message>
+    <message>
+        <source>Recording your voice</source>
+        <translation>Nagrywanie głosu</translation>
+    </message>
+    <message>
+        <source>Transcribing your recording</source>
+        <translation>Przekładam nagranie .</translation>
     </message>
 </context>
 </TS>

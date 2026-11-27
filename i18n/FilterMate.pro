@@ -75,6 +75,8 @@ SOURCES = \
     ../ui/controllers/agent_chat_controller.py \
     ../ui/controllers/agent_data.py \
     ../ui/controllers/agent_outputs.py \
+    ../ui/controllers/agent_edit_commits.py \
+    ../ui/controllers/agent_exports.py \
     ../ui/controllers/agent_speech.py \
     ../ui/controllers/agent_charts.py \
     ../adapters/agent/turn_effects.py \
@@ -84,6 +86,7 @@ SOURCES = \
     ../ui/layout/section_panels.py \
     ../ui/styles/mockup_design.py \
     ../ui/widgets/agent_panel.py \
+    ../ui/widgets/agent_activity.py \
     ../ui/widgets/agent_speech.py \
     ../ui/widgets/agent_thread.py \
     ../ui/widgets/agent_widgets_strip.py \

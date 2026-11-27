@@ -1854,6 +1854,108 @@ Hammasiga rozimisiz? Yo‘q tanlansa, hech biri bajarilmaydi.</translation>
         <source>Opening the Processing model designer</source>
         <translation>Qayta ishlash modeli konstruktori ochilmoqda</translation>
     </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1283"/>
+        <source>Review and add source: {}</source>
+        <translation>Manbani tekshirish va qo‘shish: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1312"/>
+        <source>Open this search in the browser</source>
+        <translation>Ushbu qidiruvni brauzerda ochish</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1653"/>
+        <source>sends the search query to DuckDuckGo; result sites are not visited</source>
+        <translation>qidiruv soʻrovini DuckDuckGo-ga joʻnatadi; natija saytlari tashrif buyurilmaydi</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1500"/>
+        <source>Wait for the current request to finish before changing the export folder.</source>
+        <translation>Eksport jildini o'zgartirishdan oldin joriy so'rov tugashini kuting.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1506"/>
+        <source>Default export folder: {}</source>
+        <translation>Default eksport jild: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1519"/>
+        <source>Export cancelled. Choose a default export folder from the agent menu to export.</source>
+        <translation>Eksport bekor qilindi. Eksport qilish uchun agent menyusidan andoza eksport jildini tanlang.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3461"/>
+        <source>Message sent to the running agent; applied at its next step.</source>
+        <translation>Ishlab boruvchi agentga yuborilgan xabar; keyingi bosqichda qo'llaniladi.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="540"/>
+        <source>Wait for the current request to finish before changing the Designer workspace.</source>
+        <translation>Dizayner ish maydonini o'zgartirishdan oldin joriy so'rov tugashini kuting.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="549"/>
+        <source>Advanced Designer workspace enabled: styles, layouts and QGIS map themes.</source>
+        <translation>Advanced Designer ish maydonlari: uslublar, layoutlar va QGIS xaritasi mavzulari qo'llanilgan.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="550"/>
+        <source>Standard conversation workspace enabled.</source>
+        <translation>Standart suhbat ish maydonasi qo'llanilgan.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3829"/>
+        <source>Available QGIS interfaces</source>
+        <translation>QGIS interfeyslari mavjud</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="966"/>
+        <source>Conversation from another project</source>
+        <translation>Boshqa loyiha bo'yicha suhbat</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3450"/>
+        <source>Message queued with the selected mode; the running request keeps its permissions.</source>
+        <translation>O'rnatilgan rejim bilan navbatdagi xabar; ishlaydigan so'rov o'z huquqlarini saqlaydi.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="970"/>
+        <source>Project path unavailable</source>
+        <translation>Loyiha yoʻli mavjud emas</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3830"/>
+        <source>QGIS interface: {}</source>
+        <translation>QGIS interfeysi: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="4931"/>
+        <source>The QGIS interface could not be opened: {}</source>
+        <translation>QGIS interfeysi ochilmadi: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3359"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3372"/>
+        <source>The conversation could not be archived. It has been kept open.</source>
+        <translation>Suhbatni arxivga qo'yish mumkin emas. U ochiq saqlanib qolgan.</translation>
+    </message>
+    <message>
+        <source>Custom skill; review and permissions still apply</source>
+        <translation>O'rnatilgan malaka; ko'rib chiqish va ruxsatnomalar hali ham amalda</translation>
+    </message>
+    <message>
+        <source>External connector; permissions still apply</source>
+        <translation>Tashqi konektor; ruxsatnomalar hali ham amalda</translation>
+    </message>
+    <message>
+        <source>Skill request queued; it will load before the next request.</source>
+        <translation>Qobiliyat so'rovi navbatda; keyingi so'rovdan oldin yuklanadi.</translation>
+    </message>
+    <message>
+        <source>Skill /{} is unavailable. Type / to see the available skills.</source>
+        <translation>/{} ko‘nikmasi mavjud emas. Mavjud ko‘nikmalarni ko‘rish uchun / kiriting.</translation>
+    </message>
 </context>
 <context>
     <name>AgentData</name>
@@ -1948,6 +2050,22 @@ Yo'q tanlansa, bu ma'lumotlar xotirada qoladi va loyiha yopilganda yo'qoladi.</t
         <location filename="../ui/controllers/agent_data.py" line="70"/>
         <source>Wait for the current request to finish before saving its data.</source>
         <translation>Ma'lumotlarini saqlashdan oldin joriy so'rov tugashini kuting.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_data.py" line="91"/>
+        <location filename="../ui/controllers/agent_data.py" line="121"/>
+        <source>Do not offer again this session</source>
+        <translation>Ushbu seansni yana taklif qilmang .</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_data.py" line="92"/>
+        <source>Hide save suggestions until QGIS restarts. You can still save from the agent menu.</source>
+        <translation>QGIS qayta ishga tushirilmaguncha takliflarni saqlang. Siz hali ham agentlar menyusidan saqlashingiz mumkin.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_data.py" line="93"/>
+        <source>Save suggestions are hidden for this QGIS session. The data stay in memory.</source>
+        <translation>Ushbu QGIS seansida saqlab qolish takliflari yashirilgan. Ma'lumotlar xotirada qoladi.</translation>
     </message>
 </context>
 <context>
@@ -3703,6 +3821,236 @@ Yo'q tanlansa, bu ma'lumotlar xotirada qoladi va loyiha yopilganda yo'qoladi.</t
         <location filename="../ui/widgets/agent_panel.py" line="727"/>
         <source>Processing model designer…</source>
         <translation>Qayta ishlash modeli konstruktori…</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="3263"/>
+        <source>Detect service type</source>
+        <translation>Xizmat turini aniqlash</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="3275"/>
+        <source>Source name (optional)</source>
+        <translation>Manba nomi (qo'llanilmagan)</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="3277"/>
+        <source>Enable after adding</source>
+        <translation>Qo‘shilgandan so‘ng yoqish</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="3392"/>
+        <source>Source added to this form. Save these settings to keep it.</source>
+        <translation>Ushbu shaklga ilova qo'shildi. Ushbu sozlamalarni saqlab qolish uchun saqlang.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="3409"/>
+        <source>Unverified suggestion. Review the address and type, then test or add it yourself.</source>
+        <translation>Tekshirilmagan taklif. Manzilni ko'rib chiqing va yozing, so'ngra uni o'zingiz sinab ko'ring yoki qo'shing.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="3371"/>
+        <source>Choose the service type if it cannot be detected from the address.</source>
+        <translation>Agar manzildan aniqlanmasa, xizmat turini tanlang.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="798"/>
+        <source>Default export folder…</source>
+        <translation>Andoza eksport faylini...</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="749"/>
+        <source>Push</source>
+        <translation>Push</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="742"/>
+        <source>Send now</source>
+        <translation>Endi yuboring</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="746"/>
+        <source>Send the first waiting message to the running agent</source>
+        <translation>Birinchi kutish xabarini ishchi agentga yuboring</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="911"/>
+        <source>Messages sent while the agent works</source>
+        <translation>Agent ishlayotgan paytda yuborilgan xabarlar</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="914"/>
+        <location filename="../ui/widgets/agent_panel.py" line="2209"/>
+        <source>Push: guide the running request</source>
+        <translation>Push: ishga tushirilgan soʻrovni yoʻnaltiring</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="915"/>
+        <location filename="../ui/widgets/agent_panel.py" line="2210"/>
+        <source>Queue: wait for the current request to finish</source>
+        <translation>Navbat: joriy soʻrovni tugatish uchun kuting</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="2040"/>
+        <source>Queue</source>
+        <translation>Navbat</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="2211"/>
+        <source>Messages during a run: Push or Queue. Ctrl+Shift+Enter uses the other mode.</source>
+        <translation>Yugurish paytida xabarlar: Shush yoki Queue. Ctrl+Shift+Enter boshqa rejimdan foydalanadi.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="2222"/>
+        <source>Enter guides the running request. Ctrl+Shift+Enter queues a follow-up.</source>
+        <translation>Kiritish so'rovni yo'naltiradi. Ctrl+Shift+Enter navbatlari davom etadi.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="2224"/>
+        <source>Enter queues a follow-up. Ctrl+Shift+Enter guides the running request.</source>
+        <translation>Qatlamlarni kuzatib boring. Ctrl+Shift+Enter ishga tushirish so'rovini yo'naltiradi.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="2231"/>
+        <source>Send to the running agent (Enter)</source>
+        <translation>Ishlab boruvchi agentga joʻnatish (kiring)</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="2232"/>
+        <source>Queue the request (Enter)</source>
+        <translation>Soʻrovni navbatga qoʻyish (Keyboard)</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1038"/>
+        <source>Enter sends in the selected mode. Esc stops. Ctrl+Shift+Enter uses the other mode.</source>
+        <translation>Kiritish tanlangan rejimda yuboradi. Esc to'xtatadi. Ctrl+Shift+Enter boshqa rejimdan foydalanadi.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="780"/>
+        <location filename="../ui/widgets/agent_panel.py" line="781"/>
+        <location filename="../ui/widgets/agent_panel.py" line="2086"/>
+        <source>Dictate with the microphone</source>
+        <translation>Mikrofon bilan diktatsiya qilish</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="824"/>
+        <source>Microphone settings…</source>
+        <translation>Mikrofon sozlamalari...</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="854"/>
+        <source>Cancel dictation</source>
+        <translation>Diktatsiyani bekor qilish</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="2085"/>
+        <source>Stop recording and transcribe</source>
+        <translation>Yozib olishni toʻxtatish va transkriptatsiya qilish</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="2086"/>
+        <source>Cancel transcription</source>
+        <translation>Transkripsiya bekor qilish</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="800"/>
+        <source>Advanced Designer workspace</source>
+        <translation>Avvansiyali dizayner ish maydonchasi</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="803"/>
+        <source>Brainstorm a solution…</source>
+        <translation>Yechimni o'ylab ko'ring...</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="995"/>
+        <source>Designer</source>
+        <translation>Dizaynchi</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="999"/>
+        <source>Ideas</source>
+        <translation>G'oyalar</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="999"/>
+        <source>Styles</source>
+        <translation>Stillar</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1000"/>
+        <source>Print layout</source>
+        <translation>Bosib chiqarish layoti</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1000"/>
+        <source>Map themes</source>
+        <translation>Xaritadagi mavzular</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1005"/>
+        <source>Insert an editable request: {}</source>
+        <translation>tahrirlash uchun iltimosni kiriting: {}</translation>
+    </message>
+    <message>
+        <source>Help me brainstorm and refine a solution from the current context. Propose two or three options and ask only questions that change the choice. Do not change the project yet.</source>
+        <translation>Menga fikrlash tarzini o'tkazishga yordam bering va hozirgi kontekstdan yechimni sozlashga yordam bering. Ikkita yoki uchta variantni taklif qiling va faqat tanlovni o'zgartiradigan savollar bering. Loyihani hali o'zgartirmang.</translation>
+    </message>
+    <message>
+        <source>In the advanced Designer workspace, propose refined layer styles and labels for this project. Compare two directions with readable colors and hierarchy. Do not apply them yet.</source>
+        <translation>Avvansiyali dizayner ish maydonida ushbu loyiha uchun sof qatlam uslublari va etiketlarini taklif qiling. Ikki yo'nalishni o'qib bo'ladigan ranglar va hierarxiya bilan taqqoslang. Ularni hali qo'llamang.</translation>
+    </message>
+    <message>
+        <source>In the advanced Designer workspace, propose a print layout: purpose, page format, map, legend, scale and typography. Refine the proposal with me before creating or changing anything.</source>
+        <translation>Avvansiyalashgan dizayner ish maydonida bosma layoatini taklif qiling: maqsad, sahifa formati, xarita, afsona, o'lcham va tipografiya. Biror narsani yaratishdan yoki o'zgartirishdan oldin taklifni men bilan sozlang.</translation>
+    </message>
+    <message>
+        <source>In the advanced Designer workspace, inspect existing QGIS map themes and propose how to organize them for different views and layouts. Do not save, replace, apply or remove a theme yet.</source>
+        <translation>Avvansiyalashgan dizayner ish maydonida mavjud QGIS xarita mavzularini tekshiring va ularni turli ko'rinishlar va layoutlar uchun qanday tashkil etishni taklif qiling. Mavzularni saqlash, almashtirish, qo'llash yoki olib tashlash kerak emas.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1121"/>
+        <source>Conversations</source>
+        <translation>Suhbatlar</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="2220"/>
+        <source>Current request: {}. Next message: {}. It will wait for the current request.</source>
+        <translation>Joriy talab: {}. Keyingi xabar: {}. U joriy talabni kutadi.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1174"/>
+        <location filename="../ui/widgets/agent_panel.py" line="1366"/>
+        <source>Open conversation</source>
+        <translation>Ochiq suhbat</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1236"/>
+        <source>Project path unavailable</source>
+        <translation>Loyiha yoʻli mavjud emas</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1367"/>
+        <source>Read conversation</source>
+        <translation>Suhbatni oʻqing</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1122"/>
+        <source>Up to 200 recent conversations on this computer. Other projects open for reading only.</source>
+        <translation>Ushbu kompyuterda 200 ga yaqin so'nggi suhbatlar mavjud. Boshqa loyihalar faqat o'qish uchun ochiq.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1237"/>
+        <source>current</source>
+        <translation>joriy</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1241"/>
+        <source>{} conversation(s)</source>
+        <translation>{} suhbat</translation>
+    </message>
+    <message>
+        <source>Type / for skills or @ for project layers. Enter/Tab chooses a skill; Enter sends the edited request.</source>
+        <translation>Mulohazalar uchun / yoki loyiha qatlamlari uchun @ ga yozing. Enter/Tab qobiliyatni tanlaydi; Enter tahrirlangan talabni yuboradi.</translation>
     </message>
 </context>
 <context>
@@ -14991,6 +15339,502 @@ Papka: {6}</translation>
         <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
         <source>Kept points</source>
         <translation type="obsolete">Saqlangan nuqtalar</translation>
+    </message>
+</context>
+<context>
+    <name>AgentSpeech</name>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="279"/>
+        <source>Audio stays in memory and is discarded after transcription. The text is inserted in the draft; you review it and press Send yourself.</source>
+        <translation>Audio xotirada qoladi va matnga aylantirilgandan keyin o‘chiriladi. Matn qoralamaga kiritiladi; uni tekshiring va Yuborish tugmasini o‘zingiz bosing.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="41"/>
+        <source>Automatic, or a language code: fr, en…</source>
+        <translation>Avtomatik yoki til kodi: fr, en...</translation>
+    </message>
+    <message>
+        <source>Choose a transcription model (at most 200 characters).</source>
+        <translation>Transkripsiya modelini tanlang (kamida 200 belgi).</translation>
+    </message>
+    <message>
+        <source>Choose a transcription service.</source>
+        <translation>Transkripsiya xizmatini tanlang.</translation>
+    </message>
+    <message>
+        <source>Choose whether to send recorded audio to this transcription service.</source>
+        <translation>Ushbu transkripsiya xizmatiga audio yozib yuborishni tanlang.</translation>
+    </message>
+    <message>
+        <source>Configure the microphone service before recording.</source>
+        <translation>Yozishdan oldin mikrofon xizmatini o'rnating.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_speech.py" line="134"/>
+        <source>Dictation added to the draft. Review it, then press Send.</source>
+        <translation>Loyihaga diktatsiya qo'shildi. Uni ko'rib chiqing, so'ngra yuborishni bosing.</translation>
+    </message>
+    <message>
+        <source>Language is an ISO code such as fr or en, or empty for automatic detection.</source>
+        <translation>Til - ISO kodi, masalan fr yoki en yoki avtomatik aniqlash uchun bo'sh.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_speech.py" line="94"/>
+        <source>Local service</source>
+        <translation>Mahalliy xizmat</translation>
+    </message>
+    <message>
+        <source>Microphone access was denied. Enable it in system privacy settings.</source>
+        <translation>Mikrofondan foydalanish rad etildi. Uni tizimning maxfiylik sozlamalarida qo'llash.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_speech.py" line="39"/>
+        <source>Microphone configured. Click the microphone to dictate.</source>
+        <translation>Mikrofon sozlangan. Mikrofonni bosing.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="21"/>
+        <source>Microphone settings</source>
+        <translation>Mikrofon sozlamalari</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_speech.py" line="140"/>
+        <source>Microphone: {}</source>
+        <translation>Mikrofon: {}</translation>
+    </message>
+    <message>
+        <source>No audio was recorded. Check the microphone and try again.</source>
+        <translation>Hech qanday audio yozib olinmagan. Mikrofonni tekshiring va yana urinib ko'ring.</translation>
+    </message>
+    <message>
+        <source>No microphone is available. Check the device in Microphone settings.</source>
+        <translation>Mikrofon mavjud emas. Qurilmani mikrofon sozlamalarida tekshiring.</translation>
+    </message>
+    <message>
+        <source>No speech was recognized. Try recording again.</source>
+        <translation>Hech qanday nutq tanilmagan. Yana tomosha qilishga harakat qiling.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="51"/>
+        <source>Previously selected microphone (unavailable)</source>
+        <translation>Oldin tanlangan mikrofon (olmaydi)</translation>
+    </message>
+    <message>
+        <source>Qt Multimedia is unavailable in this QGIS installation.</source>
+        <translation>Qt Multimedia ushbu QGIS o'rnatishida mavjud emas.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_speech.py" line="95"/>
+        <source>Recording… {} · {}</source>
+        <translation>Yozib olish ... {} · {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="58"/>
+        <source>Remove stored transcription key</source>
+        <translation>Oʻrnatilgan transkripsiya kalitini olib tashlash</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_speech.py" line="75"/>
+        <location filename="../ui/widgets/agent_speech.py" line="170"/>
+        <source>Requesting microphone access…</source>
+        <translation>Mikrofondan foydalanishingizni so'raymiz...</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="61"/>
+        <source>Send recorded audio to this service for transcription</source>
+        <translation>Transkripsiya uchun ushbu xizmatga audio yozib yuborish</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="281"/>
+        <source>Start your local OpenAI-compatible transcription server first. No audio leaves this computer.</source>
+        <translation>Mahalliy ishingizni boshlash OpenAI-compatible Avvalo transkripsiya serverini. Kompyuterdan hech qanday ovoz chiqmaydi.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="55"/>
+        <source>Stored key</source>
+        <translation>saqlash kalit</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="43"/>
+        <source>System default microphone</source>
+        <translation>Tizimning andoza mikrofoni</translation>
+    </message>
+    <message>
+        <source>The API key contains an invalid character.</source>
+        <translation>API kalitida haqiqiy bo'lmagan belgi mavjud.</translation>
+    </message>
+    <message>
+        <source>The chat provider has no stored key for this transcription address.</source>
+        <translation>Chat provayderida ushbu transkripsiya manzili uchun saqlangan kalit yo'q.</translation>
+    </message>
+    <message>
+        <source>The local transcription service must run on this computer (localhost).</source>
+        <translation>Mahalliy transkripsiya xizmati ushbu kompyuterda (localhost) ishlashi kerak.</translation>
+    </message>
+    <message>
+        <source>The microphone audio format is not supported.</source>
+        <translation>Mikrofon audio formatini qo'llab-quvvatlamaydi.</translation>
+    </message>
+    <message>
+        <source>The microphone could not be started. Check permissions and audio input settings.</source>
+        <translation>Mikrofonni ishga tushirib bo'lmadi. Ruxsatlar va audio kirish parametrlarini tekshiring.</translation>
+    </message>
+    <message>
+        <source>The microphone stopped unexpectedly. Check the selected input device.</source>
+        <translation>Mikrofon kutilmagan holda to'xtadi. Tanlangan kirish qurilmasini tekshiring.</translation>
+    </message>
+    <message>
+        <source>The recorded audio is empty or exceeds the dictation limit.</source>
+        <translation>Yozib olingan audio bo'sh yoki dikta qilish chegarasidan oshadi.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="282"/>
+        <source>The selected service receives the recorded audio and may charge for transcription. Keys are stored in the QGIS authentication database.</source>
+        <translation>Tanlangan xizmat yozib olingan ovozni qabul qiladi va transkripsiya uchun pul to'lashi mumkin. kalitlar QGIS autentifikatsiya ma'lumotlar bazasida saqlanadi.</translation>
+    </message>
+    <message>
+        <source>The stored transcription key belongs to another service address.</source>
+        <translation>O'rnatilgan transkripsiya kaliti boshqa xizmat manziliga tegishli.</translation>
+    </message>
+    <message>
+        <source>The transcript is too long for a dictation.</source>
+        <translation>Transkripsiya diktatsiya qilish uchun juda uzoq.</translation>
+    </message>
+    <message>
+        <source>The transcription response is too large.</source>
+        <translation>Transkripsiya reaksiyasi juda katta.</translation>
+    </message>
+    <message>
+        <source>The transcription service could not be reached. Check its address and connection.</source>
+        <translation>Transkripsiya xizmatiga murojaat qilish mumkin emas edi. Manzilini va u bilan bog'liqligini tekshiring.</translation>
+    </message>
+    <message>
+        <source>The transcription service did not return a JSON transcript.</source>
+        <translation>Transkripsiya xizmati JSON transkriptasini qaytarmadi.</translation>
+    </message>
+    <message>
+        <source>The transcription service redirected the request. Check its address in Microphone settings.</source>
+        <translation>Transkripsiya xizmati iltimosni o'zgartirdi. Mikrofon sozlamalarida uning manzilini tekshiring.</translation>
+    </message>
+    <message>
+        <source>The transcription service took too long to answer.</source>
+        <translation>Transkripsiya xizmati javob berish uchun juda uzoq vaqt talab qildi.</translation>
+    </message>
+    <message>
+        <source>This transcription service needs an API key.</source>
+        <translation>Ushbu transkripsiya xizmati API kalitga muhtoj.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_speech.py" line="112"/>
+        <location filename="../ui/widgets/agent_speech.py" line="233"/>
+        <source>Transcribing…</source>
+        <translation>Transkriptatsiya qilish...</translation>
+    </message>
+    <message>
+        <source>Use a service address without credentials, query or fragment.</source>
+        <translation>Xizmat manzilini ma'lumotlar, so'rov yoki fragmentsiz ishlating.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="56"/>
+        <source>Use the chat provider's key for this same address</source>
+        <translation>Shu manzil uchun chat provayderining kalitidan foydalaning</translation>
+    </message>
+    <message>
+        <source>Local server (OpenAI-compatible)</source>
+        <translation>Mahalliy server (OpenAI-compatible)</translation>
+    </message>
+    <message>
+        <source>Transcription service</source>
+        <translation>Transkripsiya xizmati</translation>
+    </message>
+    <message>
+        <source>Service address</source>
+        <translation>Xizmat manzili</translation>
+    </message>
+    <message>
+        <source>Transcription model</source>
+        <translation>Transkripsiya modeli</translation>
+    </message>
+    <message>
+        <source>Language</source>
+        <translation>Til</translation>
+    </message>
+    <message>
+        <source>Microphone</source>
+        <translation>Mikrofon</translation>
+    </message>
+    <message>
+        <source>API key</source>
+        <translation>API kaliti</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="68"/>
+        <location filename="../ui/widgets/agent_speech.py" line="139"/>
+        <source>Test microphone</source>
+        <translation>Mikrofonni sinash</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="70"/>
+        <source>Test transcription</source>
+        <translation>Transkripsiyani sinash</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="76"/>
+        <source>Microphone level: %p%</source>
+        <translation>Mikrofon darajasi: %p%</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="77"/>
+        <source>Record up to 10 seconds, then test transcription with the settings above.</source>
+        <translation>10 soniyaga qadar yozib oling, so'ngra yuqoridagi moslamalar yordamida transkripsiya sinovini o'tkazing.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="122"/>
+        <source>Settings changed. Test transcription again.</source>
+        <translation>Sozlamalar o'zgardi. Tekroriy transkripsiya sinovini o'tkazing.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="154"/>
+        <source>Test cancelled.</source>
+        <translation>Sinov bekor qilindi.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="169"/>
+        <source>Stop microphone test</source>
+        <translation>Mikrofonni toʻxtatish testi</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="190"/>
+        <source>Speak into the microphone… {} / 10 s</source>
+        <translation>Mikrofonga gapiring... {} / 10 s</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="203"/>
+        <source>Recording ready. Click Test transcription to check the service.</source>
+        <translation>Yozuv tayyor. Xizmatni tekshirish uchun Test transkripsiyasini bosing.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="232"/>
+        <source>Cancel transcription</source>
+        <translation>Transkripsiya bekor qilish</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="246"/>
+        <source>Transcription test succeeded.</source>
+        <translation>Transkripsiya tekshiruvi muvaffaqiyatli bo'ldi.</translation>
+    </message>
+    <message>
+        <source>Mistral requires a two-letter language code such as fr or en, or empty for automatic detection.</source>
+        <translation>Mistral avtomatik aniqlash uchun fr yoki en kabi ikki harfli til kodini yoki bo'sh kodni talab qiladi.</translation>
+    </message>
+</context>
+<context>
+    <name>AgentEditCommits</name>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="101"/>
+        <source>A memory layer stays in memory after saving its edits. Save project and layers to keep it after closing QGIS.</source>
+        <translation>Xotira qatlami o'z tahrirlarini saqlashdan keyin xotirada qoladi. QGISni yopgandan so'ng uni saqlab qolish uchun loyiha va qatlamlarni saqlash.</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="24"/>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="27"/>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="30"/>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="41"/>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="45"/>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="47"/>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="50"/>
+        <source>The transaction group could not be verified. Use QGIS to save these edits.</source>
+        <translation>Transaksiya guruhi tasdiqlanmagan. Ushbu tahrirlarni saqlash uchun QGISdan foydalaning.</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="85"/>
+        <source>Layer edits are still pending.</source>
+        <translation>Katta tahrirlar hali ham kutilmoqda.</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="91"/>
+        <source>Layer edits</source>
+        <translation>Qatlam tahrirlari</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="91"/>
+        <source>Save the layer edits?</source>
+        <translation>Qatlam tahrirlari saqlansinmi?</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="92"/>
+        <source>Save layer edits</source>
+        <translation>Qatlam tahrirlarini saqlash</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="92"/>
+        <source>Keep pending</source>
+        <translation>O‘zgarishlarni kutishda qoldirish</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="93"/>
+        <source>Checking and saving the layer edits…</source>
+        <translation>qatlam tahrirlarini tekshirish va saqlash...</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="94"/>
+        <source>Edits remain pending unless saved or discarded in QGIS. A new edit needs a new confirmation.</source>
+        <translation>QGISda saqlanmagan yoki tashlab yuborilmagan holda tahrirlar davom etadi. Yangi tahrirlash uchun yangi tasdiq kerak.</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="96"/>
+        <source>Saved edits can no longer be undone from the agent chat.</source>
+        <translation>Saqlangan tahrirlarni agent chatidan endi bekor qilib bo‘lmaydi.</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="97"/>
+        <source>Save all pending changes to the data source, including any manual edits on the listed layers?</source>
+        <translation>Ro‘yxatdagi qatlamlarda qo‘lda qilingan tahrirlarni ham qo‘shib, barcha kutilayotgan o‘zgarishlar ma’lumotlar manbasiga saqlansinmi?</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="99"/>
+        <source>These layers share a QGIS transaction. They are saved together.</source>
+        <translation>Ushbu qatlamlar QGIS operatsiyasini baham ko'rishadi. Ular birgalikda qutqarilgan.</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="130"/>
+        <source>The conversation changed or a request is running. Ask for a new confirmation.</source>
+        <translation>Suhbat o'zgardi yoki so'rov davom etmoqda. Yangi tasdiqni so'rang.</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="133"/>
+        <source>The layers changed since this confirmation. Review them and ask again.</source>
+        <translation>Ushbu tasdiqdan keyin qatlamlar o'zgardi. Ularni ko'rib chiqing va yana so'rang.</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="136"/>
+        <source>A listed layer is protected from the agent. Save its edits directly in QGIS.</source>
+        <translation>Ro'yxatlangan qatlam agentdan himoyalangan. tahrirlarini to'g'ridan-to'g'ri QGIS-ga saqlash.</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="147"/>
+        <source>QGIS refused to save the edits.</source>
+        <translation>QGIS tahrirlarni saqlashdan bosh tortdi.</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="163"/>
+        <source>Layer edits saved: {}</source>
+        <translation>Qatlam tahrirlari saqlandi: {}</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="152"/>
+        <source>The layer edits were not fully saved. Review their state in QGIS.</source>
+        <translation>Qatlam tahrirlari to‘liq saqlanmadi. Ularning holatini QGIS ichida tekshiring.</translation>
+    </message>
+</context>
+<context>
+    <name>AgentExports</name>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_exports.py" line="13"/>
+        <source>Choose the default agent export folder</source>
+        <translation>Andoza agent eksport jildini tanlang</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_exports.py" line="20"/>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_exports.py" line="22"/>
+        <source>Choose an existing folder outside the QGIS profiles.</source>
+        <translation>QGIS profillaridan tashqari mavjud jildni tanlang.</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_exports.py" line="22"/>
+        <source>Export folder</source>
+        <translation>Eksport jildi</translation>
+    </message>
+</context>
+<context>
+    <name>AgentActivity</name>
+    <message>
+        <source>Ready for a message</source>
+        <translation>Xabar uchun tayyor</translation>
+    </message>
+    <message>
+        <source>Finished — ready for a message</source>
+        <translation>Xabar uchun tayyor</translation>
+    </message>
+    <message>
+        <source>Thinking</source>
+        <translation>Oʻylash</translation>
+    </message>
+    <message>
+        <source>Reading data</source>
+        <translation>Ma'lumotlarni o'qish</translation>
+    </message>
+    <message>
+        <source>Working</source>
+        <translation>Ishlash</translation>
+    </message>
+    <message>
+        <source>Fetching data</source>
+        <translation>Ma'lumotlarni olish</translation>
+    </message>
+    <message>
+        <source>Writing the response</source>
+        <translation>Javobni yozish</translation>
+    </message>
+    <message>
+        <source>Waiting</source>
+        <translation>Kutayotgan</translation>
+    </message>
+    <message>
+        <source>Retrying</source>
+        <translation>Qayta sinab koʻring</translation>
+    </message>
+    <message>
+        <source>Stopped or stopping</source>
+        <translation>Toʻxtatilgan yoki toʻxtatish</translation>
+    </message>
+    <message>
+        <source>You are writing a message</source>
+        <translation>Siz xabar yozyapsiz</translation>
+    </message>
+    <message>
+        <source>Messages are queued</source>
+        <translation>Xabarlar navbatda</translation>
+    </message>
+    <message>
+        <source>The request needs your attention</source>
+        <translation>Talab sizning e'tiboringizni talab qiladi</translation>
+    </message>
+    <message>
+        <source>Searching for data</source>
+        <translation>Ma'lumotlarni qidirish</translation>
+    </message>
+    <message>
+        <source>Processing data</source>
+        <translation>Ma'lumotlarni qayta ishlash</translation>
+    </message>
+    <message>
+        <source>Editing a layer</source>
+        <translation>Qatlamni tahrirlash</translation>
+    </message>
+    <message>
+        <source>Exporting files</source>
+        <translation>Fayllarni eksport qilish</translation>
+    </message>
+    <message>
+        <source>Designing the map</source>
+        <translation>Xaritani yaratish</translation>
+    </message>
+    <message>
+        <source>Navigating in QGIS</source>
+        <translation>QGISda navigatsiya qilish</translation>
+    </message>
+    <message>
+        <source>Waiting for your confirmation</source>
+        <translation>Sizning tasdiqingizni kutyapman</translation>
+    </message>
+    <message>
+        <source>Recording your voice</source>
+        <translation>Ovozingizni yozib olish</translation>
+    </message>
+    <message>
+        <source>Transcribing your recording</source>
+        <translation>Yozuvingizni transkripsiyalash</translation>
     </message>
 </context>
 </TS>

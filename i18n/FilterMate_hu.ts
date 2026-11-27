@@ -1854,6 +1854,108 @@ Mindegyikhez hozzájárul? A Nem egyiket sem hajtja végre.</translation>
         <source>Opening the Processing model designer</source>
         <translation>A feldolgozási modelltervező megnyitása</translation>
     </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1283"/>
+        <source>Review and add source: {}</source>
+        <translation>Forrás ellenőrzése és hozzáadása: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1312"/>
+        <source>Open this search in the browser</source>
+        <translation>Nyissa ki ezt a keresést a böngészőben</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1653"/>
+        <source>sends the search query to DuckDuckGo; result sites are not visited</source>
+        <translation>Küldje a keresési kérdést a DuckDuckGo-ra; az eredményeket nem látogatják meg</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1500"/>
+        <source>Wait for the current request to finish before changing the export folder.</source>
+        <translation>Várja meg, hogy a jelenlegi kérelem befejeződjön, mielőtt megváltoztatja az export mappát.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1506"/>
+        <source>Default export folder: {}</source>
+        <translation>Előzetes export mappája: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1519"/>
+        <source>Export cancelled. Choose a default export folder from the agent menu to export.</source>
+        <translation>A kivitel lemondott. Válassza ki az exportálandó ügynök menüjéből az alapértelmezett export mappát.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3461"/>
+        <source>Message sent to the running agent; applied at its next step.</source>
+        <translation>Üzenetet küldött a futó ügynöknek; a következő lépésén alkalmazva.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="540"/>
+        <source>Wait for the current request to finish before changing the Designer workspace.</source>
+        <translation>Várja meg, hogy a jelenlegi kérelem befejeződjön, mielőtt megváltoztatja a tervező munkahelyét.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="549"/>
+        <source>Advanced Designer workspace enabled: styles, layouts and QGIS map themes.</source>
+        <translation>Fejlesztett tervező munkatér engedélyezett: stílusok, elrendezések és QGIS térkép témák.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="550"/>
+        <source>Standard conversation workspace enabled.</source>
+        <translation>A szabványos beszélgetési munkahely engedélyezett.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3829"/>
+        <source>Available QGIS interfaces</source>
+        <translation>Kész QGIS felületek</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="966"/>
+        <source>Conversation from another project</source>
+        <translation>Egy másik projektből származó beszélgetés</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3450"/>
+        <source>Message queued with the selected mode; the running request keeps its permissions.</source>
+        <translation>Az üzenet sorban áll a kiválasztott móddal; a futó kérelem megtartja az engedélyét.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="970"/>
+        <source>Project path unavailable</source>
+        <translation>A projekt útvonal nem elérhető</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3830"/>
+        <source>QGIS interface: {}</source>
+        <translation>QGIS felület: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="4931"/>
+        <source>The QGIS interface could not be opened: {}</source>
+        <translation>A QGIS interfész nem nyitható: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3359"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3372"/>
+        <source>The conversation could not be archived. It has been kept open.</source>
+        <translation>A beszélgetést nem lehetett archiválni. Nyitva tartották.</translation>
+    </message>
+    <message>
+        <source>Custom skill; review and permissions still apply</source>
+        <translation>Személyes készség; még mindig érvényesek a felülvizsgálatok és az engedélyek</translation>
+    </message>
+    <message>
+        <source>External connector; permissions still apply</source>
+        <translation>Külső csatlakozó; még érvényesek a jogosultságok</translation>
+    </message>
+    <message>
+        <source>Skill request queued; it will load before the next request.</source>
+        <translation>A készségkérés sorban áll; a következő kérés előtt feltöltődik.</translation>
+    </message>
+    <message>
+        <source>Skill /{} is unavailable. Type / to see the available skills.</source>
+        <translation>A(z) /{} készség nem érhető el. Az elérhető készségek megtekintéséhez írja be a / jelet.</translation>
+    </message>
 </context>
 <context>
     <name>AgentData</name>
@@ -1948,6 +2050,22 @@ Ha a Nemet választja, az adatok a memóriában maradnak, és a projekt bezárá
         <location filename="../ui/controllers/agent_data.py" line="70"/>
         <source>Wait for the current request to finish before saving its data.</source>
         <translation>Az adatok mentése előtt várja meg az aktuális kérés végét.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_data.py" line="91"/>
+        <location filename="../ui/controllers/agent_data.py" line="121"/>
+        <source>Do not offer again this session</source>
+        <translation>Ne ajánljuk meg újra ezt a találkozót.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_data.py" line="92"/>
+        <source>Hide save suggestions until QGIS restarts. You can still save from the agent menu.</source>
+        <translation>Elrejtse a javaslatokat, amíg a QGIS újra nem indul. Még mindig mentheted az ügynök menüjétől.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_data.py" line="93"/>
+        <source>Save suggestions are hidden for this QGIS session. The data stay in memory.</source>
+        <translation>A QGIS üléshez a mentési javaslatok rejtve vannak. Az adatok a memóriában maradnak.</translation>
     </message>
 </context>
 <context>
@@ -3703,6 +3821,236 @@ Ha a Nemet választja, az adatok a memóriában maradnak, és a projekt bezárá
         <location filename="../ui/widgets/agent_panel.py" line="727"/>
         <source>Processing model designer…</source>
         <translation>Feldolgozási modelltervező…</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="3263"/>
+        <source>Detect service type</source>
+        <translation>Szolgáltatás azonosító típusa</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="3275"/>
+        <source>Source name (optional)</source>
+        <translation>Forrásnév (felvételi)</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="3277"/>
+        <source>Enable after adding</source>
+        <translation>Engedélyezés hozzáadás után</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="3392"/>
+        <source>Source added to this form. Save these settings to keep it.</source>
+        <translation>Forrás hozzáadott ehhez a formához. Takard meg ezeket a beállításokat, hogy megtartsd.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="3409"/>
+        <source>Unverified suggestion. Review the address and type, then test or add it yourself.</source>
+        <translation>Nem igazolt javaslat. Ellenőrizd a címet és írja be, majd próbára tedd vagy hozz hozzá.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="3371"/>
+        <source>Choose the service type if it cannot be detected from the address.</source>
+        <translation>Válassza ki a szolgáltatási típusot, ha nem található a címből.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="798"/>
+        <source>Default export folder…</source>
+        <translation>A alapértelmezett export mappát...</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="749"/>
+        <source>Push</source>
+        <translation>Push</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="742"/>
+        <source>Send now</source>
+        <translation>Küldj most!</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="746"/>
+        <source>Send the first waiting message to the running agent</source>
+        <translation>Küldd az első várakozási üzenetet a futó ügynöknek</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="911"/>
+        <source>Messages sent while the agent works</source>
+        <translation>Az ügynök dolgozása közben küldött üzenetek.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="914"/>
+        <location filename="../ui/widgets/agent_panel.py" line="2209"/>
+        <source>Push: guide the running request</source>
+        <translation>Push: vezesse a futó kérést</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="915"/>
+        <location filename="../ui/widgets/agent_panel.py" line="2210"/>
+        <source>Queue: wait for the current request to finish</source>
+        <translation>Várólista: várja a jelenlegi kérés befejezését</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="2040"/>
+        <source>Queue</source>
+        <translation>Várólista</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="2211"/>
+        <source>Messages during a run: Push or Queue. Ctrl+Shift+Enter uses the other mode.</source>
+        <translation>Üzenetek futás közben: nyomás vagy sor. Ctrl+Shift+Enter használja a másik módot.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="2222"/>
+        <source>Enter guides the running request. Ctrl+Shift+Enter queues a follow-up.</source>
+        <translation>Be kell vezetni a futó kérést. Ctrl+Shift+Enter sorok követés.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="2224"/>
+        <source>Enter queues a follow-up. Ctrl+Shift+Enter guides the running request.</source>
+        <translation>Adj sorokat a nyomon követésre. Ctrl+Shift+Enter vezeti a futó kérelmet.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="2231"/>
+        <source>Send to the running agent (Enter)</source>
+        <translation>Küldje el a futó ügynöknek (Térjen be)</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="2232"/>
+        <source>Queue the request (Enter)</source>
+        <translation>A kérelem sorban állása (Bejegyzés)</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1038"/>
+        <source>Enter sends in the selected mode. Esc stops. Ctrl+Shift+Enter uses the other mode.</source>
+        <translation>Az Enter küld a kiválasztott módban. Az Esc megáll. Ctrl+Shift+Enter használja a másik módot.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="780"/>
+        <location filename="../ui/widgets/agent_panel.py" line="781"/>
+        <location filename="../ui/widgets/agent_panel.py" line="2086"/>
+        <source>Dictate with the microphone</source>
+        <translation>A mikrofonnal diktálj</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="824"/>
+        <source>Microphone settings…</source>
+        <translation>A mikrofon beállításai...</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="854"/>
+        <source>Cancel dictation</source>
+        <translation>Törölje a diktálást</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="2085"/>
+        <source>Stop recording and transcribe</source>
+        <translation>Állítsd le a felvételt, és transzkribálj!</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="2086"/>
+        <source>Cancel transcription</source>
+        <translation>A transzkriptáció törlése</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="800"/>
+        <source>Advanced Designer workspace</source>
+        <translation>Fejlesztett tervező munkahely</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="803"/>
+        <source>Brainstorm a solution…</source>
+        <translation>Brainstorm egy megoldást...</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="995"/>
+        <source>Designer</source>
+        <translation>Tervező</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="999"/>
+        <source>Ideas</source>
+        <translation>Ideák</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="999"/>
+        <source>Styles</source>
+        <translation>Sztílussal</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1000"/>
+        <source>Print layout</source>
+        <translation>Nyomtatási beépítés</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1000"/>
+        <source>Map themes</source>
+        <translation>A térkép témái</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1005"/>
+        <source>Insert an editable request: {}</source>
+        <translation>Adjon be egy szerkeszthető kérelmet: {}</translation>
+    </message>
+    <message>
+        <source>Help me brainstorm and refine a solution from the current context. Propose two or three options and ask only questions that change the choice. Do not change the project yet.</source>
+        <translation>Segíts meg gondolkodni és finomítani egy megoldást a jelenlegi kontextusból. Tegye fel két-három választási lehetőséget, és csak olyan kérdéseket tegyen fel, amelyek megváltoztatják a választást. Még ne változtasd meg a projektet.</translation>
+    </message>
+    <message>
+        <source>In the advanced Designer workspace, propose refined layer styles and labels for this project. Compare two directions with readable colors and hierarchy. Do not apply them yet.</source>
+        <translation>A fejlett tervező munkaterületben javasoljuk a projekt finomított rétegstílusát és címkéjét. Összehasonlítsa két irányt olvasható színekkel és hierarchiával. Még ne alkalmazd őket.</translation>
+    </message>
+    <message>
+        <source>In the advanced Designer workspace, propose a print layout: purpose, page format, map, legend, scale and typography. Refine the proposal with me before creating or changing anything.</source>
+        <translation>A fejlett tervező munkatérben javasoljon egy nyomtatási elrendezést: cél, oldalformátum, térkép, legenda, skála és tipográfia. Tisztítsd meg a javaslatot velem, mielőtt bármit is megterveznél vagy megváltoztatnál.</translation>
+    </message>
+    <message>
+        <source>In the advanced Designer workspace, inspect existing QGIS map themes and propose how to organize them for different views and layouts. Do not save, replace, apply or remove a theme yet.</source>
+        <translation>A fejlett tervező munkatérben ellenőrizze a meglévő QGIS térkép témákat, és javasolja, hogyan lehet őket különböző nézetekre és kialakításokra szervezni. Ne mentse meg, cserélje ki, alkalmazza vagy távolítsa el a témát.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1121"/>
+        <source>Conversations</source>
+        <translation>Beszélgetések</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="2220"/>
+        <source>Current request: {}. Next message: {}. It will wait for the current request.</source>
+        <translation>A jelenlegi kérelem: {}- Nem. Következő üzenet: {}- Nem. Megvárja a jelenlegi kérést.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1174"/>
+        <location filename="../ui/widgets/agent_panel.py" line="1366"/>
+        <source>Open conversation</source>
+        <translation>Nyitott beszélgetés</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1236"/>
+        <source>Project path unavailable</source>
+        <translation>A projekt útvonal nem elérhető</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1367"/>
+        <source>Read conversation</source>
+        <translation>Olvasd meg a beszélgetést</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1122"/>
+        <source>Up to 200 recent conversations on this computer. Other projects open for reading only.</source>
+        <translation>Több mint 200 beszélgetés volt ezen a számítógépen. Más projektek csak olvasásra nyitva állnak.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1237"/>
+        <source>current</source>
+        <translation>aktuális</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1241"/>
+        <source>{} conversation(s)</source>
+        <translation>{} beszélgetés</translation>
+    </message>
+    <message>
+        <source>Type / for skills or @ for project layers. Enter/Tab chooses a skill; Enter sends the edited request.</source>
+        <translation>A projektrétegekre / vagy @-t írjon. Az Enter/Tab kiválaszt egy készséget; az Enter elküld a szerkesztett kérelmet.</translation>
     </message>
 </context>
 <context>
@@ -14991,6 +15339,502 @@ Mappa: {6}</translation>
         <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
         <source>Kept points</source>
         <translation type="obsolete">Megtartott pontok</translation>
+    </message>
+</context>
+<context>
+    <name>AgentSpeech</name>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="279"/>
+        <source>Audio stays in memory and is discarded after transcription. The text is inserted in the draft; you review it and press Send yourself.</source>
+        <translation>A hang a memóriában marad, majd az átírás után törlődik. A szöveg a piszkozatba kerül; ellenőrizze, és saját maga kattintson a Küldés gombra.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="41"/>
+        <source>Automatic, or a language code: fr, en…</source>
+        <translation>Automatikus, vagy nyelvi kód: fr, en...</translation>
+    </message>
+    <message>
+        <source>Choose a transcription model (at most 200 characters).</source>
+        <translation>Válassza ki a transzkripciós modellt (legfeljebb 200 karakter).</translation>
+    </message>
+    <message>
+        <source>Choose a transcription service.</source>
+        <translation>Válassza ki a transzkripciós szolgáltatást.</translation>
+    </message>
+    <message>
+        <source>Choose whether to send recorded audio to this transcription service.</source>
+        <translation>Válassza ki, hogy ezt a transzkripciós szolgáltatást kapcsolja-e fel.</translation>
+    </message>
+    <message>
+        <source>Configure the microphone service before recording.</source>
+        <translation>A rögzítés előtt állítsa be a mikrofon szolgáltatást.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_speech.py" line="134"/>
+        <source>Dictation added to the draft. Review it, then press Send.</source>
+        <translation>A tervekhez diktáció került. Átnézze, majd nyomja meg a küldést.</translation>
+    </message>
+    <message>
+        <source>Language is an ISO code such as fr or en, or empty for automatic detection.</source>
+        <translation>A nyelv olyan ISO-kód, mint a fr vagy en, vagy automatikus észlelésre üres.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_speech.py" line="94"/>
+        <source>Local service</source>
+        <translation>Helyi szolgáltatás</translation>
+    </message>
+    <message>
+        <source>Microphone access was denied. Enable it in system privacy settings.</source>
+        <translation>Megtagadta a mikrofon hozzáférését. A rendszer adatvédelmi beállításaiban engedélyezze.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_speech.py" line="39"/>
+        <source>Microphone configured. Click the microphone to dictate.</source>
+        <translation>Mikrofon konfigurálva. Kattintson a mikrofonra, hogy diktálj.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="21"/>
+        <source>Microphone settings</source>
+        <translation>Mikrofon beállításai</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_speech.py" line="140"/>
+        <source>Microphone: {}</source>
+        <translation>Mikrófon: {}</translation>
+    </message>
+    <message>
+        <source>No audio was recorded. Check the microphone and try again.</source>
+        <translation>Semmi hangot nem vettek fel. Ellenőrizze a mikrofonot, és próbálja meg újra.</translation>
+    </message>
+    <message>
+        <source>No microphone is available. Check the device in Microphone settings.</source>
+        <translation>Nincs mikrofon. Ellenőrizze a készüléket a mikrofon beállításaiban.</translation>
+    </message>
+    <message>
+        <source>No speech was recognized. Try recording again.</source>
+        <translation>Nem ismerték fel a beszédet. Próbáld újra felvenni.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="51"/>
+        <source>Previously selected microphone (unavailable)</source>
+        <translation>Előzőleg kiválasztott mikrofon (nem áll rendelkezésre)</translation>
+    </message>
+    <message>
+        <source>Qt Multimedia is unavailable in this QGIS installation.</source>
+        <translation>A Qt Multimedia nem áll rendelkezésre a QGIS telepítésben.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_speech.py" line="95"/>
+        <source>Recording… {} · {}</source>
+        <translation>Felvétel... {} · {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="58"/>
+        <source>Remove stored transcription key</source>
+        <translation>A tárolt transzkripciós kulcs eltávolítása</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_speech.py" line="75"/>
+        <location filename="../ui/widgets/agent_speech.py" line="170"/>
+        <source>Requesting microphone access…</source>
+        <translation>Micrófon hozzáférését kérem...</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="61"/>
+        <source>Send recorded audio to this service for transcription</source>
+        <translation>Küldj felvett hangot a transzkripcióhoz</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="281"/>
+        <source>Start your local OpenAI-compatible transcription server first. No audio leaves this computer.</source>
+        <translation>Kezdd a helyi OpenAI-compatible Először a transzkripciós szerver. Semmi hang nem hagyja el ezt a számítógépet.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="55"/>
+        <source>Stored key</source>
+        <translation>A tárolt kulcs</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="43"/>
+        <source>System default microphone</source>
+        <translation>A rendszer alapértelmezett mikrofonja</translation>
+    </message>
+    <message>
+        <source>The API key contains an invalid character.</source>
+        <translation>Az API-kulcs nem érvényes karaktert tartalmaz.</translation>
+    </message>
+    <message>
+        <source>The chat provider has no stored key for this transcription address.</source>
+        <translation>A chat szolgáltatónak nincs tárolt kulcsa ennek a transzkripciós címnek.</translation>
+    </message>
+    <message>
+        <source>The local transcription service must run on this computer (localhost).</source>
+        <translation>A helyi transzkripciós szolgáltatást ezen a számítógépen kell futtatni (localhost).</translation>
+    </message>
+    <message>
+        <source>The microphone audio format is not supported.</source>
+        <translation>A mikrofon hangformátuma nem támogatott.</translation>
+    </message>
+    <message>
+        <source>The microphone could not be started. Check permissions and audio input settings.</source>
+        <translation>A mikrofont nem lehetett bekapcsolni. Ellenőrizze a jogosultságokat és az audio belépési beállítások.</translation>
+    </message>
+    <message>
+        <source>The microphone stopped unexpectedly. Check the selected input device.</source>
+        <translation>A mikrofon váratlanul leállt. Ellenőrizze a kiválasztott belépőeszközt.</translation>
+    </message>
+    <message>
+        <source>The recorded audio is empty or exceeds the dictation limit.</source>
+        <translation>A rögzített hang üres vagy túlhaladja a diktálási határértéket.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="282"/>
+        <source>The selected service receives the recorded audio and may charge for transcription. Keys are stored in the QGIS authentication database.</source>
+        <translation>A kiválasztott szolgáltatás megkapja a rögzített hangot, és a transzkripció díjat veheti fel. A kulcsokat a QGIS hitelesítési adatbázisban tárolják.</translation>
+    </message>
+    <message>
+        <source>The stored transcription key belongs to another service address.</source>
+        <translation>A tárolt transzkripciós kulcs egy másik szolgáltatási címhez tartozik.</translation>
+    </message>
+    <message>
+        <source>The transcript is too long for a dictation.</source>
+        <translation>A lemez túl hosszú a diktáláshoz.</translation>
+    </message>
+    <message>
+        <source>The transcription response is too large.</source>
+        <translation>A transzkripció reakció túl nagy.</translation>
+    </message>
+    <message>
+        <source>The transcription service could not be reached. Check its address and connection.</source>
+        <translation>A transzkripciós szolgáltatást nem lehetett elérni. Ellenőrizze a címét és a kapcsolatot.</translation>
+    </message>
+    <message>
+        <source>The transcription service did not return a JSON transcript.</source>
+        <translation>A transzkripciós szolgáltatás nem adott vissza egy JSON transzkriptumot.</translation>
+    </message>
+    <message>
+        <source>The transcription service redirected the request. Check its address in Microphone settings.</source>
+        <translation>A transzkripciós szolgálat átvezette a kérést. Ellenőrizze a címét a mikrofon beállításaiban.</translation>
+    </message>
+    <message>
+        <source>The transcription service took too long to answer.</source>
+        <translation>A transzkripciós szolgálat túl sokáig tartott válaszolni.</translation>
+    </message>
+    <message>
+        <source>This transcription service needs an API key.</source>
+        <translation>Ez a transzkripciós szolgáltatás API kulcsot igényel.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_speech.py" line="112"/>
+        <location filename="../ui/widgets/agent_speech.py" line="233"/>
+        <source>Transcribing…</source>
+        <translation>Átírás...</translation>
+    </message>
+    <message>
+        <source>Use a service address without credentials, query or fragment.</source>
+        <translation>Használja a szolgáltatási címet hitelesítő adatokkal, kérdéseivel vagy töredékekkel.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="56"/>
+        <source>Use the chat provider's key for this same address</source>
+        <translation>Használd a chat szolgáltató kulcsát ugyanazon a címre</translation>
+    </message>
+    <message>
+        <source>Local server (OpenAI-compatible)</source>
+        <translation>Helyi szerver (OpenAI-compatible)</translation>
+    </message>
+    <message>
+        <source>Transcription service</source>
+        <translation>Transzkripciós szolgáltatás</translation>
+    </message>
+    <message>
+        <source>Service address</source>
+        <translation>Szolgáltatási cím</translation>
+    </message>
+    <message>
+        <source>Transcription model</source>
+        <translation>A transzkripciós modell</translation>
+    </message>
+    <message>
+        <source>Language</source>
+        <translation>Nyelv</translation>
+    </message>
+    <message>
+        <source>Microphone</source>
+        <translation>Mikrofon</translation>
+    </message>
+    <message>
+        <source>API key</source>
+        <translation>API-kulcs</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="68"/>
+        <location filename="../ui/widgets/agent_speech.py" line="139"/>
+        <source>Test microphone</source>
+        <translation>Mikrofon tesztelése</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="70"/>
+        <source>Test transcription</source>
+        <translation>Átírás tesztelése</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="76"/>
+        <source>Microphone level: %p%</source>
+        <translation>Mikrofon szint: %p%</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="77"/>
+        <source>Record up to 10 seconds, then test transcription with the settings above.</source>
+        <translation>10 másodpercig rögzítsük, majd teszteljük a transzkripciót a fenti beállításokkal.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="122"/>
+        <source>Settings changed. Test transcription again.</source>
+        <translation>A beállítások megváltoztak. Újra teszteljük a transzkripciót.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="154"/>
+        <source>Test cancelled.</source>
+        <translation>A teszt lemondott.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="169"/>
+        <source>Stop microphone test</source>
+        <translation>Megállító mikrofonvizsgálat</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="190"/>
+        <source>Speak into the microphone… {} / 10 s</source>
+        <translation>Beszélj a mikrofonba... {} 10 másodperc</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="203"/>
+        <source>Recording ready. Click Test transcription to check the service.</source>
+        <translation>Felvétel kész. Kattintson a Test transzkripcióra, hogy ellenőrizze a szolgáltatást.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="232"/>
+        <source>Cancel transcription</source>
+        <translation>A transzkriptáció törlése</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="246"/>
+        <source>Transcription test succeeded.</source>
+        <translation>A transzkripciós teszt sikeres volt.</translation>
+    </message>
+    <message>
+        <source>Mistral requires a two-letter language code such as fr or en, or empty for automatic detection.</source>
+        <translation>A Mistral két betűs nyelvi kódot igényel, mint a fr vagy en, vagy üreset automatikus észlelésre.</translation>
+    </message>
+</context>
+<context>
+    <name>AgentEditCommits</name>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="101"/>
+        <source>A memory layer stays in memory after saving its edits. Save project and layers to keep it after closing QGIS.</source>
+        <translation>A memória réteg a szerkesztéseinek mentése után marad a memóriában. A projekt és a rétegek tárolása a QGIS bezárása után.</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="24"/>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="27"/>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="30"/>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="41"/>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="45"/>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="47"/>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="50"/>
+        <source>The transaction group could not be verified. Use QGIS to save these edits.</source>
+        <translation>A tranzakciós csoportot nem lehetett ellenőrizni. A QGIS segítségével mentse meg ezeket a szerkesztéseket.</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="85"/>
+        <source>Layer edits are still pending.</source>
+        <translation>A réteg szerkesztése még várakozik.</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="91"/>
+        <source>Layer edits</source>
+        <translation>Rétegmódosítások</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="91"/>
+        <source>Save the layer edits?</source>
+        <translation>Menti a rétegmódosításokat?</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="92"/>
+        <source>Save layer edits</source>
+        <translation>Rétegmódosítások mentése</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="92"/>
+        <source>Keep pending</source>
+        <translation>Módosítások függőben tartása</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="93"/>
+        <source>Checking and saving the layer edits…</source>
+        <translation>A réteg szerkesztéseinek ellenőrzése és mentése...</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="94"/>
+        <source>Edits remain pending unless saved or discarded in QGIS. A new edit needs a new confirmation.</source>
+        <translation>A szerkesztések várakozóak maradnak, kivéve ha azokat a QGIS-ben tárolják vagy eldobják. Egy új szerkesztésnek új megerősítésre van szüksége.</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="96"/>
+        <source>Saved edits can no longer be undone from the agent chat.</source>
+        <translation>A mentett módosítások már nem vonhatók vissza az ügynök csevegéséből.</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="97"/>
+        <source>Save all pending changes to the data source, including any manual edits on the listed layers?</source>
+        <translation>Menti az összes függőben lévő módosítást az adatforrásba, beleértve a felsorolt rétegek kézi módosításait is?</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="99"/>
+        <source>These layers share a QGIS transaction. They are saved together.</source>
+        <translation>Ezek a rétegek egy QGIS tranzakcióval rendelkeznek. Együtt mentették meg őket.</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="130"/>
+        <source>The conversation changed or a request is running. Ask for a new confirmation.</source>
+        <translation>A beszélgetés megváltozott, vagy egy kérés fut. Kérj új megerősítést.</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="133"/>
+        <source>The layers changed since this confirmation. Review them and ask again.</source>
+        <translation>A rétegek megváltoztak a megerősítés óta. Ellenőrizd őket, és kérdezd megint.</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="136"/>
+        <source>A listed layer is protected from the agent. Save its edits directly in QGIS.</source>
+        <translation>A felsorolt réteg védett az ügynöktől. A szerkesztéseket közvetlenül a QGIS-ben mentse meg.</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="147"/>
+        <source>QGIS refused to save the edits.</source>
+        <translation>A QGIS nem mentette meg a szerkesztéseket.</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="163"/>
+        <source>Layer edits saved: {}</source>
+        <translation>Rétegmódosítások mentve: {}</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="152"/>
+        <source>The layer edits were not fully saved. Review their state in QGIS.</source>
+        <translation>A rétegmódosítások mentése nem fejeződött be teljesen. Ellenőrizze az állapotukat a QGIS-ben.</translation>
+    </message>
+</context>
+<context>
+    <name>AgentExports</name>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_exports.py" line="13"/>
+        <source>Choose the default agent export folder</source>
+        <translation>Válassza ki az alapértelmezett ügynök export mappáját</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_exports.py" line="20"/>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_exports.py" line="22"/>
+        <source>Choose an existing folder outside the QGIS profiles.</source>
+        <translation>Válassza ki a QGIS profilokon kívül egy meglévő mappát.</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_exports.py" line="22"/>
+        <source>Export folder</source>
+        <translation>Exportmappa</translation>
+    </message>
+</context>
+<context>
+    <name>AgentActivity</name>
+    <message>
+        <source>Ready for a message</source>
+        <translation>Készen állunk egy üzenetre.</translation>
+    </message>
+    <message>
+        <source>Finished — ready for a message</source>
+        <translation>Kész az üzenethez</translation>
+    </message>
+    <message>
+        <source>Thinking</source>
+        <translation>Gondolkodás</translation>
+    </message>
+    <message>
+        <source>Reading data</source>
+        <translation>Az adatolvasás</translation>
+    </message>
+    <message>
+        <source>Working</source>
+        <translation>A munka</translation>
+    </message>
+    <message>
+        <source>Fetching data</source>
+        <translation>Adatok behozatalára</translation>
+    </message>
+    <message>
+        <source>Writing the response</source>
+        <translation>A válasz írása</translation>
+    </message>
+    <message>
+        <source>Waiting</source>
+        <translation>Várni</translation>
+    </message>
+    <message>
+        <source>Retrying</source>
+        <translation>Újra próbálkozás</translation>
+    </message>
+    <message>
+        <source>Stopped or stopping</source>
+        <translation>Megállás vagy megállás</translation>
+    </message>
+    <message>
+        <source>You are writing a message</source>
+        <translation>Egy üzenetet írsz.</translation>
+    </message>
+    <message>
+        <source>Messages are queued</source>
+        <translation>Az üzenetek sorban vannak.</translation>
+    </message>
+    <message>
+        <source>The request needs your attention</source>
+        <translation>A kérésnek szüksége van a figyelmére.</translation>
+    </message>
+    <message>
+        <source>Searching for data</source>
+        <translation>Adatok keresése</translation>
+    </message>
+    <message>
+        <source>Processing data</source>
+        <translation>Az adatfeldolgozás</translation>
+    </message>
+    <message>
+        <source>Editing a layer</source>
+        <translation>Egy réteg szerkesztése</translation>
+    </message>
+    <message>
+        <source>Exporting files</source>
+        <translation>Exportálási fájlok</translation>
+    </message>
+    <message>
+        <source>Designing the map</source>
+        <translation>A térképen tervezés</translation>
+    </message>
+    <message>
+        <source>Navigating in QGIS</source>
+        <translation>QGIS navigáció</translation>
+    </message>
+    <message>
+        <source>Waiting for your confirmation</source>
+        <translation>Várom a megerősítést.</translation>
+    </message>
+    <message>
+        <source>Recording your voice</source>
+        <translation>A hangod felvételét</translation>
+    </message>
+    <message>
+        <source>Transcribing your recording</source>
+        <translation>A felvételeket átírom.</translation>
     </message>
 </context>
 </TS>

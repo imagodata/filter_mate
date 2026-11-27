@@ -1854,6 +1854,108 @@ Hyväksytkö ne kaikki? Ei suorittaa ei yhtään niistä.</translation>
         <source>Opening the Processing model designer</source>
         <translation>Avataan Processing-mallintajaa</translation>
     </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1283"/>
+        <source>Review and add source: {}</source>
+        <translation>Tarkista ja lisää lähde: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1312"/>
+        <source>Open this search in the browser</source>
+        <translation>Avaa tämä hakemus selaimessa</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1653"/>
+        <source>sends the search query to DuckDuckGo; result sites are not visited</source>
+        <translation>lähettää hakukysymyksen DuckDuckGo:lle; tulossivustoja ei vierailla</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1500"/>
+        <source>Wait for the current request to finish before changing the export folder.</source>
+        <translation>Odottakaa, että nykyinen pyyntö valmistuu ennen kuin muutatte vienti kansion.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1506"/>
+        <source>Default export folder: {}</source>
+        <translation>Valmistettu vienti kansio: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1519"/>
+        <source>Export cancelled. Choose a default export folder from the agent menu to export.</source>
+        <translation>Vienti peruttu. Valitse oletusarvoinen vienti kansio asiakkaan menusosta.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3461"/>
+        <source>Message sent to the running agent; applied at its next step.</source>
+        <translation>Viesti, joka lähetetään toimittajalle. Käytetään seuraavassa vaiheessa.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="540"/>
+        <source>Wait for the current request to finish before changing the Designer workspace.</source>
+        <translation>Odottakaa, että nykyinen pyyntö valmistuu ennen Designer -työalueen muuttamista.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="549"/>
+        <source>Advanced Designer workspace enabled: styles, layouts and QGIS map themes.</source>
+        <translation>Advanced Designer -työpaikka: tyylit, suunnittelut ja QGIS-kartatemaat.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="550"/>
+        <source>Standard conversation workspace enabled.</source>
+        <translation>Standardin keskustelun työtilaa on mahdollistettu.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3829"/>
+        <source>Available QGIS interfaces</source>
+        <translation>Käytettävissä olevat QGIS-liittymät</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="966"/>
+        <source>Conversation from another project</source>
+        <translation>Keskustelu toisesta hankkeesta</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3450"/>
+        <source>Message queued with the selected mode; the running request keeps its permissions.</source>
+        <translation>Viesti on jonossa valitussa tilassa; käynnissä oleva pyyntö säilyttää sallit.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="970"/>
+        <source>Project path unavailable</source>
+        <translation>Hankkeen polku ei ole käytettävissä</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3830"/>
+        <source>QGIS interface: {}</source>
+        <translation>QGIS käyttöliittymä: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="4931"/>
+        <source>The QGIS interface could not be opened: {}</source>
+        <translation>QGIS:n käyttöliittymä ei voitu avata: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3359"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3372"/>
+        <source>The conversation could not be archived. It has been kept open.</source>
+        <translation>Keskustelua ei voitu arkistoida. Se on pidetty auki.</translation>
+    </message>
+    <message>
+        <source>Custom skill; review and permissions still apply</source>
+        <translation>Muodostettu osaaminen; tarkastus- ja luvat ovat edelleen voimassa</translation>
+    </message>
+    <message>
+        <source>External connector; permissions still apply</source>
+        <translation>Ulkopuolinen yhteys; käyttöoikeudet ovat edelleen voimassa</translation>
+    </message>
+    <message>
+        <source>Skill request queued; it will load before the next request.</source>
+        <translation>Taidetta pyydetään jonossa; se latautuu ennen seuraavaa pyyntöä.</translation>
+    </message>
+    <message>
+        <source>Skill /{} is unavailable. Type / to see the available skills.</source>
+        <translation>Taito /{} ei ole käytettävissä. Näet käytettävissä olevat taidot kirjoittamalla /.</translation>
+    </message>
 </context>
 <context>
     <name>AgentData</name>
@@ -1948,6 +2050,22 @@ Jos valitset Ei, tiedot säilyvät muistissa ja häviävät projektin sulkeutues
         <location filename="../ui/controllers/agent_data.py" line="70"/>
         <source>Wait for the current request to finish before saving its data.</source>
         <translation>Odota nykyisen pyynnön valmistumista ennen sen tietojen tallentamista.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_data.py" line="91"/>
+        <location filename="../ui/controllers/agent_data.py" line="121"/>
+        <source>Do not offer again this session</source>
+        <translation>Älä tarjoa tätä istuntoa uudelleen .</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_data.py" line="92"/>
+        <source>Hide save suggestions until QGIS restarts. You can still save from the agent menu.</source>
+        <translation>Piilottaa ehdotukset, kunnes QGIS käynnistyy uudelleen. Voit silti säästää asiakkaan menusta.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_data.py" line="93"/>
+        <source>Save suggestions are hidden for this QGIS session. The data stay in memory.</source>
+        <translation>QGIS-istunnon tallentamisehdotukset ovat piilotettuja. Tiedot jäävät muistiin.</translation>
     </message>
 </context>
 <context>
@@ -3703,6 +3821,236 @@ Jos valitset Ei, tiedot säilyvät muistissa ja häviävät projektin sulkeutues
         <location filename="../ui/widgets/agent_panel.py" line="727"/>
         <source>Processing model designer…</source>
         <translation>Processing-mallintaja…</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="3263"/>
+        <source>Detect service type</source>
+        <translation>Palvelun tyyppi</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="3275"/>
+        <source>Source name (optional)</source>
+        <translation>Lähteen nimi (valinnainen)</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="3277"/>
+        <source>Enable after adding</source>
+        <translation>Ota käyttöön lisäämisen jälkeen</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="3392"/>
+        <source>Source added to this form. Save these settings to keep it.</source>
+        <translation>Lähteä lisättiin tähän lomakkeeseen. Säästä nämä asetukset.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="3409"/>
+        <source>Unverified suggestion. Review the address and type, then test or add it yourself.</source>
+        <translation>Epävarmistettu ehdotus. Tarkista osoite ja kirjoitus, testaa tai lisää itse.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="3371"/>
+        <source>Choose the service type if it cannot be detected from the address.</source>
+        <translation>Valitse palvelutyyppi, jos sitä ei voida havaita osoitteesta.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="798"/>
+        <source>Default export folder…</source>
+        <translation>Ennakkoratkaisu-portti...</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="749"/>
+        <source>Push</source>
+        <translation>Push</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="742"/>
+        <source>Send now</source>
+        <translation>Lähetä nyt .</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="746"/>
+        <source>Send the first waiting message to the running agent</source>
+        <translation>Lähetä ensimmäinen odotusviesti toimittajalle</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="911"/>
+        <source>Messages sent while the agent works</source>
+        <translation>Viestejä lähetetään, kun agentti työskentelee.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="914"/>
+        <location filename="../ui/widgets/agent_panel.py" line="2209"/>
+        <source>Push: guide the running request</source>
+        <translation>Push: ohjaa käynnissä oleva pyyntö</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="915"/>
+        <location filename="../ui/widgets/agent_panel.py" line="2210"/>
+        <source>Queue: wait for the current request to finish</source>
+        <translation>Jono: odottakaa, että nykyinen pyyntö valmistuu</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="2040"/>
+        <source>Queue</source>
+        <translation>Jono</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="2211"/>
+        <source>Messages during a run: Push or Queue. Ctrl+Shift+Enter uses the other mode.</source>
+        <translation>Lähetykset juoksun aikana: Työntää tai jonossa. Ctrl+Shift+Enter käyttää toista tilaa.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="2222"/>
+        <source>Enter guides the running request. Ctrl+Shift+Enter queues a follow-up.</source>
+        <translation>Sisääntäminen ohjaa käynnissä olevaa pyyntöä. Ctrl+Shift+Enter on jatkotoimia.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="2224"/>
+        <source>Enter queues a follow-up. Ctrl+Shift+Enter guides the running request.</source>
+        <translation>Sisäytä jonot seuranta. Ctrl+Shift+Enter ohjaa käynnistävää pyyntöä.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="2231"/>
+        <source>Send to the running agent (Enter)</source>
+        <translation>Lähetä toimittajalle (pääsy)</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="2232"/>
+        <source>Queue the request (Enter)</source>
+        <translation>Pyyntö on järjestettävä jonossa.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1038"/>
+        <source>Enter sends in the selected mode. Esc stops. Ctrl+Shift+Enter uses the other mode.</source>
+        <translation>Enter lähettää valitussa tilassa. Esc pysähtyy. Ctrl+Shift+Enter käyttää toista tilaa.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="780"/>
+        <location filename="../ui/widgets/agent_panel.py" line="781"/>
+        <location filename="../ui/widgets/agent_panel.py" line="2086"/>
+        <source>Dictate with the microphone</source>
+        <translation>Diktaattakaa mikrofonin avulla</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="824"/>
+        <source>Microphone settings…</source>
+        <translation>Mikrofonin asetukset...</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="854"/>
+        <source>Cancel dictation</source>
+        <translation>Peruuta diktaatio</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="2085"/>
+        <source>Stop recording and transcribe</source>
+        <translation>Lopeta tallentaminen ja transkribointi</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="2086"/>
+        <source>Cancel transcription</source>
+        <translation>Ilmoitusta peruutetaan</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="800"/>
+        <source>Advanced Designer workspace</source>
+        <translation>Edistynyt suunnittelijan työpaikka</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="803"/>
+        <source>Brainstorm a solution…</source>
+        <translation>Ajattelemme ratkaisua...</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="995"/>
+        <source>Designer</source>
+        <translation>Rakentaja</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="999"/>
+        <source>Ideas</source>
+        <translation>Ajatukset</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="999"/>
+        <source>Styles</source>
+        <translation>Tyyliä</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1000"/>
+        <source>Print layout</source>
+        <translation>Tulostuslaite</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1000"/>
+        <source>Map themes</source>
+        <translation>Karttakohteet</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1005"/>
+        <source>Insert an editable request: {}</source>
+        <translation>Lisää muokkaava pyyntö: {}</translation>
+    </message>
+    <message>
+        <source>Help me brainstorm and refine a solution from the current context. Propose two or three options and ask only questions that change the choice. Do not change the project yet.</source>
+        <translation>Auta minua miettiä ja korjata ratkaisun nykyisestä kontekstista. Ehdottele kaksi tai kolme vaihtoehtoa ja kysy vain kysymyksiä, jotka muuttavat valinnan. Älä vielä muuta suunnitelmaa.</translation>
+    </message>
+    <message>
+        <source>In the advanced Designer workspace, propose refined layer styles and labels for this project. Compare two directions with readable colors and hierarchy. Do not apply them yet.</source>
+        <translation>Kehittyneessä Designer -työalueessa ehdottaa tämän projektin hienostuneita laatu- ja etikettiä. Vertaa kaksi suuntaa lukitavissa väreissä ja hierarkiaan. Älä käytä niitä vielä.</translation>
+    </message>
+    <message>
+        <source>In the advanced Designer workspace, propose a print layout: purpose, page format, map, legend, scale and typography. Refine the proposal with me before creating or changing anything.</source>
+        <translation>Kehittyneessä Designer-työalueessa ehdottaa painonmuoto: tarkoitus, sivun muoto, kartta, legenda, mittakaava ja typografia. Selvitä ehdotus ennen kuin teet tai muutat mitään.</translation>
+    </message>
+    <message>
+        <source>In the advanced Designer workspace, inspect existing QGIS map themes and propose how to organize them for different views and layouts. Do not save, replace, apply or remove a theme yet.</source>
+        <translation>Kehittyneessä Designer -työalueessa tarkista olemassa olevia QGIS-karttiteemoja ja ehdottaa, miten ne järjestetään eri näkymät ja suunnittelut varten. Älä tallenna, korvaa, sovita tai poista teemaa vielä.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1121"/>
+        <source>Conversations</source>
+        <translation>Keskusteluja</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="2220"/>
+        <source>Current request: {}. Next message: {}. It will wait for the current request.</source>
+        <translation>Nykyinen pyyntö: {}- En tiedä . Seuraava viesti: {}- En tiedä . Se odottaa nykyistä pyyntöä.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1174"/>
+        <location filename="../ui/widgets/agent_panel.py" line="1366"/>
+        <source>Open conversation</source>
+        <translation>Avoin keskustelu</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1236"/>
+        <source>Project path unavailable</source>
+        <translation>Hankkeen polku ei ole käytettävissä</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1367"/>
+        <source>Read conversation</source>
+        <translation>Lue keskustelua</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1122"/>
+        <source>Up to 200 recent conversations on this computer. Other projects open for reading only.</source>
+        <translation>Tähän tietokoneeseen on saatu 200 viimeaikaista keskustelua. Muut hankkeet ovat avoimia vain lukemiseen.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1237"/>
+        <source>current</source>
+        <translation>nykyinen</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1241"/>
+        <source>{} conversation(s)</source>
+        <translation>{} Keskustelu</translation>
+    </message>
+    <message>
+        <source>Type / for skills or @ for project layers. Enter/Tab chooses a skill; Enter sends the edited request.</source>
+        <translation>Kirjoita / taitoille tai @ hankkeen kerroksille. Enter/Tab valitsee taidon; Enter lähettää muokkaaman pyynnön.</translation>
     </message>
 </context>
 <context>
@@ -14991,6 +15339,502 @@ Kansio: {6}</translation>
         <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
         <source>Kept points</source>
         <translation type="obsolete">Säilytetyt pisteet</translation>
+    </message>
+</context>
+<context>
+    <name>AgentSpeech</name>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="279"/>
+        <source>Audio stays in memory and is discarded after transcription. The text is inserted in the draft; you review it and press Send yourself.</source>
+        <translation>Ääni pysyy muistissa ja poistetaan litteroinnin jälkeen. Teksti lisätään luonnokseen; tarkista se ja paina itse Lähetä.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="41"/>
+        <source>Automatic, or a language code: fr, en…</source>
+        <translation>Automaattinen tai kielikodi: fr, en...</translation>
+    </message>
+    <message>
+        <source>Choose a transcription model (at most 200 characters).</source>
+        <translation>Valitse transkriptiomalli (enintään 200 merkkiä).</translation>
+    </message>
+    <message>
+        <source>Choose a transcription service.</source>
+        <translation>Valitse transkriptiopalvelu.</translation>
+    </message>
+    <message>
+        <source>Choose whether to send recorded audio to this transcription service.</source>
+        <translation>Valitse, lähetätkö nauhoitettu ääntä tähän transkriptiopalveluun.</translation>
+    </message>
+    <message>
+        <source>Configure the microphone service before recording.</source>
+        <translation>Laita mikrofonin käyttöön ennen kuvausta.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_speech.py" line="134"/>
+        <source>Dictation added to the draft. Review it, then press Send.</source>
+        <translation>Käsikirjoitus lisättiin luonnokselle. Tarkista se ja paina Lähetä.</translation>
+    </message>
+    <message>
+        <source>Language is an ISO code such as fr or en, or empty for automatic detection.</source>
+        <translation>Kieli on ISO-koodi, kuten fr tai en, tai tyhjä automaattiseen havaitsemiseen.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_speech.py" line="94"/>
+        <source>Local service</source>
+        <translation>Paikallinen palvelu</translation>
+    </message>
+    <message>
+        <source>Microphone access was denied. Enable it in system privacy settings.</source>
+        <translation>Mikrofonin käyttö kiellettiin. Aktivoi sen järjestelmän yksityisyysasetuksissa.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_speech.py" line="39"/>
+        <source>Microphone configured. Click the microphone to dictate.</source>
+        <translation>Mikrofooni on määritetty. Klikkaa mikrofonia diktoimaan.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="21"/>
+        <source>Microphone settings</source>
+        <translation>Mikrofonin asetukset</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_speech.py" line="140"/>
+        <source>Microphone: {}</source>
+        <translation>Mikrofooni: {}</translation>
+    </message>
+    <message>
+        <source>No audio was recorded. Check the microphone and try again.</source>
+        <translation>Ei ääntä. Tarkista mikrofonin ja yritä uudestaan.</translation>
+    </message>
+    <message>
+        <source>No microphone is available. Check the device in Microphone settings.</source>
+        <translation>Mikrofonia ei ole käytettävissä. Tarkista laite mikrofonin asetuksissa.</translation>
+    </message>
+    <message>
+        <source>No speech was recognized. Try recording again.</source>
+        <translation>Puheet eivät tunnistettu. Yritä nauhoittaa uudestaan.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="51"/>
+        <source>Previously selected microphone (unavailable)</source>
+        <translation>Aiemmin valittu mikrofoni (ei ole käytettävissä)</translation>
+    </message>
+    <message>
+        <source>Qt Multimedia is unavailable in this QGIS installation.</source>
+        <translation>Qt Multimedia ei ole käytettävissä tässä QGIS-laitoksessa.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_speech.py" line="95"/>
+        <source>Recording… {} · {}</source>
+        <translation>Kuvaa... {} · {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="58"/>
+        <source>Remove stored transcription key</source>
+        <translation>Poista tallennettu transkripti avain</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_speech.py" line="75"/>
+        <location filename="../ui/widgets/agent_speech.py" line="170"/>
+        <source>Requesting microphone access…</source>
+        <translation>Pyydän mikrofonin pääsyä...</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="61"/>
+        <source>Send recorded audio to this service for transcription</source>
+        <translation>Lähetä äänitetty ääni tästä palvelusta transkriptiota varten</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="281"/>
+        <source>Start your local OpenAI-compatible transcription server first. No audio leaves this computer.</source>
+        <translation>Aloita paikallinen OpenAI-compatible Ensin transkriptioserveri. Tämä tietokone ei saa äänen.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="55"/>
+        <source>Stored key</source>
+        <translation>Säilytetty avain</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="43"/>
+        <source>System default microphone</source>
+        <translation>Järjestelmän oletusarvoinen mikrofonin</translation>
+    </message>
+    <message>
+        <source>The API key contains an invalid character.</source>
+        <translation>API- avain sisältää epätodennäköisen merkkeen.</translation>
+    </message>
+    <message>
+        <source>The chat provider has no stored key for this transcription address.</source>
+        <translation>Chat-palvelun tarjoajalla ei ole tallennettu avainta tähän transkriptiosoitteeseen.</translation>
+    </message>
+    <message>
+        <source>The local transcription service must run on this computer (localhost).</source>
+        <translation>Paikallisen transkriptiotalouden on suoritettava tällä tietokoneella (localhost).</translation>
+    </message>
+    <message>
+        <source>The microphone audio format is not supported.</source>
+        <translation>Mikrofonin äänimuotoisuus ei tueta.</translation>
+    </message>
+    <message>
+        <source>The microphone could not be started. Check permissions and audio input settings.</source>
+        <translation>Mikrofonia ei voitu käynnistää. Tarkista käyttöoikeudet ja ääniasetukset.</translation>
+    </message>
+    <message>
+        <source>The microphone stopped unexpectedly. Check the selected input device.</source>
+        <translation>Mikrofooni pysähtyi odottamatta. Tarkista valitu sisäänkäyntilaite.</translation>
+    </message>
+    <message>
+        <source>The recorded audio is empty or exceeds the dictation limit.</source>
+        <translation>Nauhoitettu ääni on tyhjä tai ylittää diktaation rajan.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="282"/>
+        <source>The selected service receives the recorded audio and may charge for transcription. Keys are stored in the QGIS authentication database.</source>
+        <translation>Valitu palvelu saa tallennettu äänen ja voi veloittaa transkriptiota. Avaimet tallennetaan QGIS-tunnistustietokannassa.</translation>
+    </message>
+    <message>
+        <source>The stored transcription key belongs to another service address.</source>
+        <translation>Säilytetty transkriptiohjaus kuuluu toiseen palvelukohteeseen.</translation>
+    </message>
+    <message>
+        <source>The transcript is too long for a dictation.</source>
+        <translation>Kirjoitukset ovat liian pitkiä diktaatiolle.</translation>
+    </message>
+    <message>
+        <source>The transcription response is too large.</source>
+        <translation>Transkriptiotason vastaus on liian suuri.</translation>
+    </message>
+    <message>
+        <source>The transcription service could not be reached. Check its address and connection.</source>
+        <translation>Kirjoituspalveluun ei päässyt. Tarkista sen osoite ja yhteys.</translation>
+    </message>
+    <message>
+        <source>The transcription service did not return a JSON transcript.</source>
+        <translation>Transkriptiopalvelu ei palauttanut JSON-transkriptiä.</translation>
+    </message>
+    <message>
+        <source>The transcription service redirected the request. Check its address in Microphone settings.</source>
+        <translation>Transkriptipalvelu ohjasi pyynnön. Tarkista sen osoite mikrofonin asetuksissa.</translation>
+    </message>
+    <message>
+        <source>The transcription service took too long to answer.</source>
+        <translation>Kirjoituspalvelun vastaus kesti liian kauan.</translation>
+    </message>
+    <message>
+        <source>This transcription service needs an API key.</source>
+        <translation>Tämä transkriptioturva tarvitsee API- avaimen.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_speech.py" line="112"/>
+        <location filename="../ui/widgets/agent_speech.py" line="233"/>
+        <source>Transcribing…</source>
+        <translation>Kirjoittelen...</translation>
+    </message>
+    <message>
+        <source>Use a service address without credentials, query or fragment.</source>
+        <translation>Käytä palvelinosoitetta ilman luottokortteja, kyselyjä tai fragmentteja.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="56"/>
+        <source>Use the chat provider's key for this same address</source>
+        <translation>Käytä chat-palveluntarjoajan avainta samalle osoitteelle</translation>
+    </message>
+    <message>
+        <source>Local server (OpenAI-compatible)</source>
+        <translation>Paikallinen palvelin (OpenAI-compatible)</translation>
+    </message>
+    <message>
+        <source>Transcription service</source>
+        <translation>Kirjoituspalvelu</translation>
+    </message>
+    <message>
+        <source>Service address</source>
+        <translation>Palveluosoite</translation>
+    </message>
+    <message>
+        <source>Transcription model</source>
+        <translation>Transkriptiomalli</translation>
+    </message>
+    <message>
+        <source>Language</source>
+        <translation>Kieli</translation>
+    </message>
+    <message>
+        <source>Microphone</source>
+        <translation>Mikrofooni</translation>
+    </message>
+    <message>
+        <source>API key</source>
+        <translation>API-avain</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="68"/>
+        <location filename="../ui/widgets/agent_speech.py" line="139"/>
+        <source>Test microphone</source>
+        <translation>Testaa mikrofoni</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="70"/>
+        <source>Test transcription</source>
+        <translation>Testaa litterointi</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="76"/>
+        <source>Microphone level: %p%</source>
+        <translation>Mikrofonin taso: %p%</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="77"/>
+        <source>Record up to 10 seconds, then test transcription with the settings above.</source>
+        <translation>Nauhoitetaan 10 sekuntia ja testataan sitten transkriptio yllä mainituilla asetuksilla.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="122"/>
+        <source>Settings changed. Test transcription again.</source>
+        <translation>Asetukset muuttuivat. Kokeile uudelleen.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="154"/>
+        <source>Test cancelled.</source>
+        <translation>Testi peruutettiin.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="169"/>
+        <source>Stop microphone test</source>
+        <translation>Mikrofonin pysäyttäminen</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="190"/>
+        <source>Speak into the microphone… {} / 10 s</source>
+        <translation>Puhu mikrofonille. {} / 10 sekuntia</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="203"/>
+        <source>Recording ready. Click Test transcription to check the service.</source>
+        <translation>Kuvaa valmiina. Klikkaa Test transkriptiota tarkistamaan palvelua.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="232"/>
+        <source>Cancel transcription</source>
+        <translation>Ilmoitusta peruutetaan</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="246"/>
+        <source>Transcription test succeeded.</source>
+        <translation>Transkriptiotesti onnistui.</translation>
+    </message>
+    <message>
+        <source>Mistral requires a two-letter language code such as fr or en, or empty for automatic detection.</source>
+        <translation>Mistral vaatii kaksi kirjaimellista kodoa, kuten fr tai en, tai tyhjää automaattisen havaitsemiseksi.</translation>
+    </message>
+</context>
+<context>
+    <name>AgentEditCommits</name>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="101"/>
+        <source>A memory layer stays in memory after saving its edits. Save project and layers to keep it after closing QGIS.</source>
+        <translation>Muistilaatu säilyy muistiin, kun se on tallennettu. Säästä projektin ja kerrosten säilyttämiseksi QGIS:n sulkemisen jälkeen.</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="24"/>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="27"/>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="30"/>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="41"/>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="45"/>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="47"/>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="50"/>
+        <source>The transaction group could not be verified. Use QGIS to save these edits.</source>
+        <translation>Tehtäväryhmää ei voitu tarkistaa. Käytä QGIS:tä tallentaa nämä muokkaukset.</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="85"/>
+        <source>Layer edits are still pending.</source>
+        <translation>Layer-muokkaukset odottavat vielä.</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="91"/>
+        <source>Layer edits</source>
+        <translation>Tasojen muokkaukset</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="91"/>
+        <source>Save the layer edits?</source>
+        <translation>Tallennetaanko tasojen muokkaukset?</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="92"/>
+        <source>Save layer edits</source>
+        <translation>Tallenna tasojen muokkaukset</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="92"/>
+        <source>Keep pending</source>
+        <translation>Jätä muutokset odottamaan</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="93"/>
+        <source>Checking and saving the layer edits…</source>
+        <translation>Tarkistaminen ja tallentaminen laatujen muokkauksista...</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="94"/>
+        <source>Edits remain pending unless saved or discarded in QGIS. A new edit needs a new confirmation.</source>
+        <translation>Muutokset ovat edelleen odottamatta, ellei ne ole tallennettu tai hylätty QGIS:ssä. Uusi muokkaus tarvitsee uuden vahvistuksen.</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="96"/>
+        <source>Saved edits can no longer be undone from the agent chat.</source>
+        <translation>Tallennettuja muokkauksia ei voi enää kumota agentin keskustelusta.</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="97"/>
+        <source>Save all pending changes to the data source, including any manual edits on the listed layers?</source>
+        <translation>Tallennetaanko kaikki odottavat muutokset tietolähteeseen, mukaan lukien lueteltujen tasojen käsin tehdyt muokkaukset?</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="99"/>
+        <source>These layers share a QGIS transaction. They are saved together.</source>
+        <translation>Nämä kerroset jakavat QGIS-tapahtuman. He pelastetaan yhdessä.</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="130"/>
+        <source>The conversation changed or a request is running. Ask for a new confirmation.</source>
+        <translation>Keskustelu on muuttunut tai pyyntö on käynnissä. Pyydä uutta vahvistusta.</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="133"/>
+        <source>The layers changed since this confirmation. Review them and ask again.</source>
+        <translation>Lajeja on muuttunut tämän vahvistuksen jälkeen. Tarkista ne ja kysy uudestaan.</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="136"/>
+        <source>A listed layer is protected from the agent. Save its edits directly in QGIS.</source>
+        <translation>Luetteloitu laatu on suojattu tekijältä. Säilytä muokkaukset suoraan QGIS:ään.</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="147"/>
+        <source>QGIS refused to save the edits.</source>
+        <translation>QGIS kieltäytyi tallentamasta muutoksia.</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="163"/>
+        <source>Layer edits saved: {}</source>
+        <translation>Tasojen muokkaukset tallennettu: {}</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="152"/>
+        <source>The layer edits were not fully saved. Review their state in QGIS.</source>
+        <translation>Tasojen muokkauksia ei tallennettu kokonaan. Tarkista niiden tila QGISissä.</translation>
+    </message>
+</context>
+<context>
+    <name>AgentExports</name>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_exports.py" line="13"/>
+        <source>Choose the default agent export folder</source>
+        <translation>Valitse oletusarvoinen toimittajan vienti kansio</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_exports.py" line="20"/>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_exports.py" line="22"/>
+        <source>Choose an existing folder outside the QGIS profiles.</source>
+        <translation>Valitse olemassa oleva kansio QGIS-profiilien ulkopuolella.</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_exports.py" line="22"/>
+        <source>Export folder</source>
+        <translation>Vientikansio</translation>
+    </message>
+</context>
+<context>
+    <name>AgentActivity</name>
+    <message>
+        <source>Ready for a message</source>
+        <translation>Valmis viestiin.</translation>
+    </message>
+    <message>
+        <source>Finished — ready for a message</source>
+        <translation>Valmistettu  ⁇  valmiina viestiin</translation>
+    </message>
+    <message>
+        <source>Thinking</source>
+        <translation>Ajatteleva</translation>
+    </message>
+    <message>
+        <source>Reading data</source>
+        <translation>Lukemista koskevat tiedot</translation>
+    </message>
+    <message>
+        <source>Working</source>
+        <translation>Työpaikka</translation>
+    </message>
+    <message>
+        <source>Fetching data</source>
+        <translation>Tietojen hankkiminen</translation>
+    </message>
+    <message>
+        <source>Writing the response</source>
+        <translation>Vastauksen kirjoittaminen</translation>
+    </message>
+    <message>
+        <source>Waiting</source>
+        <translation>Odottaminen</translation>
+    </message>
+    <message>
+        <source>Retrying</source>
+        <translation>Kokeilu uudelleen</translation>
+    </message>
+    <message>
+        <source>Stopped or stopping</source>
+        <translation>Pysähdytty tai pysähtynyt</translation>
+    </message>
+    <message>
+        <source>You are writing a message</source>
+        <translation>Kirjoitat viestin .</translation>
+    </message>
+    <message>
+        <source>Messages are queued</source>
+        <translation>Viesteet ovat jonossa</translation>
+    </message>
+    <message>
+        <source>The request needs your attention</source>
+        <translation>Pyyntö vaatii huomiota.</translation>
+    </message>
+    <message>
+        <source>Searching for data</source>
+        <translation>Tietojen etsiminen</translation>
+    </message>
+    <message>
+        <source>Processing data</source>
+        <translation>Käsittelijät</translation>
+    </message>
+    <message>
+        <source>Editing a layer</source>
+        <translation>Lataan muokkaaminen</translation>
+    </message>
+    <message>
+        <source>Exporting files</source>
+        <translation>Exportti tiedostoja</translation>
+    </message>
+    <message>
+        <source>Designing the map</source>
+        <translation>Kartan suunnittelu</translation>
+    </message>
+    <message>
+        <source>Navigating in QGIS</source>
+        <translation>Seuraus QGIS:ssä</translation>
+    </message>
+    <message>
+        <source>Waiting for your confirmation</source>
+        <translation>Odotan vahvistusta.</translation>
+    </message>
+    <message>
+        <source>Recording your voice</source>
+        <translation>Kuvaa ääntäsi</translation>
+    </message>
+    <message>
+        <source>Transcribing your recording</source>
+        <translation>Kirjoituksesi.</translation>
     </message>
 </context>
 </TS>

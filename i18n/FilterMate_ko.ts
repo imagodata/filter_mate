@@ -1854,6 +1854,108 @@ Do you agree to all of them? No runs none of them.</source>
         <source>Opening the Processing model designer</source>
         <translation>처리 모델 디자이너 여는 중</translation>
     </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1283"/>
+        <source>Review and add source: {}</source>
+        <translation>소스 검토 및 추가: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1312"/>
+        <source>Open this search in the browser</source>
+        <translation>브라우저에서 검색을 열</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1653"/>
+        <source>sends the search query to DuckDuckGo; result sites are not visited</source>
+        <translation>DuckDuckGo에 검색 쿼리를 전송합니다. 결과 사이트는 방문되지 않습니다</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1500"/>
+        <source>Wait for the current request to finish before changing the export folder.</source>
+        <translation>수출 폴더를 변경하기 전에 현재 요청이 완료될 때까지 기다립니다.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1506"/>
+        <source>Default export folder: {}</source>
+        <translation>기본 수출 폴더: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1519"/>
+        <source>Export cancelled. Choose a default export folder from the agent menu to export.</source>
+        <translation>수출은 취소됐습니다. 수출하기 위한 에이전트 메뉴에서 기본 수출 폴더를 선택하십시오.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3461"/>
+        <source>Message sent to the running agent; applied at its next step.</source>
+        <translation>실행 중인 에이전트에 전송된 메시지; 다음 단계에 적용됩니다.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="540"/>
+        <source>Wait for the current request to finish before changing the Designer workspace.</source>
+        <translation>현재 요청이 완료되기 전에 설계자 작업 공간을 변경하십시오.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="549"/>
+        <source>Advanced Designer workspace enabled: styles, layouts and QGIS map themes.</source>
+        <translation>고급 디자이너 작업 공간: 스타일, 레이아웃 및 QGIS 지도 테마가 활성화되었습니다.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="550"/>
+        <source>Standard conversation workspace enabled.</source>
+        <translation>표준 대화 작업 공간이 활성화되었습니다.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3829"/>
+        <source>Available QGIS interfaces</source>
+        <translation>사용 가능한 QGIS 인터페이스</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="966"/>
+        <source>Conversation from another project</source>
+        <translation>다른 프로젝트의 대화</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3450"/>
+        <source>Message queued with the selected mode; the running request keeps its permissions.</source>
+        <translation>선택된 모드와 함께 문자열에 있는 메시지; 실행 요청은 권한을 유지합니다.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="970"/>
+        <source>Project path unavailable</source>
+        <translation>프로젝트 경로 가동되지 않습니다</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3830"/>
+        <source>QGIS interface: {}</source>
+        <translation>QGIS 인터페이스: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="4931"/>
+        <source>The QGIS interface could not be opened: {}</source>
+        <translation>QGIS 인터페이스는 열 수 없습니다: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3359"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3372"/>
+        <source>The conversation could not be archived. It has been kept open.</source>
+        <translation>대화를 기록할 수 없었습니다. 문을 열어두고 있습니다.</translation>
+    </message>
+    <message>
+        <source>Custom skill; review and permissions still apply</source>
+        <translation>사용자 지정 기술; 검토 및 권한은 여전히 적용됩니다</translation>
+    </message>
+    <message>
+        <source>External connector; permissions still apply</source>
+        <translation>외부 커넥터; 권한은 여전히 적용됩니다</translation>
+    </message>
+    <message>
+        <source>Skill request queued; it will load before the next request.</source>
+        <translation>기술 요청 큐; 다음 요청 전에 로드됩니다.</translation>
+    </message>
+    <message>
+        <source>Skill /{} is unavailable. Type / to see the available skills.</source>
+        <translation>스킬 /{}을(를) 사용할 수 없습니다. 사용 가능한 스킬을 보려면 /를 입력하세요.</translation>
+    </message>
 </context>
 <context>
     <name>AgentData</name>
@@ -1948,6 +2050,22 @@ If you choose No, these data stay in memory and will be lost when the project cl
         <location filename="../ui/controllers/agent_data.py" line="70"/>
         <source>Wait for the current request to finish before saving its data.</source>
         <translation>현재 요청이 끝난 뒤 데이터를 저장하세요.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_data.py" line="91"/>
+        <location filename="../ui/controllers/agent_data.py" line="121"/>
+        <source>Do not offer again this session</source>
+        <translation>이 세션을 다시 하지 마세요</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_data.py" line="92"/>
+        <source>Hide save suggestions until QGIS restarts. You can still save from the agent menu.</source>
+        <translation>QGIS가 다시 시작될 때까지 제안들을 저장하십시오. 여전히 에이전트 메뉴에서 저장할 수 있습니다.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_data.py" line="93"/>
+        <source>Save suggestions are hidden for this QGIS session. The data stay in memory.</source>
+        <translation>이 QGIS 세션에 대한 저장 제안은 숨겨져 있습니다. 데이터는 기억에 남아 있습니다.</translation>
     </message>
 </context>
 <context>
@@ -3703,6 +3821,236 @@ If you choose No, these data stay in memory and will be lost when the project cl
         <location filename="../ui/widgets/agent_panel.py" line="727"/>
         <source>Processing model designer…</source>
         <translation>처리 모델 디자이너…</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="3263"/>
+        <source>Detect service type</source>
+        <translation>탐지 서비스 유형</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="3275"/>
+        <source>Source name (optional)</source>
+        <translation>소스 이름 (선택)</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="3277"/>
+        <source>Enable after adding</source>
+        <translation>추가 후 활성화</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="3392"/>
+        <source>Source added to this form. Save these settings to keep it.</source>
+        <translation>이 양식에 출처가 추가되었습니다. 이 설정을 저장해서 보관하세요.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="3409"/>
+        <source>Unverified suggestion. Review the address and type, then test or add it yourself.</source>
+        <translation>검증되지 않은 제안 주소를 확인하고 입력하고 직접 테스트하거나 추가하십시오.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="3371"/>
+        <source>Choose the service type if it cannot be detected from the address.</source>
+        <translation>주소에서 감지할 수 없는 경우 서비스 유형을 선택하십시오.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="798"/>
+        <source>Default export folder…</source>
+        <translation>기본 수출 폴더...</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="749"/>
+        <source>Push</source>
+        <translation>Push</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="742"/>
+        <source>Send now</source>
+        <translation>지금 보내</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="746"/>
+        <source>Send the first waiting message to the running agent</source>
+        <translation>첫 번째 대기 메시지를 실행 중인 에이전트에 보내</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="911"/>
+        <source>Messages sent while the agent works</source>
+        <translation>에이전트가 일하는 동안 전송된 메시지</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="914"/>
+        <location filename="../ui/widgets/agent_panel.py" line="2209"/>
+        <source>Push: guide the running request</source>
+        <translation>Push: 실행 요청을 가이드</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="915"/>
+        <location filename="../ui/widgets/agent_panel.py" line="2210"/>
+        <source>Queue: wait for the current request to finish</source>
+        <translation>대기열: 현재 요청이 완료될 때까지 기다립니다</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="2040"/>
+        <source>Queue</source>
+        <translation>대기열</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="2211"/>
+        <source>Messages during a run: Push or Queue. Ctrl+Shift+Enter uses the other mode.</source>
+        <translation>경주 중 메시지: 푸시 또는 큐. Ctrl+Shift+Enter는 다른 모드를 사용합니다.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="2222"/>
+        <source>Enter guides the running request. Ctrl+Shift+Enter queues a follow-up.</source>
+        <translation>입력하는 것은 실행 요청을 안내합니다. Ctrl+Shift+Enter 라인은 후속입니다.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="2224"/>
+        <source>Enter queues a follow-up. Ctrl+Shift+Enter guides the running request.</source>
+        <translation>대기열을 입력하고 추적하세요. Ctrl+Shift+Enter는 실행 요청을 안내합니다.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="2231"/>
+        <source>Send to the running agent (Enter)</source>
+        <translation>실행 중인 에이전트에게 보내 (입기)</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="2232"/>
+        <source>Queue the request (Enter)</source>
+        <translation>요청에 줄을 서 (Enter)</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1038"/>
+        <source>Enter sends in the selected mode. Esc stops. Ctrl+Shift+Enter uses the other mode.</source>
+        <translation>입력은 선택된 모드에서 전송합니다. 에스크가 멈춰요 Ctrl+Shift+Enter는 다른 모드를 사용합니다.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="780"/>
+        <location filename="../ui/widgets/agent_panel.py" line="781"/>
+        <location filename="../ui/widgets/agent_panel.py" line="2086"/>
+        <source>Dictate with the microphone</source>
+        <translation>마이크 를 사용 하여 명령</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="824"/>
+        <source>Microphone settings…</source>
+        <translation>마이크 설정...</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="854"/>
+        <source>Cancel dictation</source>
+        <translation>명령 취소</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="2085"/>
+        <source>Stop recording and transcribe</source>
+        <translation>녹음을 중단하고 복사</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="2086"/>
+        <source>Cancel transcription</source>
+        <translation>복사본을 취소</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="800"/>
+        <source>Advanced Designer workspace</source>
+        <translation>고급 디자이너 작업 공간</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="803"/>
+        <source>Brainstorm a solution…</source>
+        <translation>브레인스톰 해법을...</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="995"/>
+        <source>Designer</source>
+        <translation>설계자</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="999"/>
+        <source>Ideas</source>
+        <translation>아이디어</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="999"/>
+        <source>Styles</source>
+        <translation>스타일</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1000"/>
+        <source>Print layout</source>
+        <translation>인쇄 레이아웃</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1000"/>
+        <source>Map themes</source>
+        <translation>지도 주제는</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1005"/>
+        <source>Insert an editable request: {}</source>
+        <translation>편집 가능한 요청을 삽입: {}</translation>
+    </message>
+    <message>
+        <source>Help me brainstorm and refine a solution from the current context. Propose two or three options and ask only questions that change the choice. Do not change the project yet.</source>
+        <translation>지금과 같은 상황에서 해결책을 정비하는 데 도움이 되세요. 두 세 가지 선택지를 제안하고 선택의 변화를 일으키는 질문만 해 보십시오. 아직 프로젝트를 바꾸지 마세요.</translation>
+    </message>
+    <message>
+        <source>In the advanced Designer workspace, propose refined layer styles and labels for this project. Compare two directions with readable colors and hierarchy. Do not apply them yet.</source>
+        <translation>고급 디자이너 작업 공간에서 이 프로젝트에 정교한 레이어 스타일과 레이블을 제안하십시오. 두 가지 방향과 읽을 수 있는 색상과 계층을 비교해 보세요. 아직 적용하지 마세요.</translation>
+    </message>
+    <message>
+        <source>In the advanced Designer workspace, propose a print layout: purpose, page format, map, legend, scale and typography. Refine the proposal with me before creating or changing anything.</source>
+        <translation>고급 디자이너 작업 공간에서 인쇄 레이아웃: 목적, 페이지 형식, 지도, 전설, 규모 및 타이포그래피를 제안하십시오. 아무것도 만들거나 바꾸기 전에 제안에 대해 나와 함께 정리해 보세요.</translation>
+    </message>
+    <message>
+        <source>In the advanced Designer workspace, inspect existing QGIS map themes and propose how to organize them for different views and layouts. Do not save, replace, apply or remove a theme yet.</source>
+        <translation>고급 설계자 작업 공간에서 기존 QGIS 지도 테마를 확인하고 다양한 조회 및 레이아웃을 위해 어떻게 정리할 수 있는지 제안합니다. 아직 테마를 저장하거나 교체하거나 적용하거나 제거하지 마십시오.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1121"/>
+        <source>Conversations</source>
+        <translation>대화</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="2220"/>
+        <source>Current request: {}. Next message: {}. It will wait for the current request.</source>
+        <translation>현재 요청: {}. 다음 메시지: {}. 현재 요청이 있을 때까지 기다립니다.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1174"/>
+        <location filename="../ui/widgets/agent_panel.py" line="1366"/>
+        <source>Open conversation</source>
+        <translation>열린 대화</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1236"/>
+        <source>Project path unavailable</source>
+        <translation>프로젝트 경로 가동되지 않습니다</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1367"/>
+        <source>Read conversation</source>
+        <translation>대화 읽기</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1122"/>
+        <source>Up to 200 recent conversations on this computer. Other projects open for reading only.</source>
+        <translation>이 컴퓨터에서 200개의 대화가 있었습니다. 다른 프로젝트들은 독서만 가능합니다.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1237"/>
+        <source>current</source>
+        <translation>전류</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1241"/>
+        <source>{} conversation(s)</source>
+        <translation>{} 대화</translation>
+    </message>
+    <message>
+        <source>Type / for skills or @ for project layers. Enter/Tab chooses a skill; Enter sends the edited request.</source>
+        <translation>프로젝트 계층에 대해 / 또는 @를 입력합니다. Enter/Tab는 스킬을 선택하고, Enter는 편집된 요청을 전송합니다.</translation>
     </message>
 </context>
 <context>
@@ -14991,6 +15339,502 @@ Folder: {6}</source>
         <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
         <source>Kept points</source>
         <translation type="obsolete">유지된 포인트</translation>
+    </message>
+</context>
+<context>
+    <name>AgentSpeech</name>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="279"/>
+        <source>Audio stays in memory and is discarded after transcription. The text is inserted in the draft; you review it and press Send yourself.</source>
+        <translation>오디오는 메모리에 유지되며 전사 후 삭제됩니다. 텍스트가 초안에 삽입되면 내용을 검토한 뒤 직접 보내기를 누르세요.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="41"/>
+        <source>Automatic, or a language code: fr, en…</source>
+        <translation>자동 또는 언어 코드: fr, en...</translation>
+    </message>
+    <message>
+        <source>Choose a transcription model (at most 200 characters).</source>
+        <translation>번역 모델을 선택하십시오 (최고 200개의 문자로).</translation>
+    </message>
+    <message>
+        <source>Choose a transcription service.</source>
+        <translation>번역 서비스를 선택하세요.</translation>
+    </message>
+    <message>
+        <source>Choose whether to send recorded audio to this transcription service.</source>
+        <translation>녹음된 오디오를 이 복사 서비스로 전송할지 여부를 선택하세요.</translation>
+    </message>
+    <message>
+        <source>Configure the microphone service before recording.</source>
+        <translation>녹음하기 전에 마이크 서비스를 설정하십시오.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_speech.py" line="134"/>
+        <source>Dictation added to the draft. Review it, then press Send.</source>
+        <translation>문헌에 독재가 추가되었습니다. 검토하고, 보내기를 누르세요.</translation>
+    </message>
+    <message>
+        <source>Language is an ISO code such as fr or en, or empty for automatic detection.</source>
+        <translation>언어는 ISO 코드는 fr 또는 en, 또는 자동 검출을 위한 빈.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_speech.py" line="94"/>
+        <source>Local service</source>
+        <translation>지역 서비스</translation>
+    </message>
+    <message>
+        <source>Microphone access was denied. Enable it in system privacy settings.</source>
+        <translation>마이크 접속이 거부되었습니다. 시스템 프라이버시 설정에서 활성화하십시오.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_speech.py" line="39"/>
+        <source>Microphone configured. Click the microphone to dictate.</source>
+        <translation>마이크 설정 마이크를 누르면 지시할 수 있습니다.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="21"/>
+        <source>Microphone settings</source>
+        <translation>마이크 설정</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_speech.py" line="140"/>
+        <source>Microphone: {}</source>
+        <translation>마이크: {}</translation>
+    </message>
+    <message>
+        <source>No audio was recorded. Check the microphone and try again.</source>
+        <translation>음향이 녹음되지 않았습니다. 마이크를 확인하고 다시 시도해보세요.</translation>
+    </message>
+    <message>
+        <source>No microphone is available. Check the device in Microphone settings.</source>
+        <translation>마이크가 없습니다. 마이크 설정에서 장치를 확인하세요.</translation>
+    </message>
+    <message>
+        <source>No speech was recognized. Try recording again.</source>
+        <translation>연설은 인정되지 않았습니다. 다시 녹음해보세요.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="51"/>
+        <source>Previously selected microphone (unavailable)</source>
+        <translation>이전에 선택된 마이크 (가격이 없습니다)</translation>
+    </message>
+    <message>
+        <source>Qt Multimedia is unavailable in this QGIS installation.</source>
+        <translation>Qt Multimedia 이 문서에서 사용할 수 없습니다 QGIS 설치</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_speech.py" line="95"/>
+        <source>Recording… {} · {}</source>
+        <translation>녹음... {} · {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="58"/>
+        <source>Remove stored transcription key</source>
+        <translation>저장된 표본 키를 제거</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_speech.py" line="75"/>
+        <location filename="../ui/widgets/agent_speech.py" line="170"/>
+        <source>Requesting microphone access…</source>
+        <translation>마이크 접속을 요청합니다.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="61"/>
+        <source>Send recorded audio to this service for transcription</source>
+        <translation>녹음된 오디오를 이 서비스로 전송하여</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="281"/>
+        <source>Start your local OpenAI-compatible transcription server first. No audio leaves this computer.</source>
+        <translation>로컬을 시작하세요 OpenAI-compatible 먼저 트랜스크립션 서버 이 컴퓨터에서 오디오가 나오지 않습니다.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="55"/>
+        <source>Stored key</source>
+        <translation>저장된 키</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="43"/>
+        <source>System default microphone</source>
+        <translation>시스템 기본 마이크</translation>
+    </message>
+    <message>
+        <source>The API key contains an invalid character.</source>
+        <translation>API 키는 유효하지 않은 문자를 포함합니다.</translation>
+    </message>
+    <message>
+        <source>The chat provider has no stored key for this transcription address.</source>
+        <translation>채팅 제공자는 이 전송 주소를 위한 저장된 키가 없습니다.</translation>
+    </message>
+    <message>
+        <source>The local transcription service must run on this computer (localhost).</source>
+        <translation>이 컴퓨터 (localhost) 에서 로컬 트랜스क्रिप्शन 서비스가 실행되어야 합니다.</translation>
+    </message>
+    <message>
+        <source>The microphone audio format is not supported.</source>
+        <translation>마이크 오디오 형식은 지원되지 않습니다.</translation>
+    </message>
+    <message>
+        <source>The microphone could not be started. Check permissions and audio input settings.</source>
+        <translation>마이크가 시작될 수 없었습니다. 권한 및 오디오 입력 설정을 확인하세요.</translation>
+    </message>
+    <message>
+        <source>The microphone stopped unexpectedly. Check the selected input device.</source>
+        <translation>마이크가 갑자기 멈췄습니다. 선택된 입력 장치를 확인하세요.</translation>
+    </message>
+    <message>
+        <source>The recorded audio is empty or exceeds the dictation limit.</source>
+        <translation>녹음된 오디오는 빈 상태 또는 디렉션 한계를 초과합니다.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="282"/>
+        <source>The selected service receives the recorded audio and may charge for transcription. Keys are stored in the QGIS authentication database.</source>
+        <translation>선택된 서비스는 녹음된 오디오를 수신하고, 전송 비용을 청구할 수 있습니다. 키는 QGIS 인증 데이터베이스에 저장됩니다.</translation>
+    </message>
+    <message>
+        <source>The stored transcription key belongs to another service address.</source>
+        <translation>저장된 복사 키는 다른 서비스 주소로 속한다.</translation>
+    </message>
+    <message>
+        <source>The transcript is too long for a dictation.</source>
+        <translation>이 기록이 너무 길어서 독재할 수 없어요</translation>
+    </message>
+    <message>
+        <source>The transcription response is too large.</source>
+        <translation>이번역 반응은 너무 크죠</translation>
+    </message>
+    <message>
+        <source>The transcription service could not be reached. Check its address and connection.</source>
+        <translation>이 글의 복사서비스는 접속할 수 없었습니다. 주소와 연결을 확인해</translation>
+    </message>
+    <message>
+        <source>The transcription service did not return a JSON transcript.</source>
+        <translation>복사 서비스는 JSON 복사본을 반환하지 않았습니다.</translation>
+    </message>
+    <message>
+        <source>The transcription service redirected the request. Check its address in Microphone settings.</source>
+        <translation>복사서비스는 요청을 다시 돌려보냈습니다. 마이크 설정에서 주소를 확인하세요.</translation>
+    </message>
+    <message>
+        <source>The transcription service took too long to answer.</source>
+        <translation>이번역은 너무 오래 걸렸습니다.</translation>
+    </message>
+    <message>
+        <source>This transcription service needs an API key.</source>
+        <translation>이 복사 서비스는 API 키가 필요합니다.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_speech.py" line="112"/>
+        <location filename="../ui/widgets/agent_speech.py" line="233"/>
+        <source>Transcribing…</source>
+        <translation>이 글을...</translation>
+    </message>
+    <message>
+        <source>Use a service address without credentials, query or fragment.</source>
+        <translation>자격증, 질의 또는 조각 없이 서비스 주소를 사용하십시오.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="56"/>
+        <source>Use the chat provider's key for this same address</source>
+        <translation>같은 주소에서 채팅 제공자의 키를 사용하세요</translation>
+    </message>
+    <message>
+        <source>Local server (OpenAI-compatible)</source>
+        <translation>로컬 서버 (OpenAI-compatible)</translation>
+    </message>
+    <message>
+        <source>Transcription service</source>
+        <translation>번역 서비스</translation>
+    </message>
+    <message>
+        <source>Service address</source>
+        <translation>서비스 주소</translation>
+    </message>
+    <message>
+        <source>Transcription model</source>
+        <translation>번역 모델</translation>
+    </message>
+    <message>
+        <source>Language</source>
+        <translation>언어</translation>
+    </message>
+    <message>
+        <source>Microphone</source>
+        <translation>마이크</translation>
+    </message>
+    <message>
+        <source>API key</source>
+        <translation>API 키</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="68"/>
+        <location filename="../ui/widgets/agent_speech.py" line="139"/>
+        <source>Test microphone</source>
+        <translation>마이크 테스트</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="70"/>
+        <source>Test transcription</source>
+        <translation>음성 전사 테스트</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="76"/>
+        <source>Microphone level: %p%</source>
+        <translation>마이크 레벨: %p%</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="77"/>
+        <source>Record up to 10 seconds, then test transcription with the settings above.</source>
+        <translation>최대 10초까지 기록하고, 위의 설정을 사용하여 발음을 테스트합니다.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="122"/>
+        <source>Settings changed. Test transcription again.</source>
+        <translation>설정이 바뀌었습니다. 다시 표본 테스트</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="154"/>
+        <source>Test cancelled.</source>
+        <translation>시험 취소됐어</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="169"/>
+        <source>Stop microphone test</source>
+        <translation>마이크 테스트를 중지</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="190"/>
+        <source>Speak into the microphone… {} / 10 s</source>
+        <translation>마이크에 들어봐... {} / 10초</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="203"/>
+        <source>Recording ready. Click Test transcription to check the service.</source>
+        <translation>녹음 준비 서비스를 확인하기 위해 테스트 복사본을 클릭하세요.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="232"/>
+        <source>Cancel transcription</source>
+        <translation>복사본을 취소</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="246"/>
+        <source>Transcription test succeeded.</source>
+        <translation>번역 테스트가 성공했습니다.</translation>
+    </message>
+    <message>
+        <source>Mistral requires a two-letter language code such as fr or en, or empty for automatic detection.</source>
+        <translation>Mistral 두 글자 언어 코드가 필요합니다. fr 또는 en, 또는 자동 검출을 위한 빈.</translation>
+    </message>
+</context>
+<context>
+    <name>AgentEditCommits</name>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="101"/>
+        <source>A memory layer stays in memory after saving its edits. Save project and layers to keep it after closing QGIS.</source>
+        <translation>메모리 계층은 편집을 저장한 후에 메모리에 남아 있습니다. QGIS를 닫은 후 프로젝트와 계층을 저장하여 유지하십시오.</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="24"/>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="27"/>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="30"/>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="41"/>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="45"/>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="47"/>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="50"/>
+        <source>The transaction group could not be verified. Use QGIS to save these edits.</source>
+        <translation>거래 그룹은 검증될 수 없었다. QGIS를 사용하여 이러한 편집을 저장하십시오.</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="85"/>
+        <source>Layer edits are still pending.</source>
+        <translation>레이어 편집은 여전히 기다리고 있습니다.</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="91"/>
+        <source>Layer edits</source>
+        <translation>레이어 편집 내용</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="91"/>
+        <source>Save the layer edits?</source>
+        <translation>레이어 편집 내용을 저장할까요?</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="92"/>
+        <source>Save layer edits</source>
+        <translation>레이어 편집 내용 저장</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="92"/>
+        <source>Keep pending</source>
+        <translation>변경 사항 보류</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="93"/>
+        <source>Checking and saving the layer edits…</source>
+        <translation>레이어 편집을 확인하고 저장하는 것...</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="94"/>
+        <source>Edits remain pending unless saved or discarded in QGIS. A new edit needs a new confirmation.</source>
+        <translation>QGIS에서 저장되거나 폐기되지 않는 한 편집은 여전히 기다리고 있습니다. 새로운 편집은 새로운 확인이 필요합니다.</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="96"/>
+        <source>Saved edits can no longer be undone from the agent chat.</source>
+        <translation>저장한 편집 내용은 에이전트 채팅에서 더 이상 실행 취소할 수 없습니다.</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="97"/>
+        <source>Save all pending changes to the data source, including any manual edits on the listed layers?</source>
+        <translation>목록에 있는 레이어의 수동 편집을 포함한 모든 보류 중인 변경 사항을 데이터 소스에 저장할까요?</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="99"/>
+        <source>These layers share a QGIS transaction. They are saved together.</source>
+        <translation>이 계층은 QGIS 거래를 공유합니다. 그들은 함께 구원받습니다.</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="130"/>
+        <source>The conversation changed or a request is running. Ask for a new confirmation.</source>
+        <translation>대화가 바뀌거나 요청이 실행중입니다. 새로운 확인을 요청하세요.</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="133"/>
+        <source>The layers changed since this confirmation. Review them and ask again.</source>
+        <translation>이 확인 이후 계층이 바뀌었습니다. 검토하고 다시 물어봐</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="136"/>
+        <source>A listed layer is protected from the agent. Save its edits directly in QGIS.</source>
+        <translation>목록의 계층은 에이전트로부터 보호됩니다. QGIS에 직접 편집을 저장합니다.</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="147"/>
+        <source>QGIS refused to save the edits.</source>
+        <translation>QGIS는 편집을 저장하는 것을 거부했습니다.</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="163"/>
+        <source>Layer edits saved: {}</source>
+        <translation>레이어 편집 내용 저장됨: {}</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="152"/>
+        <source>The layer edits were not fully saved. Review their state in QGIS.</source>
+        <translation>레이어 편집 내용이 완전히 저장되지 않았습니다. QGIS에서 상태를 확인하세요.</translation>
+    </message>
+</context>
+<context>
+    <name>AgentExports</name>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_exports.py" line="13"/>
+        <source>Choose the default agent export folder</source>
+        <translation>기본 에이전트 수출 폴더를 선택</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_exports.py" line="20"/>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_exports.py" line="22"/>
+        <source>Choose an existing folder outside the QGIS profiles.</source>
+        <translation>QGIS 프로파일 이외의 기존 폴더를 선택하십시오.</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_exports.py" line="22"/>
+        <source>Export folder</source>
+        <translation>내보내기 폴더</translation>
+    </message>
+</context>
+<context>
+    <name>AgentActivity</name>
+    <message>
+        <source>Ready for a message</source>
+        <translation>메시지 준비</translation>
+    </message>
+    <message>
+        <source>Finished — ready for a message</source>
+        <translation>완료  ⁇  메시지 준비</translation>
+    </message>
+    <message>
+        <source>Thinking</source>
+        <translation>생각</translation>
+    </message>
+    <message>
+        <source>Reading data</source>
+        <translation>읽기 데이터</translation>
+    </message>
+    <message>
+        <source>Working</source>
+        <translation>작업</translation>
+    </message>
+    <message>
+        <source>Fetching data</source>
+        <translation>데이터를 가져오는 것</translation>
+    </message>
+    <message>
+        <source>Writing the response</source>
+        <translation>답변을 작성</translation>
+    </message>
+    <message>
+        <source>Waiting</source>
+        <translation>기다림</translation>
+    </message>
+    <message>
+        <source>Retrying</source>
+        <translation>다시 시도</translation>
+    </message>
+    <message>
+        <source>Stopped or stopping</source>
+        <translation>정지 또는 정지</translation>
+    </message>
+    <message>
+        <source>You are writing a message</source>
+        <translation>당신은 메시지를 쓰고 있습니다.</translation>
+    </message>
+    <message>
+        <source>Messages are queued</source>
+        <translation>메시지는 줄을 서 있습니다.</translation>
+    </message>
+    <message>
+        <source>The request needs your attention</source>
+        <translation>이 요청은 여러분의 관심을 필요로 합니다.</translation>
+    </message>
+    <message>
+        <source>Searching for data</source>
+        <translation>데이터 검색</translation>
+    </message>
+    <message>
+        <source>Processing data</source>
+        <translation>데이터 처리</translation>
+    </message>
+    <message>
+        <source>Editing a layer</source>
+        <translation>계층을 편집</translation>
+    </message>
+    <message>
+        <source>Exporting files</source>
+        <translation>파일에 수출</translation>
+    </message>
+    <message>
+        <source>Designing the map</source>
+        <translation>지도 설계</translation>
+    </message>
+    <message>
+        <source>Navigating in QGIS</source>
+        <translation>QGIS에서 탐색</translation>
+    </message>
+    <message>
+        <source>Waiting for your confirmation</source>
+        <translation>확인을 기다리고 있습니다</translation>
+    </message>
+    <message>
+        <source>Recording your voice</source>
+        <translation>목소리 녹음</translation>
+    </message>
+    <message>
+        <source>Transcribing your recording</source>
+        <translation>녹화를 복사하고 있습니다.</translation>
     </message>
 </context>
 </TS>

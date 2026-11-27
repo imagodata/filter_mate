@@ -1854,6 +1854,108 @@ Bạn có đồng ý với tất cả không? Không thì không hành động n
         <source>Opening the Processing model designer</source>
         <translation>Đang mở trình thiết kế mô hình xử lý</translation>
     </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1283"/>
+        <source>Review and add source: {}</source>
+        <translation>Xem xét và thêm nguồn: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1312"/>
+        <source>Open this search in the browser</source>
+        <translation>Mở tìm kiếm này trong trình duyệt</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1653"/>
+        <source>sends the search query to DuckDuckGo; result sites are not visited</source>
+        <translation>gửi truy vấn tìm kiếm đến DuckDuckGo; các trang kết quả không được truy cập</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1500"/>
+        <source>Wait for the current request to finish before changing the export folder.</source>
+        <translation>Chờ cho yêu cầu hiện tại kết thúc trước khi thay đổi thư mục xuất khẩu.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1506"/>
+        <source>Default export folder: {}</source>
+        <translation>Dữ liệu xuất khẩu mặc định: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1519"/>
+        <source>Export cancelled. Choose a default export folder from the agent menu to export.</source>
+        <translation>Xuất khẩu bị hủy. Chọn thư mục xuất khẩu mặc định từ menu đại lý để xuất khẩu.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3461"/>
+        <source>Message sent to the running agent; applied at its next step.</source>
+        <translation>Thông điệp được gửi cho đại lý đang chạy; áp dụng ở bước tiếp theo của nó.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="540"/>
+        <source>Wait for the current request to finish before changing the Designer workspace.</source>
+        <translation>Chờ cho yêu cầu hiện tại để hoàn thành trước khi thay đổi không gian làm việc của Designer.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="549"/>
+        <source>Advanced Designer workspace enabled: styles, layouts and QGIS map themes.</source>
+        <translation>Không gian làm việc của Advanced Designer được bật: phong cách, bố cục và chủ đề bản đồ QGIS.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="550"/>
+        <source>Standard conversation workspace enabled.</source>
+        <translation>Không gian làm việc trò chuyện tiêu chuẩn được bật.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3829"/>
+        <source>Available QGIS interfaces</source>
+        <translation>Các giao diện QGIS có sẵn</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="966"/>
+        <source>Conversation from another project</source>
+        <translation>Cuộc trò chuyện từ một dự án khác</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3450"/>
+        <source>Message queued with the selected mode; the running request keeps its permissions.</source>
+        <translation>Thông điệp xếp hàng với chế độ được chọn; yêu cầu chạy giữ lại quyền của nó.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="970"/>
+        <source>Project path unavailable</source>
+        <translation>Path dự án không có sẵn</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3830"/>
+        <source>QGIS interface: {}</source>
+        <translation>giao diện QGIS: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="4931"/>
+        <source>The QGIS interface could not be opened: {}</source>
+        <translation>Các giao diện QGIS không thể mở: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3359"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3372"/>
+        <source>The conversation could not be archived. It has been kept open.</source>
+        <translation>Cuộc trò chuyện không thể được lưu trữ. Nó đã được giữ mở.</translation>
+    </message>
+    <message>
+        <source>Custom skill; review and permissions still apply</source>
+        <translation>Kỹ năng tùy chỉnh; xem xét và quyền vẫn áp dụng</translation>
+    </message>
+    <message>
+        <source>External connector; permissions still apply</source>
+        <translation>Kết nối bên ngoài; quyền vẫn áp dụng</translation>
+    </message>
+    <message>
+        <source>Skill request queued; it will load before the next request.</source>
+        <translation>Các yêu cầu kỹ năng xếp hàng; nó sẽ tải trước khi yêu cầu tiếp theo.</translation>
+    </message>
+    <message>
+        <source>Skill /{} is unavailable. Type / to see the available skills.</source>
+        <translation>Kỹ năng /{} không khả dụng. Nhập / để xem các kỹ năng khả dụng.</translation>
+    </message>
 </context>
 <context>
     <name>AgentData</name>
@@ -1948,6 +2050,22 @@ Nếu chọn Không, dữ liệu vẫn ở trong bộ nhớ và sẽ mất khi �
         <location filename="../ui/controllers/agent_data.py" line="70"/>
         <source>Wait for the current request to finish before saving its data.</source>
         <translation>Đợi yêu cầu hiện tại kết thúc trước khi lưu dữ liệu của nó.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_data.py" line="91"/>
+        <location filename="../ui/controllers/agent_data.py" line="121"/>
+        <source>Do not offer again this session</source>
+        <translation>Đừng nhắc lại buổi họp này.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_data.py" line="92"/>
+        <source>Hide save suggestions until QGIS restarts. You can still save from the agent menu.</source>
+        <translation>Cất giữ các đề xuất cho đến khi QGIS khởi động lại. Bạn vẫn có thể lưu từ menu đại lý.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_data.py" line="93"/>
+        <source>Save suggestions are hidden for this QGIS session. The data stay in memory.</source>
+        <translation>Các gợi ý lưu được ẩn cho phiên QGIS này. Dữ liệu vẫn còn trong trí nhớ.</translation>
     </message>
 </context>
 <context>
@@ -3703,6 +3821,236 @@ Nếu chọn Không, dữ liệu vẫn ở trong bộ nhớ và sẽ mất khi �
         <location filename="../ui/widgets/agent_panel.py" line="727"/>
         <source>Processing model designer…</source>
         <translation>Trình thiết kế mô hình xử lý…</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="3263"/>
+        <source>Detect service type</source>
+        <translation>Loại dịch vụ phát hiện</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="3275"/>
+        <source>Source name (optional)</source>
+        <translation>Tên nguồn (không tùy chọn)</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="3277"/>
+        <source>Enable after adding</source>
+        <translation>Bật sau khi thêm</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="3392"/>
+        <source>Source added to this form. Save these settings to keep it.</source>
+        <translation>Nguồn được thêm vào biểu mẫu này. Hãy lưu các cài đặt này để giữ nó.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="3409"/>
+        <source>Unverified suggestion. Review the address and type, then test or add it yourself.</source>
+        <translation>Một gợi ý chưa được xác minh. Xem lại địa chỉ và nhập, sau đó kiểm tra hoặc tự thêm nó.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="3371"/>
+        <source>Choose the service type if it cannot be detected from the address.</source>
+        <translation>Chọn loại dịch vụ nếu không thể phát hiện được từ địa chỉ.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="798"/>
+        <source>Default export folder…</source>
+        <translation>Phú thư xuất khẩu mặc định...</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="749"/>
+        <source>Push</source>
+        <translation>Push</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="742"/>
+        <source>Send now</source>
+        <translation>Gửi đi ngay.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="746"/>
+        <source>Send the first waiting message to the running agent</source>
+        <translation>Gửi thông điệp chờ đợi đầu tiên cho đại lý đang chạy</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="911"/>
+        <source>Messages sent while the agent works</source>
+        <translation>Các tin nhắn được gửi trong khi đại lý đang làm việc</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="914"/>
+        <location filename="../ui/widgets/agent_panel.py" line="2209"/>
+        <source>Push: guide the running request</source>
+        <translation>Push: hướng dẫn yêu cầu chạy</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="915"/>
+        <location filename="../ui/widgets/agent_panel.py" line="2210"/>
+        <source>Queue: wait for the current request to finish</source>
+        <translation>Hàng đợi: chờ cho yêu cầu hiện tại để hoàn thành</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="2040"/>
+        <source>Queue</source>
+        <translation>Hàng đợi</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="2211"/>
+        <source>Messages during a run: Push or Queue. Ctrl+Shift+Enter uses the other mode.</source>
+        <translation>Thông điệp trong một cuộc chạy: Push hoặc queue. Ctrl+Shift+Enter sử dụng chế độ khác.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="2222"/>
+        <source>Enter guides the running request. Ctrl+Shift+Enter queues a follow-up.</source>
+        <translation>Nhập hướng dẫn yêu cầu đang chạy. Ctrl+Shift+Enter xếp hàng theo dõi.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="2224"/>
+        <source>Enter queues a follow-up. Ctrl+Shift+Enter guides the running request.</source>
+        <translation>Nhập hàng theo dõi. Ctrl+Shift+Enter hướng dẫn yêu cầu chạy.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="2231"/>
+        <source>Send to the running agent (Enter)</source>
+        <translation>Chuyển cho đại lý đang chạy (Enter)</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="2232"/>
+        <source>Queue the request (Enter)</source>
+        <translation>Đặt hàng yêu cầu (Enter)</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1038"/>
+        <source>Enter sends in the selected mode. Esc stops. Ctrl+Shift+Enter uses the other mode.</source>
+        <translation>Enter gửi trong chế độ đã chọn. Esc dừng lại. Ctrl+Shift+Enter sử dụng chế độ khác.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="780"/>
+        <location filename="../ui/widgets/agent_panel.py" line="781"/>
+        <location filename="../ui/widgets/agent_panel.py" line="2086"/>
+        <source>Dictate with the microphone</source>
+        <translation>Định lệnh bằng micrô</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="824"/>
+        <source>Microphone settings…</source>
+        <translation>Cài đặt micro...</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="854"/>
+        <source>Cancel dictation</source>
+        <translation>Tháo lệnh</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="2085"/>
+        <source>Stop recording and transcribe</source>
+        <translation>Ngừng ghi lại và sao chép</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="2086"/>
+        <source>Cancel transcription</source>
+        <translation>Tháo lại bản sao</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="800"/>
+        <source>Advanced Designer workspace</source>
+        <translation>Không gian làm việc của nhà thiết kế tiên tiến</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="803"/>
+        <source>Brainstorm a solution…</source>
+        <translation>Một cơn bão suy nghĩ về một giải pháp...</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="995"/>
+        <source>Designer</source>
+        <translation>Thiết kế</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="999"/>
+        <source>Ideas</source>
+        <translation>Các ý tưởng</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="999"/>
+        <source>Styles</source>
+        <translation>Phong cách</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1000"/>
+        <source>Print layout</source>
+        <translation>Layout in</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1000"/>
+        <source>Map themes</source>
+        <translation>Các chủ đề bản đồ</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1005"/>
+        <source>Insert an editable request: {}</source>
+        <translation>Nhập một yêu cầu có thể chỉnh sửa: {}</translation>
+    </message>
+    <message>
+        <source>Help me brainstorm and refine a solution from the current context. Propose two or three options and ask only questions that change the choice. Do not change the project yet.</source>
+        <translation>Giúp tôi suy nghĩ và tinh chỉnh một giải pháp từ ngữ cảnh hiện tại. Hãy đề xuất hai hoặc ba lựa chọn và chỉ hỏi những câu hỏi thay đổi sự lựa chọn. Đừng thay đổi dự án.</translation>
+    </message>
+    <message>
+        <source>In the advanced Designer workspace, propose refined layer styles and labels for this project. Compare two directions with readable colors and hierarchy. Do not apply them yet.</source>
+        <translation>Trong không gian làm việc Designer tiên tiến, đề xuất các phong cách và nhãn lớp tinh tế cho dự án này. So sánh hai hướng với màu sắc dễ đọc và hệ thống phân cấp. Đừng áp dụng chúng.</translation>
+    </message>
+    <message>
+        <source>In the advanced Designer workspace, propose a print layout: purpose, page format, map, legend, scale and typography. Refine the proposal with me before creating or changing anything.</source>
+        <translation>Trong không gian làm việc thiết kế tiên tiến, đề xuất một bố cục in: mục đích, định dạng trang, bản đồ, huyền thoại, quy mô và kiểu chữ. Hãy hoàn thiện đề xuất với tôi trước khi tạo ra hoặc thay đổi bất cứ điều gì.</translation>
+    </message>
+    <message>
+        <source>In the advanced Designer workspace, inspect existing QGIS map themes and propose how to organize them for different views and layouts. Do not save, replace, apply or remove a theme yet.</source>
+        <translation>Trong không gian làm việc Designer tiên tiến, kiểm tra các chủ đề bản đồ QGIS hiện có và đề xuất cách tổ chức chúng cho các khung cảnh và bố cục khác nhau. Không lưu, thay thế, áp dụng hoặc loại bỏ một chủ đề.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1121"/>
+        <source>Conversations</source>
+        <translation>Các cuộc trò chuyện</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="2220"/>
+        <source>Current request: {}. Next message: {}. It will wait for the current request.</source>
+        <translation>Yêu cầu hiện tại: {}. Thông điệp tiếp theo: {}. Nó sẽ chờ yêu cầu hiện tại.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1174"/>
+        <location filename="../ui/widgets/agent_panel.py" line="1366"/>
+        <source>Open conversation</source>
+        <translation>Cuộc trò chuyện mở</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1236"/>
+        <source>Project path unavailable</source>
+        <translation>Path dự án không có sẵn</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1367"/>
+        <source>Read conversation</source>
+        <translation>Đọc cuộc trò chuyện</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1122"/>
+        <source>Up to 200 recent conversations on this computer. Other projects open for reading only.</source>
+        <translation>Có tới 200 cuộc trò chuyện gần đây trên máy tính này. Các dự án khác chỉ mở để đọc.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1237"/>
+        <source>current</source>
+        <translation>hiện tại</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1241"/>
+        <source>{} conversation(s)</source>
+        <translation>{} cuộc trò chuyện</translation>
+    </message>
+    <message>
+        <source>Type / for skills or @ for project layers. Enter/Tab chooses a skill; Enter sends the edited request.</source>
+        <translation>Nhập / cho kỹ năng hoặc @ cho các lớp dự án. Enter/Tab chọn một kỹ năng; Enter gửi yêu cầu chỉnh sửa.</translation>
     </message>
 </context>
 <context>
@@ -14991,6 +15339,502 @@ Thư mục: {6}</translation>
         <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
         <source>Kept points</source>
         <translation type="obsolete">Điểm được giữ lại</translation>
+    </message>
+</context>
+<context>
+    <name>AgentSpeech</name>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="279"/>
+        <source>Audio stays in memory and is discarded after transcription. The text is inserted in the draft; you review it and press Send yourself.</source>
+        <translation>Âm thanh được giữ trong bộ nhớ và xóa sau khi chép lời. Văn bản được chèn vào bản nháp; hãy kiểm tra rồi tự nhấn Gửi.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="41"/>
+        <source>Automatic, or a language code: fr, en…</source>
+        <translation>Tự động, hoặc mã ngôn ngữ: fr, en...</translation>
+    </message>
+    <message>
+        <source>Choose a transcription model (at most 200 characters).</source>
+        <translation>Chọn mô hình sao chép (tối đa 200 ký tự).</translation>
+    </message>
+    <message>
+        <source>Choose a transcription service.</source>
+        <translation>Chọn dịch vụ sao chép.</translation>
+    </message>
+    <message>
+        <source>Choose whether to send recorded audio to this transcription service.</source>
+        <translation>Chọn xem bạn muốn gửi âm thanh được ghi lại cho dịch vụ sao chép này hay không.</translation>
+    </message>
+    <message>
+        <source>Configure the microphone service before recording.</source>
+        <translation>Thiết lập dịch vụ micrô trước khi ghi âm.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_speech.py" line="134"/>
+        <source>Dictation added to the draft. Review it, then press Send.</source>
+        <translation>Lệnh quy định được thêm vào dự thảo. Xem lại, sau đó nhấn Send.</translation>
+    </message>
+    <message>
+        <source>Language is an ISO code such as fr or en, or empty for automatic detection.</source>
+        <translation>Ngôn ngữ là mã ISO như fr hoặc en, hoặc trống để phát hiện tự động.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_speech.py" line="94"/>
+        <source>Local service</source>
+        <translation>Dịch vụ địa phương</translation>
+    </message>
+    <message>
+        <source>Microphone access was denied. Enable it in system privacy settings.</source>
+        <translation>Máy nghe bị từ chối. Khả năng nó trong cài đặt quyền riêng tư hệ thống.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_speech.py" line="39"/>
+        <source>Microphone configured. Click the microphone to dictate.</source>
+        <translation>Máy nghe được thiết lập. Nhấp vào micrô để quyết định.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="21"/>
+        <source>Microphone settings</source>
+        <translation>Cài đặt micrô</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_speech.py" line="140"/>
+        <source>Microphone: {}</source>
+        <translation>Máy vi: {}</translation>
+    </message>
+    <message>
+        <source>No audio was recorded. Check the microphone and try again.</source>
+        <translation>Không có âm thanh nào được ghi lại. Kiểm tra micro và thử lại.</translation>
+    </message>
+    <message>
+        <source>No microphone is available. Check the device in Microphone settings.</source>
+        <translation>Không có micrô nào. Kiểm tra thiết bị trong cài đặt Microphone.</translation>
+    </message>
+    <message>
+        <source>No speech was recognized. Try recording again.</source>
+        <translation>Không có lời nói nào được nhận ra. Hãy thử quay lại một lần nữa.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="51"/>
+        <source>Previously selected microphone (unavailable)</source>
+        <translation>Microphone được chọn trước đây (không có sẵn)</translation>
+    </message>
+    <message>
+        <source>Qt Multimedia is unavailable in this QGIS installation.</source>
+        <translation>Qt Multimedia không có sẵn trong cài đặt QGIS này.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_speech.py" line="95"/>
+        <source>Recording… {} · {}</source>
+        <translation>Đăng âm... {} · {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="58"/>
+        <source>Remove stored transcription key</source>
+        <translation>Xóa khóa sao chép lưu trữ</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_speech.py" line="75"/>
+        <location filename="../ui/widgets/agent_speech.py" line="170"/>
+        <source>Requesting microphone access…</source>
+        <translation>Tôi yêu cầu truy cập micro...</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="61"/>
+        <source>Send recorded audio to this service for transcription</source>
+        <translation>Gửi âm thanh được ghi lại cho dịch vụ này để sao chép</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="281"/>
+        <source>Start your local OpenAI-compatible transcription server first. No audio leaves this computer.</source>
+        <translation>Bắt đầu địa phương của bạn OpenAI-compatible máy chủ sao chép trước. Không có âm thanh nào rời khỏi máy tính này.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="55"/>
+        <source>Stored key</source>
+        <translation>Chìa khoá lưu trữ</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="43"/>
+        <source>System default microphone</source>
+        <translation>Microphone mặc định của hệ thống</translation>
+    </message>
+    <message>
+        <source>The API key contains an invalid character.</source>
+        <translation>Khóa API chứa một ký tự không hợp lệ.</translation>
+    </message>
+    <message>
+        <source>The chat provider has no stored key for this transcription address.</source>
+        <translation>Nhà cung cấp trò chuyện không có khóa lưu trữ cho địa chỉ sao chép này.</translation>
+    </message>
+    <message>
+        <source>The local transcription service must run on this computer (localhost).</source>
+        <translation>Dịch vụ sao chép địa phương phải chạy trên máy tính này (localhost).</translation>
+    </message>
+    <message>
+        <source>The microphone audio format is not supported.</source>
+        <translation>Các định dạng âm thanh của micrô không được hỗ trợ.</translation>
+    </message>
+    <message>
+        <source>The microphone could not be started. Check permissions and audio input settings.</source>
+        <translation>Máy vi không thể khởi động được. Kiểm tra quyền và cài đặt đầu vào âm thanh.</translation>
+    </message>
+    <message>
+        <source>The microphone stopped unexpectedly. Check the selected input device.</source>
+        <translation>Máy vi dừng lại bất ngờ. Kiểm tra thiết bị đầu vào được chọn.</translation>
+    </message>
+    <message>
+        <source>The recorded audio is empty or exceeds the dictation limit.</source>
+        <translation>Âm thanh được ghi âm là trống hoặc vượt quá giới hạn định nghĩa.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="282"/>
+        <source>The selected service receives the recorded audio and may charge for transcription. Keys are stored in the QGIS authentication database.</source>
+        <translation>Dịch vụ được chọn nhận âm thanh ghi lại và có thể tính phí cho bản sao. Các khóa được lưu trữ trong cơ sở dữ liệu xác thực QGIS.</translation>
+    </message>
+    <message>
+        <source>The stored transcription key belongs to another service address.</source>
+        <translation>Chìa khóa sao chép được lưu trữ thuộc địa chỉ dịch vụ khác.</translation>
+    </message>
+    <message>
+        <source>The transcript is too long for a dictation.</source>
+        <translation>Bản ghi quá dài để đưa ra lệnh.</translation>
+    </message>
+    <message>
+        <source>The transcription response is too large.</source>
+        <translation>Phản ứng sao chép quá lớn.</translation>
+    </message>
+    <message>
+        <source>The transcription service could not be reached. Check its address and connection.</source>
+        <translation>Dịch vụ sao chép không thể tiếp cận được. Kiểm tra địa chỉ và kết nối.</translation>
+    </message>
+    <message>
+        <source>The transcription service did not return a JSON transcript.</source>
+        <translation>Dịch vụ sao chép đã không trả lại một bản sao JSON.</translation>
+    </message>
+    <message>
+        <source>The transcription service redirected the request. Check its address in Microphone settings.</source>
+        <translation>Dịch vụ sao chép đã chuyển hướng yêu cầu. Kiểm tra địa chỉ trong cài đặt Microphone.</translation>
+    </message>
+    <message>
+        <source>The transcription service took too long to answer.</source>
+        <translation>Dịch vụ sao chép đã mất quá lâu để trả lời.</translation>
+    </message>
+    <message>
+        <source>This transcription service needs an API key.</source>
+        <translation>Dịch vụ sao chép này cần một khóa API.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_speech.py" line="112"/>
+        <location filename="../ui/widgets/agent_speech.py" line="233"/>
+        <source>Transcribing…</source>
+        <translation>Chuyển lại...</translation>
+    </message>
+    <message>
+        <source>Use a service address without credentials, query or fragment.</source>
+        <translation>Sử dụng địa chỉ dịch vụ mà không có thông tin tín dụng, truy vấn hoặc đoạn.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="56"/>
+        <source>Use the chat provider's key for this same address</source>
+        <translation>Sử dụng chìa khóa của nhà cung cấp trò chuyện cho địa chỉ này</translation>
+    </message>
+    <message>
+        <source>Local server (OpenAI-compatible)</source>
+        <translation>Server địa phương (OpenAI-compatible)</translation>
+    </message>
+    <message>
+        <source>Transcription service</source>
+        <translation>Dịch vụ sao chép</translation>
+    </message>
+    <message>
+        <source>Service address</source>
+        <translation>Địa chỉ dịch vụ</translation>
+    </message>
+    <message>
+        <source>Transcription model</source>
+        <translation>Mô hình sao chép</translation>
+    </message>
+    <message>
+        <source>Language</source>
+        <translation>Ngôn ngữ</translation>
+    </message>
+    <message>
+        <source>Microphone</source>
+        <translation>Microphone</translation>
+    </message>
+    <message>
+        <source>API key</source>
+        <translation>Khóa API</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="68"/>
+        <location filename="../ui/widgets/agent_speech.py" line="139"/>
+        <source>Test microphone</source>
+        <translation>Kiểm tra micrô</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="70"/>
+        <source>Test transcription</source>
+        <translation>Kiểm tra chép lời</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="76"/>
+        <source>Microphone level: %p%</source>
+        <translation>Mức micrô: %p%</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="77"/>
+        <source>Record up to 10 seconds, then test transcription with the settings above.</source>
+        <translation>Tải lên đến 10 giây, sau đó thử bản sao bằng các cài đặt ở trên.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="122"/>
+        <source>Settings changed. Test transcription again.</source>
+        <translation>Cài đặt đã thay đổi. Thử lại bản sao.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="154"/>
+        <source>Test cancelled.</source>
+        <translation>Thử nghiệm bị hủy.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="169"/>
+        <source>Stop microphone test</source>
+        <translation>Kiểm tra microphone dừng</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="190"/>
+        <source>Speak into the microphone… {} / 10 s</source>
+        <translation>Nói vào micro... {} / 10 s</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="203"/>
+        <source>Recording ready. Click Test transcription to check the service.</source>
+        <translation>Đăng âm sẵn sàng. Nhấp vào Test transcription để kiểm tra dịch vụ.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="232"/>
+        <source>Cancel transcription</source>
+        <translation>Tháo lại bản sao</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="246"/>
+        <source>Transcription test succeeded.</source>
+        <translation>Thử nghiệm sao chép đã thành công.</translation>
+    </message>
+    <message>
+        <source>Mistral requires a two-letter language code such as fr or en, or empty for automatic detection.</source>
+        <translation>Mistral yêu cầu mã ngôn ngữ hai chữ cái như fr hoặc en, hoặc trống để phát hiện tự động.</translation>
+    </message>
+</context>
+<context>
+    <name>AgentEditCommits</name>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="101"/>
+        <source>A memory layer stays in memory after saving its edits. Save project and layers to keep it after closing QGIS.</source>
+        <translation>Một lớp bộ nhớ vẫn còn trong bộ nhớ sau khi lưu các chỉnh sửa của nó. Cứu dự án và các lớp để giữ nó sau khi đóng QGIS.</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="24"/>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="27"/>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="30"/>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="41"/>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="45"/>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="47"/>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="50"/>
+        <source>The transaction group could not be verified. Use QGIS to save these edits.</source>
+        <translation>Nhóm giao dịch không thể được xác minh. Sử dụng QGIS để lưu các chỉnh sửa này.</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="85"/>
+        <source>Layer edits are still pending.</source>
+        <translation>Các chỉnh sửa lớp vẫn đang chờ.</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="91"/>
+        <source>Layer edits</source>
+        <translation>Các chỉnh sửa lớp</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="91"/>
+        <source>Save the layer edits?</source>
+        <translation>Lưu các chỉnh sửa lớp?</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="92"/>
+        <source>Save layer edits</source>
+        <translation>Lưu các chỉnh sửa lớp</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="92"/>
+        <source>Keep pending</source>
+        <translation>Giữ các thay đổi chờ lưu</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="93"/>
+        <source>Checking and saving the layer edits…</source>
+        <translation>Kiểm tra và lưu các chỉnh sửa lớp...</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="94"/>
+        <source>Edits remain pending unless saved or discarded in QGIS. A new edit needs a new confirmation.</source>
+        <translation>Các chỉnh sửa vẫn còn chờ đợi trừ khi được lưu hoặc loại bỏ trong QGIS. Một chỉnh sửa mới cần xác nhận mới.</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="96"/>
+        <source>Saved edits can no longer be undone from the agent chat.</source>
+        <translation>Các chỉnh sửa đã lưu không thể hoàn tác từ cuộc trò chuyện với tác nhân nữa.</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="97"/>
+        <source>Save all pending changes to the data source, including any manual edits on the listed layers?</source>
+        <translation>Lưu tất cả thay đổi đang chờ vào nguồn dữ liệu, kể cả các chỉnh sửa thủ công trên những lớp được liệt kê?</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="99"/>
+        <source>These layers share a QGIS transaction. They are saved together.</source>
+        <translation>Các lớp này chia sẻ một giao dịch QGIS. Họ được cứu cùng nhau.</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="130"/>
+        <source>The conversation changed or a request is running. Ask for a new confirmation.</source>
+        <translation>Cuộc trò chuyện đã thay đổi hoặc một yêu cầu đang chạy. Hãy yêu cầu xác nhận mới.</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="133"/>
+        <source>The layers changed since this confirmation. Review them and ask again.</source>
+        <translation>Các lớp đã thay đổi kể từ sự xác nhận này. Hãy xem lại và hỏi lại.</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="136"/>
+        <source>A listed layer is protected from the agent. Save its edits directly in QGIS.</source>
+        <translation>Một lớp được liệt kê là được bảo vệ khỏi tác nhân. Cung cấp các chỉnh sửa của nó trực tiếp vào QGIS.</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="147"/>
+        <source>QGIS refused to save the edits.</source>
+        <translation>QGIS từ chối lưu các chỉnh sửa.</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="163"/>
+        <source>Layer edits saved: {}</source>
+        <translation>Đã lưu các chỉnh sửa lớp: {}</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="152"/>
+        <source>The layer edits were not fully saved. Review their state in QGIS.</source>
+        <translation>Các chỉnh sửa lớp chưa được lưu đầy đủ. Hãy kiểm tra trạng thái của chúng trong QGIS.</translation>
+    </message>
+</context>
+<context>
+    <name>AgentExports</name>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_exports.py" line="13"/>
+        <source>Choose the default agent export folder</source>
+        <translation>Chọn thư mục xuất khẩu đại lý mặc định</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_exports.py" line="20"/>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_exports.py" line="22"/>
+        <source>Choose an existing folder outside the QGIS profiles.</source>
+        <translation>Chọn một thư mục hiện có bên ngoài các hồ sơ QGIS.</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_exports.py" line="22"/>
+        <source>Export folder</source>
+        <translation>Thư mục xuất</translation>
+    </message>
+</context>
+<context>
+    <name>AgentActivity</name>
+    <message>
+        <source>Ready for a message</source>
+        <translation>Sẵn sàng để gửi tin nhắn</translation>
+    </message>
+    <message>
+        <source>Finished — ready for a message</source>
+        <translation>Kết thúc  ⁇  sẵn sàng cho tin nhắn</translation>
+    </message>
+    <message>
+        <source>Thinking</source>
+        <translation>Nghĩ</translation>
+    </message>
+    <message>
+        <source>Reading data</source>
+        <translation>Dữ liệu đọc</translation>
+    </message>
+    <message>
+        <source>Working</source>
+        <translation>Làm việc</translation>
+    </message>
+    <message>
+        <source>Fetching data</source>
+        <translation>Thu thập dữ liệu</translation>
+    </message>
+    <message>
+        <source>Writing the response</source>
+        <translation>Viết câu trả lời</translation>
+    </message>
+    <message>
+        <source>Waiting</source>
+        <translation>Chờ đợi</translation>
+    </message>
+    <message>
+        <source>Retrying</source>
+        <translation>Cố gắng lại</translation>
+    </message>
+    <message>
+        <source>Stopped or stopping</source>
+        <translation>Dừng hoặc dừng</translation>
+    </message>
+    <message>
+        <source>You are writing a message</source>
+        <translation>Anh đang viết một tin nhắn.</translation>
+    </message>
+    <message>
+        <source>Messages are queued</source>
+        <translation>Thông điệp đang xếp hàng</translation>
+    </message>
+    <message>
+        <source>The request needs your attention</source>
+        <translation>Việc yêu cầu cần sự chú ý của bạn.</translation>
+    </message>
+    <message>
+        <source>Searching for data</source>
+        <translation>Tìm kiếm dữ liệu</translation>
+    </message>
+    <message>
+        <source>Processing data</source>
+        <translation>Thông tin xử lý</translation>
+    </message>
+    <message>
+        <source>Editing a layer</source>
+        <translation>Chỉnh sửa một lớp</translation>
+    </message>
+    <message>
+        <source>Exporting files</source>
+        <translation>Xuất khẩu các tệp</translation>
+    </message>
+    <message>
+        <source>Designing the map</source>
+        <translation>Thiết kế bản đồ</translation>
+    </message>
+    <message>
+        <source>Navigating in QGIS</source>
+        <translation>Di chuyển trong QGIS</translation>
+    </message>
+    <message>
+        <source>Waiting for your confirmation</source>
+        <translation>Chờ sự xác nhận của anh</translation>
+    </message>
+    <message>
+        <source>Recording your voice</source>
+        <translation>Ngắm lại giọng nói của bạn</translation>
+    </message>
+    <message>
+        <source>Transcribing your recording</source>
+        <translation>Chuyển bản ghi âm của bạn</translation>
     </message>
 </context>
 </TS>

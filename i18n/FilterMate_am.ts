@@ -1854,6 +1854,108 @@ Do you agree to all of them? No runs none of them.</source>
         <source>Opening the Processing model designer</source>
         <translation>የሂደት ሞዴል ንድፍ አውጪ በመከፈት ላይ</translation>
     </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1283"/>
+        <source>Review and add source: {}</source>
+        <translation>ምንጩን ገምግም እና አክል፦ {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1312"/>
+        <source>Open this search in the browser</source>
+        <translation>ይህንን ፍለጋ በአሳሽ ውስጥ ይክፈቱ</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1653"/>
+        <source>sends the search query to DuckDuckGo; result sites are not visited</source>
+        <translation>የፍለጋ ጥያቄውን ወደ DuckDuckGo ይልካል; ውጤቶች ጣቢያዎች አልተጎበኙም</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1500"/>
+        <source>Wait for the current request to finish before changing the export folder.</source>
+        <translation>የወጪ አቃፊውን ከመቀየርዎ በፊት የአሁኑ ጥያቄ እስኪጠናቀቅ ይጠብቁ።</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1506"/>
+        <source>Default export folder: {}</source>
+        <translation>ነባሪ የኤክስፖርት አቃፊ: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1519"/>
+        <source>Export cancelled. Choose a default export folder from the agent menu to export.</source>
+        <translation>ኤክስፖርት ተሰርዟል። ለመላክ ከኤጀንት ምናሌ ውስጥ ነባሪ የወጪ አቃፊ ይምረጡ.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3461"/>
+        <source>Message sent to the running agent; applied at its next step.</source>
+        <translation>ለሥራ አስኪያጁ የተላከ መልዕክት; በሚቀጥለው እርምጃ ላይ ተግባራዊ.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="540"/>
+        <source>Wait for the current request to finish before changing the Designer workspace.</source>
+        <translation>የዲዛይነር የሥራ ቦታን ከመቀየርዎ በፊት የአሁኑ ጥያቄ እስኪጠናቀቅ ድረስ ይጠብቁ።</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="549"/>
+        <source>Advanced Designer workspace enabled: styles, layouts and QGIS map themes.</source>
+        <translation>የላቀ ዲዛይነር የሥራ ቦታ: ቅጦች, አቀማመጦች እና QGIS ካርታ ገጽታዎች ተገብተዋል.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="550"/>
+        <source>Standard conversation workspace enabled.</source>
+        <translation>መደበኛ ውይይት የሥራ ቦታ ተችሏል.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3829"/>
+        <source>Available QGIS interfaces</source>
+        <translation>የሚገኙ የ QGIS በይነገጾች</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="966"/>
+        <source>Conversation from another project</source>
+        <translation>ከሌላ ፕሮጀክት የተገኘ ውይይት</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3450"/>
+        <source>Message queued with the selected mode; the running request keeps its permissions.</source>
+        <translation>መልዕክት በተመረጠው ሁነታ ረድፍ; እየሄደ ጥያቄ ፈቃዶቹን ይጠብቃል.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="970"/>
+        <source>Project path unavailable</source>
+        <translation>የፕሮጀክት መንገድ አይገኝም</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3830"/>
+        <source>QGIS interface: {}</source>
+        <translation>QGIS በይነገጽ: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="4931"/>
+        <source>The QGIS interface could not be opened: {}</source>
+        <translation>የ QGIS በይነገጽ ሊከፈት አልቻለም: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3359"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3372"/>
+        <source>The conversation could not be archived. It has been kept open.</source>
+        <translation>ውይይቱን ማስመዝገብ አልተቻለም። ክፍት ሆኖ ቆይቷል።</translation>
+    </message>
+    <message>
+        <source>Custom skill; review and permissions still apply</source>
+        <translation>ብጁ ችሎታ; ግምገማ እና ፍቃዶች አሁንም ይተገበራሉ</translation>
+    </message>
+    <message>
+        <source>External connector; permissions still apply</source>
+        <translation>ውጫዊ አገናኝ; አሁንም ፍቃዶች ይተገበራሉ</translation>
+    </message>
+    <message>
+        <source>Skill request queued; it will load before the next request.</source>
+        <translation>ችሎታ ጥያቄ ረድፍ; ይህ ቀጣዩ ጥያቄ በፊት ይጫናል.</translation>
+    </message>
+    <message>
+        <source>Skill /{} is unavailable. Type / to see the available skills.</source>
+        <translation>ክህሎቱ /{} አይገኝም። ያሉትን ክህሎቶች ለማየት / ይጻፉ።</translation>
+    </message>
 </context>
 <context>
     <name>AgentData</name>
@@ -1948,6 +2050,22 @@ If you choose No, these data stay in memory and will be lost when the project cl
         <location filename="../ui/controllers/agent_data.py" line="70"/>
         <source>Wait for the current request to finish before saving its data.</source>
         <translation>ውሂቡን ከማስቀመጥዎ በፊት የአሁኑ ጥያቄ እስኪያበቃ ይጠብቁ።</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_data.py" line="91"/>
+        <location filename="../ui/controllers/agent_data.py" line="121"/>
+        <source>Do not offer again this session</source>
+        <translation>ይህንን ክፍለ ጊዜ በድጋሚ አታቅርቡ</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_data.py" line="92"/>
+        <source>Hide save suggestions until QGIS restarts. You can still save from the agent menu.</source>
+        <translation>QGIS እስኪጀምር ድረስ ምክሮችን አስቀምጥ። አሁንም ከኤጀንት ምናሌ ውስጥ ማስቀመጥ ይችላሉ.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_data.py" line="93"/>
+        <source>Save suggestions are hidden for this QGIS session. The data stay in memory.</source>
+        <translation>ለዚህ QGIS ክፍለ ጊዜ የማስቀመጥ ምክሮች ተደብቀዋል. መረጃው በማስታወስ ውስጥ ይቆያል።</translation>
     </message>
 </context>
 <context>
@@ -3703,6 +3821,236 @@ If you choose No, these data stay in memory and will be lost when the project cl
         <location filename="../ui/widgets/agent_panel.py" line="727"/>
         <source>Processing model designer…</source>
         <translation>የሂደት ሞዴል ንድፍ አውጪ…</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="3263"/>
+        <source>Detect service type</source>
+        <translation>የአገልግሎት አይነት</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="3275"/>
+        <source>Source name (optional)</source>
+        <translation>የመረጃ ምንጭ ስም (የማመቻቸት)</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="3277"/>
+        <source>Enable after adding</source>
+        <translation>ከተጨመረ በኋላ አንቃ</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="3392"/>
+        <source>Source added to this form. Save these settings to keep it.</source>
+        <translation>በዚህ ቅጽ ላይ የተጨመረ ምንጭ። እነዚህን ቅንብሮች ለማስቀመጥ.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="3409"/>
+        <source>Unverified suggestion. Review the address and type, then test or add it yourself.</source>
+        <translation>ያልተረጋገጠ ሀሳብ። አድራሻውን ተመልከትና ጻፍ፤ ከዚያም በራስህ ፈትነው ወይም ጨምረው።</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="3371"/>
+        <source>Choose the service type if it cannot be detected from the address.</source>
+        <translation>ከአድራሻው መፈለግ ካልቻሉ የአገልግሎት አይነት ይምረጡ።</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="798"/>
+        <source>Default export folder…</source>
+        <translation>ነባሪ የኤክስፖርት አቃፊ...</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="749"/>
+        <source>Push</source>
+        <translation>Push</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="742"/>
+        <source>Send now</source>
+        <translation>አሁን ላክ</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="746"/>
+        <source>Send the first waiting message to the running agent</source>
+        <translation>የመጀመሪያውን የጥበቃ መልዕክት ለሥራ አስፈፃሚው ይላኩ</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="911"/>
+        <source>Messages sent while the agent works</source>
+        <translation>ወኪሉ በሚሠራበት ጊዜ የተላኩ መልዕክቶች</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="914"/>
+        <location filename="../ui/widgets/agent_panel.py" line="2209"/>
+        <source>Push: guide the running request</source>
+        <translation>Push: የሂደት ጥያቄን ይመራል</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="915"/>
+        <location filename="../ui/widgets/agent_panel.py" line="2210"/>
+        <source>Queue: wait for the current request to finish</source>
+        <translation>ወረፋ: የአሁኑ ጥያቄ እስኪጠናቀቅ ድረስ ይጠብቁ</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="2040"/>
+        <source>Queue</source>
+        <translation>ወረፋ</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="2211"/>
+        <source>Messages during a run: Push or Queue. Ctrl+Shift+Enter uses the other mode.</source>
+        <translation>በመሮጥ ወቅት መልዕክቶች: ግፋ ወይም ረድፍ። Ctrl+Shift+Enter ሌላውን ሁነታ ይጠቀማል።</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="2222"/>
+        <source>Enter guides the running request. Ctrl+Shift+Enter queues a follow-up.</source>
+        <translation>የሂደት ጥያቄን ያስገቡ። Ctrl+Shift+Enter ረድፎችን መከታተል.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="2224"/>
+        <source>Enter queues a follow-up. Ctrl+Shift+Enter guides the running request.</source>
+        <translation>ረድፎችን መከታተል ያስገቡ. Ctrl+Shift+Enter የሂደቱን ጥያቄ ይመራል።</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="2231"/>
+        <source>Send to the running agent (Enter)</source>
+        <translation>ለሥራ አስኪያጅ መላክ (ግቤት)</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="2232"/>
+        <source>Queue the request (Enter)</source>
+        <translation>መጠየቅ ረድፍ (ግቤት)</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1038"/>
+        <source>Enter sends in the selected mode. Esc stops. Ctrl+Shift+Enter uses the other mode.</source>
+        <translation>ያስገቡ በተመረጠው ሁነታ ውስጥ ይልካል. ኤስሲ ይቆማል። Ctrl+Shift+Enter ሌላውን ሁነታ ይጠቀማል።</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="780"/>
+        <location filename="../ui/widgets/agent_panel.py" line="781"/>
+        <location filename="../ui/widgets/agent_panel.py" line="2086"/>
+        <source>Dictate with the microphone</source>
+        <translation>ማይክሮፎን ይጠቀሙ</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="824"/>
+        <source>Microphone settings…</source>
+        <translation>ማይክሮፎን ቅንብሮች...</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="854"/>
+        <source>Cancel dictation</source>
+        <translation>የዲክተሩን መግለጫ መሰረዝ</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="2085"/>
+        <source>Stop recording and transcribe</source>
+        <translation>መዝገብ አቁም እና ተተርጉሙ</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="2086"/>
+        <source>Cancel transcription</source>
+        <translation>ቅጂውን መሰረዝ</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="800"/>
+        <source>Advanced Designer workspace</source>
+        <translation>የላቀ ዲዛይነር የሥራ ቦታ</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="803"/>
+        <source>Brainstorm a solution…</source>
+        <translation>የፈጠራ አውሎ ነፋስ መፍትሔ...</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="995"/>
+        <source>Designer</source>
+        <translation>ንድፍ አውጪ</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="999"/>
+        <source>Ideas</source>
+        <translation>ሐሳቦች</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="999"/>
+        <source>Styles</source>
+        <translation>ቅጦች</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1000"/>
+        <source>Print layout</source>
+        <translation>የህትመት አቀማመጥ</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1000"/>
+        <source>Map themes</source>
+        <translation>የካርታ ገጽታዎች</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1005"/>
+        <source>Insert an editable request: {}</source>
+        <translation>{} አንድ ሊስተካከል የሚችል ጥያቄ ያስገቡ</translation>
+    </message>
+    <message>
+        <source>Help me brainstorm and refine a solution from the current context. Propose two or three options and ask only questions that change the choice. Do not change the project yet.</source>
+        <translation>አሁን ካለው አገባብ ጋር በተያያዘ መፍትሄ እንድሰጥ እርዳኝ። ሁለት ወይም ሦስት አማራጮችን ጠይቅ፤ ምርጫውን የሚቀይሩ ጥያቄዎችን ብቻ ጠይቅ። ገና ፕሮጀክቱን አትቀይር።</translation>
+    </message>
+    <message>
+        <source>In the advanced Designer workspace, propose refined layer styles and labels for this project. Compare two directions with readable colors and hierarchy. Do not apply them yet.</source>
+        <translation>በተራቀቀ ዲዛይነር የሥራ ቦታ ውስጥ ለዚህ ፕሮጀክት የተሻሉ የቅጥ ቅጦች እና መለያዎችን ያቅርቡ ። ሁለት አቅጣጫዎችን ከአንባቢ ቀለሞችና Hierarchy ጋር አወዳድር። ገና አትጠቀሙባቸው።</translation>
+    </message>
+    <message>
+        <source>In the advanced Designer workspace, propose a print layout: purpose, page format, map, legend, scale and typography. Refine the proposal with me before creating or changing anything.</source>
+        <translation>በተራቀቀ ዲዛይነር የሥራ ቦታ ውስጥ የህትመት አቀማመጥ: ዓላማ, የገጽ ቅርጸት, ካርታ, አፈ ታሪክ, ስኬል እና የቲፖግራፊ ያቅርቡ. ማንኛውንም ነገር ከመፍጠር ወይም ከመቀየርዎ በፊት ሀሳቡን ከእኔ ጋር ያጠናክሩ ።</translation>
+    </message>
+    <message>
+        <source>In the advanced Designer workspace, inspect existing QGIS map themes and propose how to organize them for different views and layouts. Do not save, replace, apply or remove a theme yet.</source>
+        <translation>የላቀ ዲዛይነር የሥራ ቦታ ውስጥ, ነባር QGIS ካርታ ገጽታዎች ይፈትሹ እና የተለያዩ እይታዎች እና አቀማመጦች እነሱን ለማደራጀት እንዴት እንደሚቻል መወሰን. ጭብጡን አስቀምጥ፣ ተተካ፣ ተግባራዊ ወይም አስወግድ።</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1121"/>
+        <source>Conversations</source>
+        <translation>ውይይቶች</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="2220"/>
+        <source>Current request: {}. Next message: {}. It will wait for the current request.</source>
+        <translation>የአሁኑ ጥያቄ: {}. ቀጣይ መልዕክት: {}. አሁን ያለውን ጥያቄ ይጠብቃል።</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1174"/>
+        <location filename="../ui/widgets/agent_panel.py" line="1366"/>
+        <source>Open conversation</source>
+        <translation>ክፍት ውይይት</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1236"/>
+        <source>Project path unavailable</source>
+        <translation>የፕሮጀክት መንገድ አይገኝም</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1367"/>
+        <source>Read conversation</source>
+        <translation>ውይይት ያንብቡ</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1122"/>
+        <source>Up to 200 recent conversations on this computer. Other projects open for reading only.</source>
+        <translation>በዚህ ኮምፒውተር ላይ እስከ 200 የሚደርሱ የቅርብ ጊዜ ውይይቶች አሉ። ሌሎች ፕሮጀክቶች ለንባብ ብቻ ክፍት ናቸው።</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1237"/>
+        <source>current</source>
+        <translation>የአሁኑ</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1241"/>
+        <source>{} conversation(s)</source>
+        <translation>{} ውይይት</translation>
+    </message>
+    <message>
+        <source>Type / for skills or @ for project layers. Enter/Tab chooses a skill; Enter sends the edited request.</source>
+        <translation>ለችሎቶች / ወይም ለፕሮጀክት ደረጃዎች @ ይተይቡ. Enter/Tab አንድ ችሎታ ይምረጣል; Enter አርትዖት ጥያቄ ይልካል.</translation>
     </message>
 </context>
 <context>
@@ -14991,6 +15339,502 @@ Folder: {6}</source>
         <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
         <source>Kept points</source>
         <translation type="obsolete">የተያዙ ነጥቦች</translation>
+    </message>
+</context>
+<context>
+    <name>AgentSpeech</name>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="279"/>
+        <source>Audio stays in memory and is discarded after transcription. The text is inserted in the draft; you review it and press Send yourself.</source>
+        <translation>ድምጹ በማህደረ ትውስታ ውስጥ ይቆያል፤ ወደ ጽሑፍ ከተቀየረ በኋላ ይሰረዛል። ጽሑፉ ወደ ረቂቁ ይገባል፤ ይገምግሙት እና እርስዎ ራስዎ ላክ የሚለውን ይጫኑ።</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="41"/>
+        <source>Automatic, or a language code: fr, en…</source>
+        <translation>አውቶማቲክ ወይም የቋንቋ ኮድ: fr, en...</translation>
+    </message>
+    <message>
+        <source>Choose a transcription model (at most 200 characters).</source>
+        <translation>የጽሑፍ ሞዴል ይምረጡ (በጣም 200 ቁምፊዎች) ።</translation>
+    </message>
+    <message>
+        <source>Choose a transcription service.</source>
+        <translation>የትራንስክሪፕሽን አገልግሎት ምረጥ።</translation>
+    </message>
+    <message>
+        <source>Choose whether to send recorded audio to this transcription service.</source>
+        <translation>ይህን የድምጽ ማቅረቢያ አገልግሎት ለመላክ ወይም ላለመላክ ይምረጡ።</translation>
+    </message>
+    <message>
+        <source>Configure the microphone service before recording.</source>
+        <translation>ከመቅረጽዎ በፊት የማይክሮፎኑን አገልግሎት ያዋቅሩ።</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_speech.py" line="134"/>
+        <source>Dictation added to the draft. Review it, then press Send.</source>
+        <translation>ወደ ረቂቁ የተጨመረው አጻጻፍ። ተመልከቱት፤ ከዚያም ላክ የሚለውን ይጫኑ።</translation>
+    </message>
+    <message>
+        <source>Language is an ISO code such as fr or en, or empty for automatic detection.</source>
+        <translation>ቋንቋ እንደ fr ወይም en ያለ የ ISO ኮድ ነው ፣ ወይም ለስላሳ ማወቂያ ባዶ ነው።</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_speech.py" line="94"/>
+        <source>Local service</source>
+        <translation>የአካባቢ አገልግሎት</translation>
+    </message>
+    <message>
+        <source>Microphone access was denied. Enable it in system privacy settings.</source>
+        <translation>ማይክሮፎን መዳረሻ ውድቅ ተደርጓል። በስርዓት የግላዊነት ቅንብሮች ውስጥ ያግኙት።</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_speech.py" line="39"/>
+        <source>Microphone configured. Click the microphone to dictate.</source>
+        <translation>ማይክሮፎኑ ተዘጋጅቷል። ለማዘዝ ማይክሮፎኑን ጠቅ አድርግ።</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="21"/>
+        <source>Microphone settings</source>
+        <translation>ማይክሮፎን ቅንብሮች</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_speech.py" line="140"/>
+        <source>Microphone: {}</source>
+        <translation>ማይክሮፎን: {}</translation>
+    </message>
+    <message>
+        <source>No audio was recorded. Check the microphone and try again.</source>
+        <translation>ምንም ድምጽ አልተመዘገበም። ማይክሮፎኑን ተመልከትና እንደገና ሞክር።</translation>
+    </message>
+    <message>
+        <source>No microphone is available. Check the device in Microphone settings.</source>
+        <translation>ማይክሮፎን የለም። በማይክሮፎን ቅንብሮች ውስጥ መሣሪያውን ይመልከቱ።</translation>
+    </message>
+    <message>
+        <source>No speech was recognized. Try recording again.</source>
+        <translation>ምንም ዓይነት ንግግር አልተገኘም። እንደገና ለመቅዳት ሞክር.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="51"/>
+        <source>Previously selected microphone (unavailable)</source>
+        <translation>ቀደም ሲል የተመረጠው ማይክሮፎን (የማይገኝ)</translation>
+    </message>
+    <message>
+        <source>Qt Multimedia is unavailable in this QGIS installation.</source>
+        <translation>Qt Multimedia በዚህ QGIS ተቋም ውስጥ አይገኝም.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_speech.py" line="95"/>
+        <source>Recording… {} · {}</source>
+        <translation>መቅዳት... {} · {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="58"/>
+        <source>Remove stored transcription key</source>
+        <translation>የተቀመጠውን የቅጅ ቁልፍ አስወግድ</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_speech.py" line="75"/>
+        <location filename="../ui/widgets/agent_speech.py" line="170"/>
+        <source>Requesting microphone access…</source>
+        <translation>ማይክሮፎን መዳረሻ መጠየቅ...</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="61"/>
+        <source>Send recorded audio to this service for transcription</source>
+        <translation>የተቀዳ የድምጽ መልዕክት ለትራንስክሪፕሽን ወደዚህ አገልግሎት ይላኩ</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="281"/>
+        <source>Start your local OpenAI-compatible transcription server first. No audio leaves this computer.</source>
+        <translation>የአካባቢዎን ይጀምሩ OpenAI-compatible በመጀመሪያ የቅጂ ማቅረቢያ አገልጋይ። ከዚህ ኮምፒውተር ምንም ድምጽ አይወጣም።</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="55"/>
+        <source>Stored key</source>
+        <translation>የተከማቸ ቁልፍ</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="43"/>
+        <source>System default microphone</source>
+        <translation>የስርዓት ነባሪ ማይክሮፎን</translation>
+    </message>
+    <message>
+        <source>The API key contains an invalid character.</source>
+        <translation>የ API ቁልፍ ልክ ያልሆነ ቁምፊ ይዟል.</translation>
+    </message>
+    <message>
+        <source>The chat provider has no stored key for this transcription address.</source>
+        <translation>የውይይት አቅራቢው ለዚህ የጽሑፍ አድራሻ ቁልፍ አልተከማቸም።</translation>
+    </message>
+    <message>
+        <source>The local transcription service must run on this computer (localhost).</source>
+        <translation>የአካባቢው የቅጂ ጽሑፍ አገልግሎት በዚህ ኮምፒተር (localhost) ላይ መሮጥ አለበት።</translation>
+    </message>
+    <message>
+        <source>The microphone audio format is not supported.</source>
+        <translation>የማይክሮፎን የድምጽ ቅርጸት አይደገፍም።</translation>
+    </message>
+    <message>
+        <source>The microphone could not be started. Check permissions and audio input settings.</source>
+        <translation>ማይክሮፎኑን ማስጀመር አልተቻለም። ፍቃዶችን እና የድምጽ ግብዓት ቅንብሮችን ይፈትሹ።</translation>
+    </message>
+    <message>
+        <source>The microphone stopped unexpectedly. Check the selected input device.</source>
+        <translation>ማይክሮፎኑ በድንገት ቆመ። የተመረጠውን የመግቢያ መሣሪያ ይመልከቱ።</translation>
+    </message>
+    <message>
+        <source>The recorded audio is empty or exceeds the dictation limit.</source>
+        <translation>የተቀረጸው ድምጽ ባዶ ነው ወይም የዲክቴቱን ገደብ አልፏል።</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="282"/>
+        <source>The selected service receives the recorded audio and may charge for transcription. Keys are stored in the QGIS authentication database.</source>
+        <translation>የተመረጠው አገልግሎት የተቀረጸውን ኦዲዮ ይቀበላል፤ ለቅጂ ቅጅ ክፍያ ሊጠይቅ ይችላል። ቁልፎች በ QGIS የማረጋገጫ ዳታቤዝ ውስጥ ይቀመጣሉ።</translation>
+    </message>
+    <message>
+        <source>The stored transcription key belongs to another service address.</source>
+        <translation>የተከማቸው የቅጂ ቁልፍ ከሌላ የአገልግሎት አድራሻ ጋር የተያያዘ ነው።</translation>
+    </message>
+    <message>
+        <source>The transcript is too long for a dictation.</source>
+        <translation>የጽሑፉ አጻጻፍ ለትዕዛዝ በጣም ረጅም ነው።</translation>
+    </message>
+    <message>
+        <source>The transcription response is too large.</source>
+        <translation>የቅጂ መልሱ በጣም ትልቅ ነው።</translation>
+    </message>
+    <message>
+        <source>The transcription service could not be reached. Check its address and connection.</source>
+        <translation>የቅጂ ጽሑፍ አገልግሎት ማግኘት አልተቻለም። አድራሻውን እና ግንኙነቱን ያረጋግጡ.</translation>
+    </message>
+    <message>
+        <source>The transcription service did not return a JSON transcript.</source>
+        <translation>የቅጂ ጽሑፍ አገልግሎቱ የ JSON ቅጂ መልሶ አልሰጠም።</translation>
+    </message>
+    <message>
+        <source>The transcription service redirected the request. Check its address in Microphone settings.</source>
+        <translation>የቅጂ ጽሑፍ አገልግሎት ጥያቄውን አዞረ። በማይክሮፎን ቅንብሮች ውስጥ አድራሻውን ይመልከቱ።</translation>
+    </message>
+    <message>
+        <source>The transcription service took too long to answer.</source>
+        <translation>የቅጂ ጽሑፍ አገልግሎት መልስ ለመስጠት በጣም ረዘም ያለ ጊዜ ወስዷል።</translation>
+    </message>
+    <message>
+        <source>This transcription service needs an API key.</source>
+        <translation>ይህ የቅጂ ጽሑፍ አገልግሎት API ቁልፍ.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_speech.py" line="112"/>
+        <location filename="../ui/widgets/agent_speech.py" line="233"/>
+        <source>Transcribing…</source>
+        <translation>የጽሑፍ...</translation>
+    </message>
+    <message>
+        <source>Use a service address without credentials, query or fragment.</source>
+        <translation>የአገልግሎት አድራሻ ያለ ማረጋገጫ፣ ጥያቄ ወይም ቁራጭ ይጠቀሙ።</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="56"/>
+        <source>Use the chat provider's key for this same address</source>
+        <translation>ተመሳሳይ አድራሻ ለማግኘት የቻት አቅራቢውን ቁልፍ ይጠቀሙ</translation>
+    </message>
+    <message>
+        <source>Local server (OpenAI-compatible)</source>
+        <translation>አካባቢያዊ አገልጋይ (OpenAI-compatible)</translation>
+    </message>
+    <message>
+        <source>Transcription service</source>
+        <translation>የቅጂ ጽሑፍ አገልግሎት</translation>
+    </message>
+    <message>
+        <source>Service address</source>
+        <translation>የአገልግሎት አድራሻ</translation>
+    </message>
+    <message>
+        <source>Transcription model</source>
+        <translation>የትራንስክሪፕሽን ሞዴል</translation>
+    </message>
+    <message>
+        <source>Language</source>
+        <translation>ቋንቋ</translation>
+    </message>
+    <message>
+        <source>Microphone</source>
+        <translation>ማይክሮፎን</translation>
+    </message>
+    <message>
+        <source>API key</source>
+        <translation>API ቁልፍ</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="68"/>
+        <location filename="../ui/widgets/agent_speech.py" line="139"/>
+        <source>Test microphone</source>
+        <translation>ማይክሮፎኑን ፈትሽ</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="70"/>
+        <source>Test transcription</source>
+        <translation>ወደ ጽሑፍ መቀየሩን ፈትሽ</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="76"/>
+        <source>Microphone level: %p%</source>
+        <translation>ማይክሮፎን ደረጃ: %p%</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="77"/>
+        <source>Record up to 10 seconds, then test transcription with the settings above.</source>
+        <translation>እስከ 10 ሰከንዶች ድረስ ይመዝገቡ፣ ከዚያም ከላይ ባሉት ቅንብሮች ትራንስክሪፕሽን ይሞክሩ።</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="122"/>
+        <source>Settings changed. Test transcription again.</source>
+        <translation>ቅንብሮች ተቀይረዋል። እንደገና የጽሑፍ ምርመራ።</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="154"/>
+        <source>Test cancelled.</source>
+        <translation>ሙከራው ተሰርዟል።</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="169"/>
+        <source>Stop microphone test</source>
+        <translation>የማይክሮፎን ሙከራ ማቆም</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="190"/>
+        <source>Speak into the microphone… {} / 10 s</source>
+        <translation>ወደ ማይክሮፎኑ ተናገር... {} / 10 ሰከንድ</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="203"/>
+        <source>Recording ready. Click Test transcription to check the service.</source>
+        <translation>ቀረጻ ዝግጁ ነው. አገልግሎቱን ለመፈተሽ የሙከራ ትራንስክሪፕሽን ላይ ጠቅ ያድርጉ።</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="232"/>
+        <source>Cancel transcription</source>
+        <translation>ቅጂውን መሰረዝ</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="246"/>
+        <source>Transcription test succeeded.</source>
+        <translation>የትራንስክሪፕሽን ምርመራው ስኬታማ ሆነ።</translation>
+    </message>
+    <message>
+        <source>Mistral requires a two-letter language code such as fr or en, or empty for automatic detection.</source>
+        <translation>Mistral እንደ fr ወይም en ያሉ ሁለት ፊደላት የቋንቋ ኮድ ይጠይቃል ፣ ወይም ለስላሳ ማወቂያ ባዶ ነው።</translation>
+    </message>
+</context>
+<context>
+    <name>AgentEditCommits</name>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="101"/>
+        <source>A memory layer stays in memory after saving its edits. Save project and layers to keep it after closing QGIS.</source>
+        <translation>አንድ የማስታወሻ ንብርብሮች አርትዖቶቻቸውን ካስቀመጡ በኋላ በማስታወሻ ውስጥ ይቆያሉ። QGIS ከተዘጋ በኋላ ፕሮጀክት እና ንብርብሮች እንዲቆዩ ያድርጉ።</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="24"/>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="27"/>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="30"/>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="41"/>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="45"/>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="47"/>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="50"/>
+        <source>The transaction group could not be verified. Use QGIS to save these edits.</source>
+        <translation>የግብይት ቡድኑ ሊረጋገጥ አልቻለም። እነዚህን አርትዖቶች ለማስቀመጥ QGIS ይጠቀሙ.</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="85"/>
+        <source>Layer edits are still pending.</source>
+        <translation>የደረጃ አርትዖቶች አሁንም በመጠባበቅ ላይ ናቸው.</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="91"/>
+        <source>Layer edits</source>
+        <translation>የንብርብር ለውጦች</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="91"/>
+        <source>Save the layer edits?</source>
+        <translation>የንብርብር ለውጦችን ማስቀመጥ ይፈልጋሉ?</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="92"/>
+        <source>Save layer edits</source>
+        <translation>የንብርብር ለውጦችን አስቀምጥ</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="92"/>
+        <source>Keep pending</source>
+        <translation>በመጠባበቅ ላይ አቆይ</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="93"/>
+        <source>Checking and saving the layer edits…</source>
+        <translation>የደረጃ አርትዖቶችን ማረጋገጥ እና ማስቀመጥ...</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="94"/>
+        <source>Edits remain pending unless saved or discarded in QGIS. A new edit needs a new confirmation.</source>
+        <translation>አርትዖቶች በ QGIS ውስጥ ካልተቀመጡ ወይም ካልተወገዱ በስተቀር አሁንም ይጠብቃሉ. አዲስ አርትዖት አዲስ ማረጋገጫ ይፈልጋል።</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="96"/>
+        <source>Saved edits can no longer be undone from the agent chat.</source>
+        <translation>የተቀመጡ ለውጦች ከእንግዲህ በወኪሉ ውይይት ሊቀለበሱ አይችሉም።</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="97"/>
+        <source>Save all pending changes to the data source, including any manual edits on the listed layers?</source>
+        <translation>በተዘረዘሩት ንብርብሮች ላይ ያሉ የእጅ ማስተካከያዎችን ጨምሮ ሁሉንም በመጠባበቅ ላይ ያሉ ለውጦች ወደ ውሂብ ምንጩ ማስቀመጥ ይፈልጋሉ?</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="99"/>
+        <source>These layers share a QGIS transaction. They are saved together.</source>
+        <translation>እነዚህ ንብርብሮች የ QGIS ግብይት ይጋራሉ ። አብረው ተቀምጠዋል።</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="130"/>
+        <source>The conversation changed or a request is running. Ask for a new confirmation.</source>
+        <translation>ውይይቱ ተለውጧል ወይም ጥያቄው እየሄደ ነው። አዲስ ማረጋገጫ ጠይቅ።</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="133"/>
+        <source>The layers changed since this confirmation. Review them and ask again.</source>
+        <translation>ከዚች ማረጋገጫ በኋላ ደረጃዎቹ ተለውጠዋል። ተመልከቷቸው እንደገና ጠይቋቸው።</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="136"/>
+        <source>A listed layer is protected from the agent. Save its edits directly in QGIS.</source>
+        <translation>የተዘረዘረው ንብርብሮች ከኤጀንቱ የተጠበቁ ናቸው። አርትዖቶቹን በቀጥታ በ QGIS ውስጥ ያስቀምጡ.</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="147"/>
+        <source>QGIS refused to save the edits.</source>
+        <translation>QGIS አርትዖቶቹን ለማስቀመጥ ፈቃደኛ አልሆነም።</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="163"/>
+        <source>Layer edits saved: {}</source>
+        <translation>የንብርብር ለውጦች ተቀምጠዋል፦ {}</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="152"/>
+        <source>The layer edits were not fully saved. Review their state in QGIS.</source>
+        <translation>የንብርብር ለውጦች ሙሉ በሙሉ አልተቀመጡም። ሁኔታቸውን በQGIS ውስጥ ይመልከቱ።</translation>
+    </message>
+</context>
+<context>
+    <name>AgentExports</name>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_exports.py" line="13"/>
+        <source>Choose the default agent export folder</source>
+        <translation>ነባሪ ወኪል ወደ ውጭ ማስመጣት አቃፊ ይምረጡ</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_exports.py" line="20"/>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_exports.py" line="22"/>
+        <source>Choose an existing folder outside the QGIS profiles.</source>
+        <translation>ከ QGIS መገለጫዎች ውጭ ያለ አቃፊ ይምረጡ.</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_exports.py" line="22"/>
+        <source>Export folder</source>
+        <translation>የመላኪያ አቃፊ</translation>
+    </message>
+</context>
+<context>
+    <name>AgentActivity</name>
+    <message>
+        <source>Ready for a message</source>
+        <translation>መልዕክት ለመላክ ዝግጁ</translation>
+    </message>
+    <message>
+        <source>Finished — ready for a message</source>
+        <translation>የተጠናቀቀ  ⁇  መልዕክት ዝግጁ</translation>
+    </message>
+    <message>
+        <source>Thinking</source>
+        <translation>ማሰብ</translation>
+    </message>
+    <message>
+        <source>Reading data</source>
+        <translation>የንባብ መረጃ</translation>
+    </message>
+    <message>
+        <source>Working</source>
+        <translation>ሥራ</translation>
+    </message>
+    <message>
+        <source>Fetching data</source>
+        <translation>ውሂብ ማምጣት</translation>
+    </message>
+    <message>
+        <source>Writing the response</source>
+        <translation>መልሱን መጻፍ</translation>
+    </message>
+    <message>
+        <source>Waiting</source>
+        <translation>መጠበቅ</translation>
+    </message>
+    <message>
+        <source>Retrying</source>
+        <translation>እንደገና መሞከር</translation>
+    </message>
+    <message>
+        <source>Stopped or stopping</source>
+        <translation>መቆም ወይም መቆም</translation>
+    </message>
+    <message>
+        <source>You are writing a message</source>
+        <translation>አንድ መልዕክት እየጻፍክ ነው</translation>
+    </message>
+    <message>
+        <source>Messages are queued</source>
+        <translation>መልዕክቶች ረድፍ ውስጥ ናቸው</translation>
+    </message>
+    <message>
+        <source>The request needs your attention</source>
+        <translation>ጥያቄው ትኩረትህን ይፈልጋል</translation>
+    </message>
+    <message>
+        <source>Searching for data</source>
+        <translation>መረጃን መፈለግ</translation>
+    </message>
+    <message>
+        <source>Processing data</source>
+        <translation>ውሂብ ማቀነባበር</translation>
+    </message>
+    <message>
+        <source>Editing a layer</source>
+        <translation>አንድ ንብርብር ማረም</translation>
+    </message>
+    <message>
+        <source>Exporting files</source>
+        <translation>ፋይሎችን ወደ ውጭ መላክ</translation>
+    </message>
+    <message>
+        <source>Designing the map</source>
+        <translation>ካርታውን ዲዛይን ማድረግ</translation>
+    </message>
+    <message>
+        <source>Navigating in QGIS</source>
+        <translation>በ QGIS ውስጥ ማሰስ</translation>
+    </message>
+    <message>
+        <source>Waiting for your confirmation</source>
+        <translation>የእርስዎን ማረጋገጫ በመጠባበቅ ላይ</translation>
+    </message>
+    <message>
+        <source>Recording your voice</source>
+        <translation>ድምጽህን መቅዳት</translation>
+    </message>
+    <message>
+        <source>Transcribing your recording</source>
+        <translation>የምዝገባውን ጽሑፍ በመተርጎም ላይ</translation>
     </message>
 </context>
 </TS>

@@ -1854,6 +1854,108 @@ Sang-ayon ka ba sa lahat? Kapag Hindi, walang patatakbuhin.</translation>
         <source>Opening the Processing model designer</source>
         <translation>Binubuksan ang taga-disenyo ng modelo ng Processing</translation>
     </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1283"/>
+        <source>Review and add source: {}</source>
+        <translation>Suriin at idagdag ang pinagmulan: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1312"/>
+        <source>Open this search in the browser</source>
+        <translation>Buksan ang paghahanap sa browser</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1653"/>
+        <source>sends the search query to DuckDuckGo; result sites are not visited</source>
+        <translation>nagpadala ng query sa DuckDuckGo; results site ay hindi binisita</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1500"/>
+        <source>Wait for the current request to finish before changing the export folder.</source>
+        <translation>Hulat hanggang sa matapos ang kasalukuyang kahilingan bago baguhin ang folder ng pag-export.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1506"/>
+        <source>Default export folder: {}</source>
+        <translation>Default export folder: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1519"/>
+        <source>Export cancelled. Choose a default export folder from the agent menu to export.</source>
+        <translation>Kanselahin ang pag-export. Pumili ng isang default na pag-export folder mula sa menu ng ahente upang mag-export.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3461"/>
+        <source>Message sent to the running agent; applied at its next step.</source>
+        <translation>Mensahe na ipinadala sa nagmamaneho na ahente; inilapat sa susunod na hakbang nito.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="540"/>
+        <source>Wait for the current request to finish before changing the Designer workspace.</source>
+        <translation>Hulatin ang kasalukuyang kahilingan upang tapusin bago baguhin ang Designer workspace.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="549"/>
+        <source>Advanced Designer workspace enabled: styles, layouts and QGIS map themes.</source>
+        <translation>Ang Advanced Designer workspace ay pinapayagan: mga estilo, layout at mga tema ng mapa ng QGIS.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="550"/>
+        <source>Standard conversation workspace enabled.</source>
+        <translation>Pinapayagan ang standard na lugar ng pag-uusap.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3829"/>
+        <source>Available QGIS interfaces</source>
+        <translation>Available QGIS interface</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="966"/>
+        <source>Conversation from another project</source>
+        <translation>Pag-uusap mula sa isa pang proyekto</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3450"/>
+        <source>Message queued with the selected mode; the running request keeps its permissions.</source>
+        <translation>Message queued sa napili mode; ang tumatakbo request ay nagpapanatili ng mga pahintulot nito.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="970"/>
+        <source>Project path unavailable</source>
+        <translation>Hindi magagamit ang landas ng proyekto</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3830"/>
+        <source>QGIS interface: {}</source>
+        <translation>Interface ng QGIS: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="4931"/>
+        <source>The QGIS interface could not be opened: {}</source>
+        <translation>Hindi maaaring buksan ang interface ng QGIS: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3359"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3372"/>
+        <source>The conversation could not be archived. It has been kept open.</source>
+        <translation>Hindi na mai-archive ang pag-uusap. Ito'y pinapanatili nang bukas.</translation>
+    </message>
+    <message>
+        <source>Custom skill; review and permissions still apply</source>
+        <translation>Custom skill; review at mga pahintulot pa rin ang naaangkop</translation>
+    </message>
+    <message>
+        <source>External connector; permissions still apply</source>
+        <translation>External connector; may mga pahintulot pa rin</translation>
+    </message>
+    <message>
+        <source>Skill request queued; it will load before the next request.</source>
+        <translation>Ang hangarin ng kasanayan ay nasa linya; ito'y mag-load bago ang susunod na hangarin.</translation>
+    </message>
+    <message>
+        <source>Skill /{} is unavailable. Type / to see the available skills.</source>
+        <translation>Hindi available ang kasanayang /{}. I-type ang / upang makita ang mga available na kasanayan.</translation>
+    </message>
 </context>
 <context>
     <name>AgentData</name>
@@ -1948,6 +2050,22 @@ Kung pipiliin ang Hindi, mananatili sa memorya ang data at mawawala kapag isinar
         <location filename="../ui/controllers/agent_data.py" line="70"/>
         <source>Wait for the current request to finish before saving its data.</source>
         <translation>Hintaying matapos ang kasalukuyang kahilingan bago i-save ang data nito.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_data.py" line="91"/>
+        <location filename="../ui/controllers/agent_data.py" line="121"/>
+        <source>Do not offer again this session</source>
+        <translation>Huwag ulitin ang sesyon na ito</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_data.py" line="92"/>
+        <source>Hide save suggestions until QGIS restarts. You can still save from the agent menu.</source>
+        <translation>I-save ang mga suhestiyon hanggang sa muling magsimula ang QGIS. Maaari mo pa ring i-save mula sa menu ng agent.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_data.py" line="93"/>
+        <source>Save suggestions are hidden for this QGIS session. The data stay in memory.</source>
+        <translation>Ang mga suhestiyon sa pag-save ay nakatago para sa sesyong QGIS na ito. Ang data ay nananatili sa memorya.</translation>
     </message>
 </context>
 <context>
@@ -3703,6 +3821,236 @@ Kung pipiliin ang Hindi, mananatili sa memorya ang data at mawawala kapag isinar
         <location filename="../ui/widgets/agent_panel.py" line="727"/>
         <source>Processing model designer…</source>
         <translation>Taga-disenyo ng modelo ng Processing…</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="3263"/>
+        <source>Detect service type</source>
+        <translation>Ang uri ng serbisyo sa pagtuklas</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="3275"/>
+        <source>Source name (optional)</source>
+        <translation>Pangalan ng mapagkukunan (pagpipilian)</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="3277"/>
+        <source>Enable after adding</source>
+        <translation>Paganahin pagkatapos idagdag</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="3392"/>
+        <source>Source added to this form. Save these settings to keep it.</source>
+        <translation>Pinagmumulan na idinagdag sa form na ito. I-save ang mga setting na ito upang panatilihin ito.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="3409"/>
+        <source>Unverified suggestion. Review the address and type, then test or add it yourself.</source>
+        <translation>Hindi nakumpirma na suggestion. Suriin ang address at type, pagkatapos ay subukan o magdagdag ng iyong sarili.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="3371"/>
+        <source>Choose the service type if it cannot be detected from the address.</source>
+        <translation>Piliin ang uri ng serbisyo kung hindi ito makikita sa address.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="798"/>
+        <source>Default export folder…</source>
+        <translation>Default pag-export folder...</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="749"/>
+        <source>Push</source>
+        <translation>Push</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="742"/>
+        <source>Send now</source>
+        <translation>Ipadala ngayon</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="746"/>
+        <source>Send the first waiting message to the running agent</source>
+        <translation>Ipadala ang unang mensahe ng paghihintay sa nagmamaneho na ahente</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="911"/>
+        <source>Messages sent while the agent works</source>
+        <translation>Mga mensahe na ipinadala habang nagtatrabaho ang ahente</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="914"/>
+        <location filename="../ui/widgets/agent_panel.py" line="2209"/>
+        <source>Push: guide the running request</source>
+        <translation>Push: i-guide ang pagpapatakbo ng kahilingan</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="915"/>
+        <location filename="../ui/widgets/agent_panel.py" line="2210"/>
+        <source>Queue: wait for the current request to finish</source>
+        <translation>Pila: hintayin ang kasalukuyang kahilingan upang tapusin</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="2040"/>
+        <source>Queue</source>
+        <translation>Pila</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="2211"/>
+        <source>Messages during a run: Push or Queue. Ctrl+Shift+Enter uses the other mode.</source>
+        <translation>Mga mensahe sa panahon ng isang run: Push o queue. Ctrl+Shift+Enter ay gumagamit ng ibang mode.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="2222"/>
+        <source>Enter guides the running request. Ctrl+Shift+Enter queues a follow-up.</source>
+        <translation>Ipasok ang mga gabay ng pagpapatakbo ng request. Ctrl+Shift+Enter mga linya ng pagsubaybay.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="2224"/>
+        <source>Enter queues a follow-up. Ctrl+Shift+Enter guides the running request.</source>
+        <translation>Ipasok ang mga linya ng pagsubaybay. Ctrl+Shift+Enter ang gabay sa pagpapatakbo ng request.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="2231"/>
+        <source>Send to the running agent (Enter)</source>
+        <translation>Ipadala sa nagmamaneho na ahente (Enter)</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="2232"/>
+        <source>Queue the request (Enter)</source>
+        <translation>I- queue ang kahilingan (Ipasok)</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1038"/>
+        <source>Enter sends in the selected mode. Esc stops. Ctrl+Shift+Enter uses the other mode.</source>
+        <translation>I-enter nagpadala sa napili mode. Tumigil ang Esc. Ctrl+Shift+Enter ay gumagamit ng ibang mode.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="780"/>
+        <location filename="../ui/widgets/agent_panel.py" line="781"/>
+        <location filename="../ui/widgets/agent_panel.py" line="2086"/>
+        <source>Dictate with the microphone</source>
+        <translation>I-dictate sa pamamagitan ng mikropono</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="824"/>
+        <source>Microphone settings…</source>
+        <translation>Mga setting ng microphone...</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="854"/>
+        <source>Cancel dictation</source>
+        <translation>I-cancel ang dikta</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="2085"/>
+        <source>Stop recording and transcribe</source>
+        <translation>Ihinto ang pag-record at pag-transcribe</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="2086"/>
+        <source>Cancel transcription</source>
+        <translation>I-cancel ang transkripsyon</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="800"/>
+        <source>Advanced Designer workspace</source>
+        <translation>Advanced Designer workspace</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="803"/>
+        <source>Brainstorm a solution…</source>
+        <translation>Mag-brainstorm ng isang solusyon...</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="995"/>
+        <source>Designer</source>
+        <translation>Designer</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="999"/>
+        <source>Ideas</source>
+        <translation>Mga ideya</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="999"/>
+        <source>Styles</source>
+        <translation>Mga estilo</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1000"/>
+        <source>Print layout</source>
+        <translation>Paglalarawan ng pag-print</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1000"/>
+        <source>Map themes</source>
+        <translation>Mga tema ng mapa</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1005"/>
+        <source>Insert an editable request: {}</source>
+        <translation>I-insert ang isang editable request: {}</translation>
+    </message>
+    <message>
+        <source>Help me brainstorm and refine a solution from the current context. Propose two or three options and ask only questions that change the choice. Do not change the project yet.</source>
+        <translation>Tulungan mo akong mag-brainstorm at mag-fine ng isang solusyon mula sa kasalukuyang konteksto. I-propose ang dalawang o tatlong pagpipilian at itanong lamang ang mga katanungan na nagbabago sa pagpili. Huwag pa baguhin ang proyekto.</translation>
+    </message>
+    <message>
+        <source>In the advanced Designer workspace, propose refined layer styles and labels for this project. Compare two directions with readable colors and hierarchy. Do not apply them yet.</source>
+        <translation>Sa advanced na workspace ng Designer, mag-propose ng mga refined layer style at label para sa proyektong ito. Kumparahan ang dalawang direksyon sa mga kulay na mabasa at hierarchy. Huwag mo pa itong ilapat.</translation>
+    </message>
+    <message>
+        <source>In the advanced Designer workspace, propose a print layout: purpose, page format, map, legend, scale and typography. Refine the proposal with me before creating or changing anything.</source>
+        <translation>Sa advanced na workspace ng Designer, ipangarap ang isang layout ng print: layunin, format ng pahina, mapa, alamat, sukat at tipograpiya. I-refine ang proposal sa akin bago lumikha o baguhin ang anumang bagay.</translation>
+    </message>
+    <message>
+        <source>In the advanced Designer workspace, inspect existing QGIS map themes and propose how to organize them for different views and layouts. Do not save, replace, apply or remove a theme yet.</source>
+        <translation>Sa advanced na Designer workspace, suriin ang umiiral na mga tema ng mapa ng QGIS at mag-propose kung paano ito iorganisa para sa iba't ibang mga pananaw at layout. Huwag i-save, alisin, gamitin o alisin ang isang tema.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1121"/>
+        <source>Conversations</source>
+        <translation>Mga Pag-uusap</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="2220"/>
+        <source>Current request: {}. Next message: {}. It will wait for the current request.</source>
+        <translation>kasalukuyang kahilingan: {}. Susunod na mensahe: {}. Maghihintay ito sa kasalukuyang kahilingan.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1174"/>
+        <location filename="../ui/widgets/agent_panel.py" line="1366"/>
+        <source>Open conversation</source>
+        <translation>Bukas na pag-uusap</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1236"/>
+        <source>Project path unavailable</source>
+        <translation>Hindi magagamit ang landas ng proyekto</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1367"/>
+        <source>Read conversation</source>
+        <translation>Basahin ang pag-uusap</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1122"/>
+        <source>Up to 200 recent conversations on this computer. Other projects open for reading only.</source>
+        <translation>Hanggang sa 200 kamakailang pag-uusap sa computer na ito. Ang iba pang mga proyekto ay bukas para sa pagbabasa lamang.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1237"/>
+        <source>current</source>
+        <translation>kasalukuyang</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1241"/>
+        <source>{} conversation(s)</source>
+        <translation>{} pag-uusap</translation>
+    </message>
+    <message>
+        <source>Type / for skills or @ for project layers. Enter/Tab chooses a skill; Enter sends the edited request.</source>
+        <translation>I-type / para sa mga kasanayan o @ para sa mga layer ng proyekto. Enter/Tab ay pumili ng isang kakayahan; Enter ay nagpadala ng na-edit request.</translation>
     </message>
 </context>
 <context>
@@ -14991,6 +15339,502 @@ Folder: {6}</translation>
         <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
         <source>Kept points</source>
         <translation type="obsolete">Mga pinanatiling punto</translation>
+    </message>
+</context>
+<context>
+    <name>AgentSpeech</name>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="279"/>
+        <source>Audio stays in memory and is discarded after transcription. The text is inserted in the draft; you review it and press Send yourself.</source>
+        <translation>Nananatili sa memorya ang audio at inaalis pagkatapos ng transkripsiyon. Inilalagay ang teksto sa draft; suriin ito at ikaw mismo ang pumindot sa Ipadala.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="41"/>
+        <source>Automatic, or a language code: fr, en…</source>
+        <translation>Automatic, o isang code ng wika: fr, en...</translation>
+    </message>
+    <message>
+        <source>Choose a transcription model (at most 200 characters).</source>
+        <translation>Pumili ng isang modelo ng transkripsyon (hindi bababa sa 200 character).</translation>
+    </message>
+    <message>
+        <source>Choose a transcription service.</source>
+        <translation>Pumili ng isang serbisyo sa transkripsyon.</translation>
+    </message>
+    <message>
+        <source>Choose whether to send recorded audio to this transcription service.</source>
+        <translation>Pumili kung magpadala ka ba ng naka-record na audio sa transcription service na ito.</translation>
+    </message>
+    <message>
+        <source>Configure the microphone service before recording.</source>
+        <translation>I-configure ang serbisyo ng mikropono bago mag-record.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_speech.py" line="134"/>
+        <source>Dictation added to the draft. Review it, then press Send.</source>
+        <translation>Nagdagdag ng dikta sa draft. Suriin ito, at pagkatapos ay pindutin ang Ipadala.</translation>
+    </message>
+    <message>
+        <source>Language is an ISO code such as fr or en, or empty for automatic detection.</source>
+        <translation>Ang wika ay isang ISO code tulad ng fr o en, o walang laman para sa awtomatikong pagtuklas.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_speech.py" line="94"/>
+        <source>Local service</source>
+        <translation>Mga lokal na serbisyo</translation>
+    </message>
+    <message>
+        <source>Microphone access was denied. Enable it in system privacy settings.</source>
+        <translation>Ang pag-access sa microphone ay tinanggihan. I-enable ito sa mga setting ng privacy ng sistema.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_speech.py" line="39"/>
+        <source>Microphone configured. Click the microphone to dictate.</source>
+        <translation>Nag-configure ang microphone. I-click ang microphone upang idikta.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="21"/>
+        <source>Microphone settings</source>
+        <translation>Mga setting ng microphone</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_speech.py" line="140"/>
+        <source>Microphone: {}</source>
+        <translation>Mikro: {}</translation>
+    </message>
+    <message>
+        <source>No audio was recorded. Check the microphone and try again.</source>
+        <translation>Walang audio ang na-record. Suriin ang mikropono at subukan muli.</translation>
+    </message>
+    <message>
+        <source>No microphone is available. Check the device in Microphone settings.</source>
+        <translation>Walang microphone. Suriin ang aparato sa mga setting ng mikropono.</translation>
+    </message>
+    <message>
+        <source>No speech was recognized. Try recording again.</source>
+        <translation>Walang pahayag ang kinikilala. Subukan ulit ang pag-record.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="51"/>
+        <source>Previously selected microphone (unavailable)</source>
+        <translation>Una na piniling mikropono (hindi magagamit)</translation>
+    </message>
+    <message>
+        <source>Qt Multimedia is unavailable in this QGIS installation.</source>
+        <translation>Qt Multimedia ay hindi magagamit sa QGIS installation na ito.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_speech.py" line="95"/>
+        <source>Recording… {} · {}</source>
+        <translation>Pag-recording ... {} · {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="58"/>
+        <source>Remove stored transcription key</source>
+        <translation>Alisin ang naka-imbak na key ng transcription</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_speech.py" line="75"/>
+        <location filename="../ui/widgets/agent_speech.py" line="170"/>
+        <source>Requesting microphone access…</source>
+        <translation>Pinapayagan ang pag-access ng mikropono...</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="61"/>
+        <source>Send recorded audio to this service for transcription</source>
+        <translation>Ipadala ang naka-record na audio sa serbisyong ito para sa transkripsyon</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="281"/>
+        <source>Start your local OpenAI-compatible transcription server first. No audio leaves this computer.</source>
+        <translation>Magsimula muna ng iyong lokal na OpenAI-compatible transcription server. Walang audio ang umalis sa computer na ito.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="55"/>
+        <source>Stored key</source>
+        <translation>Ang naka-imbak na susi</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="43"/>
+        <source>System default microphone</source>
+        <translation>Default microphone ng sistema</translation>
+    </message>
+    <message>
+        <source>The API key contains an invalid character.</source>
+        <translation>Ang susi ng API ay naglalaman ng isang di-nakamit na character.</translation>
+    </message>
+    <message>
+        <source>The chat provider has no stored key for this transcription address.</source>
+        <translation>Ang tagapagbigay ng chat ay walang naka-imbak na susi para sa address na ito.</translation>
+    </message>
+    <message>
+        <source>The local transcription service must run on this computer (localhost).</source>
+        <translation>Ang lokal na serbisyo ng transkripsyon ay dapat magpatakbo sa computer na ito (localhost).</translation>
+    </message>
+    <message>
+        <source>The microphone audio format is not supported.</source>
+        <translation>Ang format ng audio ng mikropono ay hindi suportado.</translation>
+    </message>
+    <message>
+        <source>The microphone could not be started. Check permissions and audio input settings.</source>
+        <translation>Hindi maaaring i-start ang microphone. Suriin ang mga pahintulot at mga setting ng audio input.</translation>
+    </message>
+    <message>
+        <source>The microphone stopped unexpectedly. Check the selected input device.</source>
+        <translation>Hindi inaasahan na tumigil ang mikropono. Suriin ang pinili na input device.</translation>
+    </message>
+    <message>
+        <source>The recorded audio is empty or exceeds the dictation limit.</source>
+        <translation>Ang naka-record na audio ay walang laman o higit sa limitasyon ng dikta.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="282"/>
+        <source>The selected service receives the recorded audio and may charge for transcription. Keys are stored in the QGIS authentication database.</source>
+        <translation>Ang pinili na serbisyo ay tumatanggap ng naka-record na audio at maaaring magbayad para sa transkripsyon. Ang mga susi ay naka-imbak sa database ng pag-authenticate ng QGIS.</translation>
+    </message>
+    <message>
+        <source>The stored transcription key belongs to another service address.</source>
+        <translation>Ang naka-save na key ng transcription ay kabilang sa isa pang address ng serbisyo.</translation>
+    </message>
+    <message>
+        <source>The transcript is too long for a dictation.</source>
+        <translation>Ang transcript ay masyadong mahaba para sa isang dikta.</translation>
+    </message>
+    <message>
+        <source>The transcription response is too large.</source>
+        <translation>Ang pagtugon sa transcription ay masyadong malaki.</translation>
+    </message>
+    <message>
+        <source>The transcription service could not be reached. Check its address and connection.</source>
+        <translation>Ang transcription service ay hindi makamit. Suriin ang address at koneksyon nito.</translation>
+    </message>
+    <message>
+        <source>The transcription service did not return a JSON transcript.</source>
+        <translation>Ang transcription service ay hindi bumalik sa isang JSON transcript.</translation>
+    </message>
+    <message>
+        <source>The transcription service redirected the request. Check its address in Microphone settings.</source>
+        <translation>Binago ng transcription service ang kahilingan. Suriin ang address nito sa mga setting ng mikropono.</translation>
+    </message>
+    <message>
+        <source>The transcription service took too long to answer.</source>
+        <translation>Ang serbisyo ng transkripsyon ay tumagal ng masyadong mahaba upang sagutin.</translation>
+    </message>
+    <message>
+        <source>This transcription service needs an API key.</source>
+        <translation>Ang transcription service na ito ay nangangailangan ng isang API key.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_speech.py" line="112"/>
+        <location filename="../ui/widgets/agent_speech.py" line="233"/>
+        <source>Transcribing…</source>
+        <translation>Pag-transcribe...</translation>
+    </message>
+    <message>
+        <source>Use a service address without credentials, query or fragment.</source>
+        <translation>Gamitin ang isang address ng serbisyo na walang mga credentials, query o fragment.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="56"/>
+        <source>Use the chat provider's key for this same address</source>
+        <translation>Gamitin ang susi ng chat provider para sa parehong address</translation>
+    </message>
+    <message>
+        <source>Local server (OpenAI-compatible)</source>
+        <translation>Local server (OpenAI-compatible)</translation>
+    </message>
+    <message>
+        <source>Transcription service</source>
+        <translation>Serbisyo sa transkripsyon</translation>
+    </message>
+    <message>
+        <source>Service address</source>
+        <translation>Address ng serbisyo</translation>
+    </message>
+    <message>
+        <source>Transcription model</source>
+        <translation>Modelo ng transkripsyon</translation>
+    </message>
+    <message>
+        <source>Language</source>
+        <translation>Wika</translation>
+    </message>
+    <message>
+        <source>Microphone</source>
+        <translation>Microphone</translation>
+    </message>
+    <message>
+        <source>API key</source>
+        <translation>API key</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="68"/>
+        <location filename="../ui/widgets/agent_speech.py" line="139"/>
+        <source>Test microphone</source>
+        <translation>Subukan ang mikropono</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="70"/>
+        <source>Test transcription</source>
+        <translation>Subukan ang transkripsiyon</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="76"/>
+        <source>Microphone level: %p%</source>
+        <translation>antas ng mikropono: %p%</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="77"/>
+        <source>Record up to 10 seconds, then test transcription with the settings above.</source>
+        <translation>I-record hanggang sa 10 segundo, pagkatapos ay subukan ang transkripsyon gamit ang mga setting sa itaas.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="122"/>
+        <source>Settings changed. Test transcription again.</source>
+        <translation>Nagbago ang mga setting. Subukan muli ang transkripsyon.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="154"/>
+        <source>Test cancelled.</source>
+        <translation>Kanselahin ang pagsubok.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="169"/>
+        <source>Stop microphone test</source>
+        <translation>Pagsusubukan ng microphone stop</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="190"/>
+        <source>Speak into the microphone… {} / 10 s</source>
+        <translation>Magsalita sa microphone... {} / 10 s</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="203"/>
+        <source>Recording ready. Click Test transcription to check the service.</source>
+        <translation>Nag-record na. I-click ang Test transcription upang suriin ang serbisyo.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="232"/>
+        <source>Cancel transcription</source>
+        <translation>I-cancel ang transkripsyon</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="246"/>
+        <source>Transcription test succeeded.</source>
+        <translation>Nagtagumpay ang transcription test.</translation>
+    </message>
+    <message>
+        <source>Mistral requires a two-letter language code such as fr or en, or empty for automatic detection.</source>
+        <translation>Ang Mistral ay nangangailangan ng dalawang-leta na code ng wika tulad ng fr o en, o walang laman para sa awtomatikong pagtuklas.</translation>
+    </message>
+</context>
+<context>
+    <name>AgentEditCommits</name>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="101"/>
+        <source>A memory layer stays in memory after saving its edits. Save project and layers to keep it after closing QGIS.</source>
+        <translation>Ang isang layer ng memorya ay nananatiling nasa memorya pagkatapos i-save ang mga edit nito. I-save ang proyekto at mga layer upang panatilihin ito pagkatapos ng pagsasara ng QGIS.</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="24"/>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="27"/>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="30"/>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="41"/>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="45"/>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="47"/>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="50"/>
+        <source>The transaction group could not be verified. Use QGIS to save these edits.</source>
+        <translation>Ang grupo ng transaksyon ay hindi maaaring suriin. Gamitin ang QGIS upang i-save ang mga edit na ito.</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="85"/>
+        <source>Layer edits are still pending.</source>
+        <translation>Ang mga pag-edit ng layer ay pa rin nakahihintay.</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="91"/>
+        <source>Layer edits</source>
+        <translation>Mga pagbabago sa layer</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="91"/>
+        <source>Save the layer edits?</source>
+        <translation>I-save ang mga pagbabago sa layer?</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="92"/>
+        <source>Save layer edits</source>
+        <translation>I-save ang mga pagbabago sa layer</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="92"/>
+        <source>Keep pending</source>
+        <translation>Panatilihing nakabinbin ang mga pagbabago</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="93"/>
+        <source>Checking and saving the layer edits…</source>
+        <translation>Pag-check at pag-save ng mga layer edits...</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="94"/>
+        <source>Edits remain pending unless saved or discarded in QGIS. A new edit needs a new confirmation.</source>
+        <translation>Ang mga pagliwat ay mananatili sa paghihintay maliban kung nai-save o inilabas sa QGIS. Ang isang bagong pag-edit ay nangangailangan ng bagong pagpapatunay.</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="96"/>
+        <source>Saved edits can no longer be undone from the agent chat.</source>
+        <translation>Hindi na maaaring bawiin sa chat ng ahente ang mga na-save na pagbabago.</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="97"/>
+        <source>Save all pending changes to the data source, including any manual edits on the listed layers?</source>
+        <translation>I-save ang lahat ng nakabinbing pagbabago sa pinagmulan ng data, kabilang ang mga manwal na pagbabago sa mga nakalistang layer?</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="99"/>
+        <source>These layers share a QGIS transaction. They are saved together.</source>
+        <translation>Ang mga layer na ito ay naghahati ng isang QGIS transaction. Sila'y niligtas na magkasama.</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="130"/>
+        <source>The conversation changed or a request is running. Ask for a new confirmation.</source>
+        <translation>Nagbago ang pag-uusap o nagmamadali ang isang kahilingan. Humingi ng bagong konfirmasyon.</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="133"/>
+        <source>The layers changed since this confirmation. Review them and ask again.</source>
+        <translation>Ang mga layer ay nagbago mula sa kumpirmasyon na ito. Subukan ang mga ito at hilingin muli.</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="136"/>
+        <source>A listed layer is protected from the agent. Save its edits directly in QGIS.</source>
+        <translation>Ang isang nakalista na layer ay protektado mula sa ahente. I-save ang mga edit nito sa QGIS.</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="147"/>
+        <source>QGIS refused to save the edits.</source>
+        <translation>Ang QGIS ay tumanggi na i-save ang mga edit.</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="163"/>
+        <source>Layer edits saved: {}</source>
+        <translation>Na-save ang mga pagbabago sa layer: {}</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="152"/>
+        <source>The layer edits were not fully saved. Review their state in QGIS.</source>
+        <translation>Hindi ganap na na-save ang mga pagbabago sa layer. Suriin ang kalagayan ng mga ito sa QGIS.</translation>
+    </message>
+</context>
+<context>
+    <name>AgentExports</name>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_exports.py" line="13"/>
+        <source>Choose the default agent export folder</source>
+        <translation>Piliin ang default na folder ng pag-export ng agent</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_exports.py" line="20"/>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_exports.py" line="22"/>
+        <source>Choose an existing folder outside the QGIS profiles.</source>
+        <translation>Pumili ng isang umiiral na folder sa labas ng mga profile ng QGIS.</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_exports.py" line="22"/>
+        <source>Export folder</source>
+        <translation>Folder ng export</translation>
+    </message>
+</context>
+<context>
+    <name>AgentActivity</name>
+    <message>
+        <source>Ready for a message</source>
+        <translation>Handa para sa isang mensahe</translation>
+    </message>
+    <message>
+        <source>Finished — ready for a message</source>
+        <translation>Natapos  ⁇  handa para sa isang mensahe</translation>
+    </message>
+    <message>
+        <source>Thinking</source>
+        <translation>Pag-iisip</translation>
+    </message>
+    <message>
+        <source>Reading data</source>
+        <translation>Pagbabasa ng data</translation>
+    </message>
+    <message>
+        <source>Working</source>
+        <translation>Nagtatrabaho</translation>
+    </message>
+    <message>
+        <source>Fetching data</source>
+        <translation>Pagdadalhin ng data</translation>
+    </message>
+    <message>
+        <source>Writing the response</source>
+        <translation>Pagsusulat ng sagot</translation>
+    </message>
+    <message>
+        <source>Waiting</source>
+        <translation>Naghihintay</translation>
+    </message>
+    <message>
+        <source>Retrying</source>
+        <translation>Pagsusubukan muli</translation>
+    </message>
+    <message>
+        <source>Stopped or stopping</source>
+        <translation>Nagtatigil o nagtatigil</translation>
+    </message>
+    <message>
+        <source>You are writing a message</source>
+        <translation>Nagsusulat ka ng isang mensahe</translation>
+    </message>
+    <message>
+        <source>Messages are queued</source>
+        <translation>Ang mga mensahe ay naka- queue</translation>
+    </message>
+    <message>
+        <source>The request needs your attention</source>
+        <translation>Ang kahilingan ay nangangailangan ng iyong pansin</translation>
+    </message>
+    <message>
+        <source>Searching for data</source>
+        <translation>Paghahanap ng data</translation>
+    </message>
+    <message>
+        <source>Processing data</source>
+        <translation>Mga datos sa pagproseso</translation>
+    </message>
+    <message>
+        <source>Editing a layer</source>
+        <translation>Pag-edit ng layer</translation>
+    </message>
+    <message>
+        <source>Exporting files</source>
+        <translation>Pag-export ng mga file</translation>
+    </message>
+    <message>
+        <source>Designing the map</source>
+        <translation>Paglalarawan ng mapa</translation>
+    </message>
+    <message>
+        <source>Navigating in QGIS</source>
+        <translation>Paglalakbay sa QGIS</translation>
+    </message>
+    <message>
+        <source>Waiting for your confirmation</source>
+        <translation>Naghihintay para sa iyong kumpirmasyon</translation>
+    </message>
+    <message>
+        <source>Recording your voice</source>
+        <translation>Pag-record ng iyong boses</translation>
+    </message>
+    <message>
+        <source>Transcribing your recording</source>
+        <translation>Pag-transcribe ng iyong recording</translation>
     </message>
 </context>
 </TS>

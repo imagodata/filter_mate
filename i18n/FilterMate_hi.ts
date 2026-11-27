@@ -1854,6 +1854,108 @@ Do you agree to all of them? No runs none of them.</source>
         <source>Opening the Processing model designer</source>
         <translation>प्रोसेसिंग मॉडल डिज़ाइनर खोला जा रहा है</translation>
     </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1283"/>
+        <source>Review and add source: {}</source>
+        <translation>स्रोत की समीक्षा करें और जोड़ें: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1312"/>
+        <source>Open this search in the browser</source>
+        <translation>ब्राउज़र में यह खोज खोलें</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1653"/>
+        <source>sends the search query to DuckDuckGo; result sites are not visited</source>
+        <translation>DuckDuckGo पर खोज क्वेरी भेजता है; परिणाम साइटों का दौरा नहीं किया जाता है</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1500"/>
+        <source>Wait for the current request to finish before changing the export folder.</source>
+        <translation>निर्यात फ़ोल्डर को बदलने से पहले वर्तमान अनुरोध के समाप्त होने की प्रतीक्षा करें।</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1506"/>
+        <source>Default export folder: {}</source>
+        <translation>डिफ़ॉल्ट निर्यात फ़ोल्डरः {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1519"/>
+        <source>Export cancelled. Choose a default export folder from the agent menu to export.</source>
+        <translation>निर्यात रद्द कर दिया गया। निर्यात करने के लिए एजेंट मेनू से डिफ़ॉल्ट निर्यात फ़ोल्डर चुनें.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3461"/>
+        <source>Message sent to the running agent; applied at its next step.</source>
+        <translation>चल रहे एजेंट को भेजा गया संदेश; उसके अगले कदम पर लागू किया गया।</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="540"/>
+        <source>Wait for the current request to finish before changing the Designer workspace.</source>
+        <translation>डिज़ाइनर कार्यक्षेत्र को बदलने से पहले वर्तमान अनुरोध के समाप्त होने की प्रतीक्षा करें।</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="549"/>
+        <source>Advanced Designer workspace enabled: styles, layouts and QGIS map themes.</source>
+        <translation>उन्नत डिजाइनर कार्यक्षेत्र सक्षमः शैलियों, लेआउट और QGIS मानचित्र विषय।</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="550"/>
+        <source>Standard conversation workspace enabled.</source>
+        <translation>मानक वार्तालाप कार्यक्षेत्र सक्षम।</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3829"/>
+        <source>Available QGIS interfaces</source>
+        <translation>उपलब्ध QGIS इंटरफेस</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="966"/>
+        <source>Conversation from another project</source>
+        <translation>एक अन्य परियोजना से बातचीत</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3450"/>
+        <source>Message queued with the selected mode; the running request keeps its permissions.</source>
+        <translation>चयनित मोड के साथ संदेश कतार; चल रहे अनुरोध अपनी अनुमति बनाए रखता है.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="970"/>
+        <source>Project path unavailable</source>
+        <translation>परियोजना पथ अनुपलब्ध</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3830"/>
+        <source>QGIS interface: {}</source>
+        <translation>QGIS इंटरफ़ेस: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="4931"/>
+        <source>The QGIS interface could not be opened: {}</source>
+        <translation>QGIS इंटरफ़ेस नहीं खोला जा सकाः {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3359"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3372"/>
+        <source>The conversation could not be archived. It has been kept open.</source>
+        <translation>बातचीत को अभिलेखागार में नहीं रखा जा सका। इसे खुला रखा गया है।</translation>
+    </message>
+    <message>
+        <source>Custom skill; review and permissions still apply</source>
+        <translation>कस्टम कौशल; समीक्षा और अनुमति अभी भी लागू हैं</translation>
+    </message>
+    <message>
+        <source>External connector; permissions still apply</source>
+        <translation>बाहरी कनेक्टर; अनुमति अभी भी लागू है</translation>
+    </message>
+    <message>
+        <source>Skill request queued; it will load before the next request.</source>
+        <translation>कौशल अनुरोध कतार; यह अगले अनुरोध से पहले लोड होगा।</translation>
+    </message>
+    <message>
+        <source>Skill /{} is unavailable. Type / to see the available skills.</source>
+        <translation>कौशल /{} उपलब्ध नहीं है। उपलब्ध कौशल देखने के लिए / टाइप करें।</translation>
+    </message>
 </context>
 <context>
     <name>AgentData</name>
@@ -1948,6 +2050,22 @@ If you choose No, these data stay in memory and will be lost when the project cl
         <location filename="../ui/controllers/agent_data.py" line="70"/>
         <source>Wait for the current request to finish before saving its data.</source>
         <translation>डेटा सहेजने से पहले वर्तमान अनुरोध समाप्त होने की प्रतीक्षा करें।</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_data.py" line="91"/>
+        <location filename="../ui/controllers/agent_data.py" line="121"/>
+        <source>Do not offer again this session</source>
+        <translation>इस सत्र को फिर से पेश न करें</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_data.py" line="92"/>
+        <source>Hide save suggestions until QGIS restarts. You can still save from the agent menu.</source>
+        <translation>QGIS को पुनरारंभ करने तक सुझावों को छुपाएं। आप अभी भी एजेंट मेनू से बचा सकते हैं.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_data.py" line="93"/>
+        <source>Save suggestions are hidden for this QGIS session. The data stay in memory.</source>
+        <translation>इस QGIS सत्र के लिए सहेजें सुझाव छिपे हुए हैं। डेटा मेमोरी में रहता है।</translation>
     </message>
 </context>
 <context>
@@ -3703,6 +3821,236 @@ If you choose No, these data stay in memory and will be lost when the project cl
         <location filename="../ui/widgets/agent_panel.py" line="727"/>
         <source>Processing model designer…</source>
         <translation>प्रोसेसिंग मॉडल डिज़ाइनर…</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="3263"/>
+        <source>Detect service type</source>
+        <translation>सेवा प्रकार का पता लगाना</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="3275"/>
+        <source>Source name (optional)</source>
+        <translation>स्रोत नाम (वैकल्पिक)</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="3277"/>
+        <source>Enable after adding</source>
+        <translation>जोड़ने के बाद सक्षम करें</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="3392"/>
+        <source>Source added to this form. Save these settings to keep it.</source>
+        <translation>इस फॉर्म में स्रोत जोड़ा गया। इसे रखने के लिए इन सेटिंग्स को सहेजें।</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="3409"/>
+        <source>Unverified suggestion. Review the address and type, then test or add it yourself.</source>
+        <translation>अप्रमाणित सुझाव। पते और टाइप की जाँच करें, फिर इसे स्वयं परीक्षण करें या जोड़ें।</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="3371"/>
+        <source>Choose the service type if it cannot be detected from the address.</source>
+        <translation>सेवा का प्रकार चुनें यदि यह पता नहीं लगाया जा सकता है।</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="798"/>
+        <source>Default export folder…</source>
+        <translation>डिफ़ॉल्ट निर्यात फ़ोल्डर...</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="749"/>
+        <source>Push</source>
+        <translation>Push</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="742"/>
+        <source>Send now</source>
+        <translation>अब भेजें</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="746"/>
+        <source>Send the first waiting message to the running agent</source>
+        <translation>चल रहे एजेंट को पहली प्रतीक्षा संदेश भेजें</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="911"/>
+        <source>Messages sent while the agent works</source>
+        <translation>एजेंट काम करते समय भेजे गए संदेश</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="914"/>
+        <location filename="../ui/widgets/agent_panel.py" line="2209"/>
+        <source>Push: guide the running request</source>
+        <translation>धक्काः चल रहे अनुरोध को निर्देशित करें</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="915"/>
+        <location filename="../ui/widgets/agent_panel.py" line="2210"/>
+        <source>Queue: wait for the current request to finish</source>
+        <translation>कतारः वर्तमान अनुरोध के समाप्त होने की प्रतीक्षा करें</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="2040"/>
+        <source>Queue</source>
+        <translation>कतार</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="2211"/>
+        <source>Messages during a run: Push or Queue. Ctrl+Shift+Enter uses the other mode.</source>
+        <translation>दौड़ के दौरान संदेशः धक्का या कतार। Ctrl+Shift+Enter दूसरे मोड का उपयोग करता है।</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="2222"/>
+        <source>Enter guides the running request. Ctrl+Shift+Enter queues a follow-up.</source>
+        <translation>प्रविष्ट करें चल रहे अनुरोध को निर्देशित करता है। Ctrl+Shift+Enter कतारें एक अनुवर्ती।</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="2224"/>
+        <source>Enter queues a follow-up. Ctrl+Shift+Enter guides the running request.</source>
+        <translation>कतारों में एक अनुवर्ती दर्ज करें। Ctrl+Shift+Enter चल रहे अनुरोध को निर्देशित करता है।</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="2231"/>
+        <source>Send to the running agent (Enter)</source>
+        <translation>चल रहे एजेंट को भेजें (प्रवेश करें)</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="2232"/>
+        <source>Queue the request (Enter)</source>
+        <translation>अनुरोध को कतार (प्रवेश)</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1038"/>
+        <source>Enter sends in the selected mode. Esc stops. Ctrl+Shift+Enter uses the other mode.</source>
+        <translation>प्रविष्टि चयनित मोड में भेजता है। एस्सी रुकता है। Ctrl+Shift+Enter दूसरे मोड का उपयोग करता है।</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="780"/>
+        <location filename="../ui/widgets/agent_panel.py" line="781"/>
+        <location filename="../ui/widgets/agent_panel.py" line="2086"/>
+        <source>Dictate with the microphone</source>
+        <translation>माइक्रोफ़ोन से लिखें</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="824"/>
+        <source>Microphone settings…</source>
+        <translation>माइक्रोफोन सेटिंग्स...</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="854"/>
+        <source>Cancel dictation</source>
+        <translation>डिक्टेशन रद्द करें</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="2085"/>
+        <source>Stop recording and transcribe</source>
+        <translation>रिकॉर्डिंग बंद करें और प्रतिलिपि</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="2086"/>
+        <source>Cancel transcription</source>
+        <translation>प्रतिलिपि रद्द करना</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="800"/>
+        <source>Advanced Designer workspace</source>
+        <translation>उन्नत डिजाइनर कार्यक्षेत्र</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="803"/>
+        <source>Brainstorm a solution…</source>
+        <translation>एक समाधान के लिए दिमाग की तूफान...</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="995"/>
+        <source>Designer</source>
+        <translation>डिजाइनर</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="999"/>
+        <source>Ideas</source>
+        <translation>विचार</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="999"/>
+        <source>Styles</source>
+        <translation>शैली</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1000"/>
+        <source>Print layout</source>
+        <translation>प्रिंट लेआउट</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1000"/>
+        <source>Map themes</source>
+        <translation>मानचित्र विषय</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1005"/>
+        <source>Insert an editable request: {}</source>
+        <translation>सम्पादन योग्य अनुरोध डालें: {}</translation>
+    </message>
+    <message>
+        <source>Help me brainstorm and refine a solution from the current context. Propose two or three options and ask only questions that change the choice. Do not change the project yet.</source>
+        <translation>मेरे दिमाग में विचार करने और वर्तमान संदर्भ से एक समाधान को परिष्कृत करने में मदद करें। दो या तीन विकल्प प्रस्तावित करें और केवल ऐसे प्रश्न पूछें जो विकल्प को बदल दें। परियोजना को अभी तक न बदलें।</translation>
+    </message>
+    <message>
+        <source>In the advanced Designer workspace, propose refined layer styles and labels for this project. Compare two directions with readable colors and hierarchy. Do not apply them yet.</source>
+        <translation>उन्नत डिजाइनर कार्यक्षेत्र में, इस परियोजना के लिए परिष्कृत परत शैलियों और लेबल का प्रस्ताव करें। दो दिशाओं को पठनीय रंगों और पदानुक्रम के साथ तुलना करें। उन्हें अभी लागू न करें।</translation>
+    </message>
+    <message>
+        <source>In the advanced Designer workspace, propose a print layout: purpose, page format, map, legend, scale and typography. Refine the proposal with me before creating or changing anything.</source>
+        <translation>उन्नत डिजाइनर कार्यक्षेत्र में, प्रिंट लेआउट का प्रस्ताव करेंः उद्देश्य, पृष्ठ प्रारूप, नक्शा, किंवदंती, पैमाने और टाइपोग्राफी। कुछ भी बनाने या बदलने से पहले मेरे साथ प्रस्ताव को परिष्कृत करें।</translation>
+    </message>
+    <message>
+        <source>In the advanced Designer workspace, inspect existing QGIS map themes and propose how to organize them for different views and layouts. Do not save, replace, apply or remove a theme yet.</source>
+        <translation>उन्नत डिजाइनर कार्यक्षेत्र में, मौजूदा निरीक्षण QGIS विषयों का मानचित्रण करें और विभिन्न विचारों और लेआउट के लिए उन्हें व्यवस्थित करने का प्रस्ताव दें। किसी विषय को अभी तक सहेजें, प्रतिस्थापित करें, लागू न करें या हटाएं।</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1121"/>
+        <source>Conversations</source>
+        <translation>बातचीत</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="2220"/>
+        <source>Current request: {}. Next message: {}. It will wait for the current request.</source>
+        <translation>वर्तमान अनुरोधः {}. अगला संदेशः {}. यह वर्तमान अनुरोध का इंतजार करेगा।</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1174"/>
+        <location filename="../ui/widgets/agent_panel.py" line="1366"/>
+        <source>Open conversation</source>
+        <translation>खुली बातचीत</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1236"/>
+        <source>Project path unavailable</source>
+        <translation>परियोजना पथ अनुपलब्ध</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1367"/>
+        <source>Read conversation</source>
+        <translation>वार्तालाप पढ़ें</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1122"/>
+        <source>Up to 200 recent conversations on this computer. Other projects open for reading only.</source>
+        <translation>इस कंप्यूटर पर 200 से अधिक हालिया वार्तालाप। अन्य परियोजनाएं केवल पढ़ने के लिए खुली हैं।</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1237"/>
+        <source>current</source>
+        <translation>वर्तमान</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1241"/>
+        <source>{} conversation(s)</source>
+        <translation>{} बातचीत</translation>
+    </message>
+    <message>
+        <source>Type / for skills or @ for project layers. Enter/Tab chooses a skill; Enter sends the edited request.</source>
+        <translation>कौशल के लिए / या परियोजना परतों के लिए @ टाइप करें। Enter/Tab एक कौशल चुनता है; Enter संपादित अनुरोध भेजता है.</translation>
     </message>
 </context>
 <context>
@@ -14991,6 +15339,502 @@ Folder: {6}</source>
         <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
         <source>Kept points</source>
         <translation type="obsolete">रखे गए बिंदु</translation>
+    </message>
+</context>
+<context>
+    <name>AgentSpeech</name>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="279"/>
+        <source>Audio stays in memory and is discarded after transcription. The text is inserted in the draft; you review it and press Send yourself.</source>
+        <translation>ऑडियो मेमोरी में रहता है और लिप्यंतरण के बाद हटा दिया जाता है। पाठ मसौदे में डाला जाता है; उसकी समीक्षा करें और स्वयं भेजें दबाएँ।</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="41"/>
+        <source>Automatic, or a language code: fr, en…</source>
+        <translation>स्वचालित, या भाषा कोडः fr, en...</translation>
+    </message>
+    <message>
+        <source>Choose a transcription model (at most 200 characters).</source>
+        <translation>एक ट्रांसक्रिप्शन मॉडल चुनें (अधिकतम 200 वर्ण) ।</translation>
+    </message>
+    <message>
+        <source>Choose a transcription service.</source>
+        <translation>एक ट्रांसक्रिप्शन सेवा चुनें।</translation>
+    </message>
+    <message>
+        <source>Choose whether to send recorded audio to this transcription service.</source>
+        <translation>इस ट्रांसक्रिप्शन सेवा को रिकॉर्ड ऑडियो भेजने का विकल्प चुनें।</translation>
+    </message>
+    <message>
+        <source>Configure the microphone service before recording.</source>
+        <translation>रिकॉर्डिंग से पहले माइक्रोफोन सेवा को कॉन्फ़िगर करें।</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_speech.py" line="134"/>
+        <source>Dictation added to the draft. Review it, then press Send.</source>
+        <translation>मसौदे में कहावत जोड़ी गई। इसे समीक्षा करें, फिर भेजें दबाएं।</translation>
+    </message>
+    <message>
+        <source>Language is an ISO code such as fr or en, or empty for automatic detection.</source>
+        <translation>भाषा एक ISO कोड जैसे fr या en, या स्वचालित पहचान के लिए खाली।</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_speech.py" line="94"/>
+        <source>Local service</source>
+        <translation>स्थानीय सेवा</translation>
+    </message>
+    <message>
+        <source>Microphone access was denied. Enable it in system privacy settings.</source>
+        <translation>माइक्रोफोन तक पहुंच से इनकार कर दिया गया था। इसे सिस्टम गोपनीयता सेटिंग्स में सक्षम करें।</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_speech.py" line="39"/>
+        <source>Microphone configured. Click the microphone to dictate.</source>
+        <translation>माइक्रोफोन कॉन्फ़िगर किया गया है। निर्देशित करने के लिए माइक्रोफ़ोन पर क्लिक करें।</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="21"/>
+        <source>Microphone settings</source>
+        <translation>माइक्रोफोन सेटिंग्स</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_speech.py" line="140"/>
+        <source>Microphone: {}</source>
+        <translation>माइक्रोफोन: {}</translation>
+    </message>
+    <message>
+        <source>No audio was recorded. Check the microphone and try again.</source>
+        <translation>कोई ऑडियो रिकॉर्ड नहीं किया गया था। माइक्रोफ़ोन की जाँच करें और फिर से प्रयास करें।</translation>
+    </message>
+    <message>
+        <source>No microphone is available. Check the device in Microphone settings.</source>
+        <translation>कोई माइक्रोफोन उपलब्ध नहीं है। माइक्रोफोन सेटिंग्स में डिवाइस की जांच करें।</translation>
+    </message>
+    <message>
+        <source>No speech was recognized. Try recording again.</source>
+        <translation>किसी भी भाषण की पहचान नहीं की गई। फिर से रिकॉर्ड करने की कोशिश करें।</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="51"/>
+        <source>Previously selected microphone (unavailable)</source>
+        <translation>पहले से चयनित माइक्रोफोन (नहीं उपलब्ध)</translation>
+    </message>
+    <message>
+        <source>Qt Multimedia is unavailable in this QGIS installation.</source>
+        <translation>Qt Multimedia इस में उपलब्ध नहीं है QGIS स्थापना।</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_speech.py" line="95"/>
+        <source>Recording… {} · {}</source>
+        <translation>रिकॉर्डिंग ... {} · {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="58"/>
+        <source>Remove stored transcription key</source>
+        <translation>संग्रहीत प्रतिलिपि कुंजी को हटाएँ</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_speech.py" line="75"/>
+        <location filename="../ui/widgets/agent_speech.py" line="170"/>
+        <source>Requesting microphone access…</source>
+        <translation>माइक्रोफ़ोन एक्सेस का अनुरोध...</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="61"/>
+        <source>Send recorded audio to this service for transcription</source>
+        <translation>प्रतिलेखन के लिए इस सेवा को रिकॉर्ड ऑडियो भेजें</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="281"/>
+        <source>Start your local OpenAI-compatible transcription server first. No audio leaves this computer.</source>
+        <translation>अपने स्थानीय शुरू करें OpenAI-compatible ट्रांसक्रिप्शन सर्वर पहले। इस कंप्यूटर से कोई ऑडियो नहीं निकलता है।</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="55"/>
+        <source>Stored key</source>
+        <translation>संग्रहीत कुंजी</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="43"/>
+        <source>System default microphone</source>
+        <translation>सिस्टम डिफ़ॉल्ट माइक्रोफोन</translation>
+    </message>
+    <message>
+        <source>The API key contains an invalid character.</source>
+        <translation>इनका API कुंजी में एक अमान्य वर्ण होता है।</translation>
+    </message>
+    <message>
+        <source>The chat provider has no stored key for this transcription address.</source>
+        <translation>चैट प्रदाता के पास इस ट्रांसक्रिप्शन पते की कोई संग्रहीत कुंजी नहीं है।</translation>
+    </message>
+    <message>
+        <source>The local transcription service must run on this computer (localhost).</source>
+        <translation>स्थानीय प्रतिलेखन सेवा को इस कंप्यूटर (localhost) पर चलाना चाहिए।</translation>
+    </message>
+    <message>
+        <source>The microphone audio format is not supported.</source>
+        <translation>माइक्रोफोन ऑडियो प्रारूप समर्थित नहीं है।</translation>
+    </message>
+    <message>
+        <source>The microphone could not be started. Check permissions and audio input settings.</source>
+        <translation>माइक्रोफ़ोन चालू नहीं किया जा सका। अनुमतियों और ऑडियो इनपुट सेटिंग्स की जाँच करें।</translation>
+    </message>
+    <message>
+        <source>The microphone stopped unexpectedly. Check the selected input device.</source>
+        <translation>माइक्रोफोन अचानक रुक गया। चयनित इनपुट डिवाइस की जांच करें।</translation>
+    </message>
+    <message>
+        <source>The recorded audio is empty or exceeds the dictation limit.</source>
+        <translation>रिकॉर्ड किए गए ऑडियो रिक्त है या डिक्टेशन सीमा से अधिक है।</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="282"/>
+        <source>The selected service receives the recorded audio and may charge for transcription. Keys are stored in the QGIS authentication database.</source>
+        <translation>चयनित सेवा रिकॉर्ड किए गए ऑडियो को प्राप्त करती है और प्रतिलेखन के लिए शुल्क ले सकती है। कुंजी QGIS प्रमाणीकरण डेटाबेस में संग्रहीत की जाती है।</translation>
+    </message>
+    <message>
+        <source>The stored transcription key belongs to another service address.</source>
+        <translation>संग्रहीत प्रतिलिपि कुंजी किसी अन्य सेवा पते से संबंधित है।</translation>
+    </message>
+    <message>
+        <source>The transcript is too long for a dictation.</source>
+        <translation>एक डिक्टेशन के लिए प्रतिलेख बहुत लंबा है।</translation>
+    </message>
+    <message>
+        <source>The transcription response is too large.</source>
+        <translation>ट्रांसक्रिप्शन प्रतिक्रिया बहुत बड़ी है।</translation>
+    </message>
+    <message>
+        <source>The transcription service could not be reached. Check its address and connection.</source>
+        <translation>प्रतिलिपि सेवा तक नहीं पहुंच सका। इसके पते और कनेक्शन की जांच करें।</translation>
+    </message>
+    <message>
+        <source>The transcription service did not return a JSON transcript.</source>
+        <translation>प्रतिलिपि सेवा ने JSON प्रतिलिपि नहीं लौटाई।</translation>
+    </message>
+    <message>
+        <source>The transcription service redirected the request. Check its address in Microphone settings.</source>
+        <translation>प्रतिलिपि सेवा ने अनुरोध को पुनर्निर्देशित किया। माइक्रोफोन सेटिंग्स में उसका पता जांचें।</translation>
+    </message>
+    <message>
+        <source>The transcription service took too long to answer.</source>
+        <translation>प्रतिलेखन सेवा को जवाब देने में बहुत समय लगा।</translation>
+    </message>
+    <message>
+        <source>This transcription service needs an API key.</source>
+        <translation>इस ट्रांसक्रिप्शन सेवा को एक API कुंजी।</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_speech.py" line="112"/>
+        <location filename="../ui/widgets/agent_speech.py" line="233"/>
+        <source>Transcribing…</source>
+        <translation>ट्रांसक्रिप्शन ...</translation>
+    </message>
+    <message>
+        <source>Use a service address without credentials, query or fragment.</source>
+        <translation>बिना क्रेडेंशियल, क्वेरी या टुकड़े के सेवा पते का उपयोग करें।</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="56"/>
+        <source>Use the chat provider's key for this same address</source>
+        <translation>उसी पते के लिए चैट प्रदाता की कुंजी का उपयोग करें</translation>
+    </message>
+    <message>
+        <source>Local server (OpenAI-compatible)</source>
+        <translation>स्थानीय सर्वर (OpenAI-compatible)</translation>
+    </message>
+    <message>
+        <source>Transcription service</source>
+        <translation>प्रतिलिपि सेवा</translation>
+    </message>
+    <message>
+        <source>Service address</source>
+        <translation>सेवा पता</translation>
+    </message>
+    <message>
+        <source>Transcription model</source>
+        <translation>प्रतिलेखन मॉडल</translation>
+    </message>
+    <message>
+        <source>Language</source>
+        <translation>भाषा</translation>
+    </message>
+    <message>
+        <source>Microphone</source>
+        <translation>माइक्रोफोन</translation>
+    </message>
+    <message>
+        <source>API key</source>
+        <translation>API कुंजी</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="68"/>
+        <location filename="../ui/widgets/agent_speech.py" line="139"/>
+        <source>Test microphone</source>
+        <translation>माइक्रोफ़ोन जाँचें</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="70"/>
+        <source>Test transcription</source>
+        <translation>लिप्यंतरण जाँचें</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="76"/>
+        <source>Microphone level: %p%</source>
+        <translation>माइक्रोफोन स्तरः %p%</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="77"/>
+        <source>Record up to 10 seconds, then test transcription with the settings above.</source>
+        <translation>10 सेकंड तक रिकॉर्ड करें, फिर उपरोक्त सेटिंग्स के साथ ट्रांसक्रिप्शन का परीक्षण करें।</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="122"/>
+        <source>Settings changed. Test transcription again.</source>
+        <translation>सेटिंग्स बदल गई। पुनः प्रतिलिपि परीक्षण करें।</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="154"/>
+        <source>Test cancelled.</source>
+        <translation>परीक्षा रद्द कर दी गई है।</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="169"/>
+        <source>Stop microphone test</source>
+        <translation>स्टॉप माइक्रोफोन टेस्ट</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="190"/>
+        <source>Speak into the microphone… {} / 10 s</source>
+        <translation>माइक्रोफ़ोन में बात करो ... {} / 10 सेकंड</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="203"/>
+        <source>Recording ready. Click Test transcription to check the service.</source>
+        <translation>रिकॉर्डिंग तैयार है। सेवा की जांच करने के लिए परीक्षण प्रतिलिपि पर क्लिक करें।</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="232"/>
+        <source>Cancel transcription</source>
+        <translation>प्रतिलिपि रद्द करना</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="246"/>
+        <source>Transcription test succeeded.</source>
+        <translation>ट्रांसक्रिप्शन परीक्षण सफल रहा।</translation>
+    </message>
+    <message>
+        <source>Mistral requires a two-letter language code such as fr or en, or empty for automatic detection.</source>
+        <translation>Mistral दो अक्षरों की भाषा कोड की आवश्यकता होती है जैसे fr या en, या स्वचालित पहचान के लिए खाली।</translation>
+    </message>
+</context>
+<context>
+    <name>AgentEditCommits</name>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="101"/>
+        <source>A memory layer stays in memory after saving its edits. Save project and layers to keep it after closing QGIS.</source>
+        <translation>एक मेमोरी लेयर अपने संपादन को सहेजने के बाद मेमोरी में रहता है। QGIS को बंद करने के बाद इसे बनाए रखने के लिए परियोजना और परतों को सहेजें।</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="24"/>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="27"/>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="30"/>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="41"/>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="45"/>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="47"/>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="50"/>
+        <source>The transaction group could not be verified. Use QGIS to save these edits.</source>
+        <translation>लेनदेन समूह का सत्यापन नहीं किया जा सका। इन संपादनों को सहेजने के लिए QGIS का उपयोग करें।</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="85"/>
+        <source>Layer edits are still pending.</source>
+        <translation>परत संपादन अभी भी लंबित हैं।</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="91"/>
+        <source>Layer edits</source>
+        <translation>परतों के संपादन</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="91"/>
+        <source>Save the layer edits?</source>
+        <translation>परतों के संपादन सहेजें?</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="92"/>
+        <source>Save layer edits</source>
+        <translation>परतों के संपादन सहेजें</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="92"/>
+        <source>Keep pending</source>
+        <translation>बदलाव लंबित रखें</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="93"/>
+        <source>Checking and saving the layer edits…</source>
+        <translation>जाँच और परत संपादन सहेजने...</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="94"/>
+        <source>Edits remain pending unless saved or discarded in QGIS. A new edit needs a new confirmation.</source>
+        <translation>QGIS में सहेजने या फेंकने के अलावा संपादन लंबित रहते हैं। एक नए संपादन को एक नई पुष्टि की आवश्यकता है।</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="96"/>
+        <source>Saved edits can no longer be undone from the agent chat.</source>
+        <translation>सहेजे गए संपादनों को अब एजेंट चैट से पूर्ववत नहीं किया जा सकता।</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="97"/>
+        <source>Save all pending changes to the data source, including any manual edits on the listed layers?</source>
+        <translation>सूचीबद्ध परतों के मैन्युअल संपादनों सहित सभी लंबित बदलाव डेटा स्रोत में सहेजें?</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="99"/>
+        <source>These layers share a QGIS transaction. They are saved together.</source>
+        <translation>ये परतें एक QGIS लेनदेन साझा करती हैं। वे एक साथ सहेजे जाते हैं।</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="130"/>
+        <source>The conversation changed or a request is running. Ask for a new confirmation.</source>
+        <translation>बातचीत बदल गई है या एक अनुरोध चल रहा है. एक नई पुष्टि के लिए पूछें.</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="133"/>
+        <source>The layers changed since this confirmation. Review them and ask again.</source>
+        <translation>इस पुष्टि के बाद से परतें बदल गई हैं। उनकी समीक्षा करें और फिर से पूछें।</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="136"/>
+        <source>A listed layer is protected from the agent. Save its edits directly in QGIS.</source>
+        <translation>एक सूचीबद्ध परत एजेंट से संरक्षित है। इसके संपादन को सीधे QGIS में सहेजें।</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="147"/>
+        <source>QGIS refused to save the edits.</source>
+        <translation>QGIS संपादकों को सहेजने से इनकार कर दिया।</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="163"/>
+        <source>Layer edits saved: {}</source>
+        <translation>परतों के संपादन सहेजे गए: {}</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="152"/>
+        <source>The layer edits were not fully saved. Review their state in QGIS.</source>
+        <translation>परतों के संपादन पूरी तरह नहीं सहेजे गए। QGIS में उनकी स्थिति जाँचें।</translation>
+    </message>
+</context>
+<context>
+    <name>AgentExports</name>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_exports.py" line="13"/>
+        <source>Choose the default agent export folder</source>
+        <translation>डिफ़ॉल्ट एजेंट निर्यात फ़ोल्डर चुनें</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_exports.py" line="20"/>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_exports.py" line="22"/>
+        <source>Choose an existing folder outside the QGIS profiles.</source>
+        <translation>QGIS प्रोफाइल के बाहर एक मौजूदा फ़ोल्डर चुनें।</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_exports.py" line="22"/>
+        <source>Export folder</source>
+        <translation>निर्यात फ़ोल्डर</translation>
+    </message>
+</context>
+<context>
+    <name>AgentActivity</name>
+    <message>
+        <source>Ready for a message</source>
+        <translation>संदेश के लिए तैयार</translation>
+    </message>
+    <message>
+        <source>Finished — ready for a message</source>
+        <translation>समाप्त  ⁇  संदेश के लिए तैयार</translation>
+    </message>
+    <message>
+        <source>Thinking</source>
+        <translation>सोचना</translation>
+    </message>
+    <message>
+        <source>Reading data</source>
+        <translation>पढ़ने के आंकड़े</translation>
+    </message>
+    <message>
+        <source>Working</source>
+        <translation>काम करना</translation>
+    </message>
+    <message>
+        <source>Fetching data</source>
+        <translation>डेटा निकालना</translation>
+    </message>
+    <message>
+        <source>Writing the response</source>
+        <translation>उत्तर लिखना</translation>
+    </message>
+    <message>
+        <source>Waiting</source>
+        <translation>प्रतीक्षा करना</translation>
+    </message>
+    <message>
+        <source>Retrying</source>
+        <translation>पुनः प्रयास करना</translation>
+    </message>
+    <message>
+        <source>Stopped or stopping</source>
+        <translation>रोकना या रोकना</translation>
+    </message>
+    <message>
+        <source>You are writing a message</source>
+        <translation>आप एक संदेश लिख रहे हैं</translation>
+    </message>
+    <message>
+        <source>Messages are queued</source>
+        <translation>संदेशों को कतार में रखा गया है</translation>
+    </message>
+    <message>
+        <source>The request needs your attention</source>
+        <translation>इस अनुरोध पर आपका ध्यान होना चाहिए</translation>
+    </message>
+    <message>
+        <source>Searching for data</source>
+        <translation>डेटा की खोज</translation>
+    </message>
+    <message>
+        <source>Processing data</source>
+        <translation>प्रसंस्करण डेटा</translation>
+    </message>
+    <message>
+        <source>Editing a layer</source>
+        <translation>एक परत को संपादित करना</translation>
+    </message>
+    <message>
+        <source>Exporting files</source>
+        <translation>फ़ाइलों का निर्यात</translation>
+    </message>
+    <message>
+        <source>Designing the map</source>
+        <translation>नक्शा डिजाइन करना</translation>
+    </message>
+    <message>
+        <source>Navigating in QGIS</source>
+        <translation>QGIS में नेविगेट करना</translation>
+    </message>
+    <message>
+        <source>Waiting for your confirmation</source>
+        <translation>आपकी पुष्टि का इंतजार कर रहा है</translation>
+    </message>
+    <message>
+        <source>Recording your voice</source>
+        <translation>अपनी आवाज रिकॉर्डिंग</translation>
+    </message>
+    <message>
+        <source>Transcribing your recording</source>
+        <translation>आपकी रिकॉर्डिंग को ट्रांसक्रिप्ट करना</translation>
     </message>
 </context>
 </TS>

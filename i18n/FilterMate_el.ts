@@ -1854,6 +1854,108 @@ Do you agree to all of them? No runs none of them.</source>
         <source>Opening the Processing model designer</source>
         <translation>Άνοιγμα του σχεδιαστή μοντέλων επεξεργασίας</translation>
     </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1283"/>
+        <source>Review and add source: {}</source>
+        <translation>Έλεγχος και προσθήκη πηγής: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1312"/>
+        <source>Open this search in the browser</source>
+        <translation>Ανοίξτε αυτή την αναζήτηση στο πρόγραμμα περιήγησης</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1653"/>
+        <source>sends the search query to DuckDuckGo; result sites are not visited</source>
+        <translation>στέλνει την αναζήτηση αναζήτησης στο DuckDuckGo; δεν επισκέπτονται τοποθεσίες αποτελεσμάτων</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1500"/>
+        <source>Wait for the current request to finish before changing the export folder.</source>
+        <translation>Περιμένετε μέχρι να ολοκληρωθεί το τρέχον αίτημα πριν αλλάξετε τον φάκελο εξαγωγής.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1506"/>
+        <source>Default export folder: {}</source>
+        <translation>Υποκατηγορία προεπιλεγμένου φακέλου εξαγωγής: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1519"/>
+        <source>Export cancelled. Choose a default export folder from the agent menu to export.</source>
+        <translation>Ακυρώθηκε η εξαγωγή. Επιλέξτε προεπιλεγμένο φάκελο εξαγωγής από το μενού πράκτορα για εξαγωγή.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3461"/>
+        <source>Message sent to the running agent; applied at its next step.</source>
+        <translation>Το μήνυμα που αποστέλλεται στον εκτελεστικό πράκτορα, εφαρμόζεται στο επόμενο βήμα του.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="540"/>
+        <source>Wait for the current request to finish before changing the Designer workspace.</source>
+        <translation>Περιμένετε μέχρι να ολοκληρωθεί το τρέχον αίτημα πριν αλλάξετε το χώρο εργασίας του σχεδιαστή.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="549"/>
+        <source>Advanced Designer workspace enabled: styles, layouts and QGIS map themes.</source>
+        <translation>Ενεργοποιημένο χώρο εργασίας Advanced Designer: στυλ, διάταξη και θέματα χάρτης QGIS.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="550"/>
+        <source>Standard conversation workspace enabled.</source>
+        <translation>Ενεργοποιήθηκε το κανονικό χώρο εργασίας συζήτησης.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3829"/>
+        <source>Available QGIS interfaces</source>
+        <translation>Διαθέσιμες διεπαφές QGIS</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="966"/>
+        <source>Conversation from another project</source>
+        <translation>Συζήτηση από άλλο έργο</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3450"/>
+        <source>Message queued with the selected mode; the running request keeps its permissions.</source>
+        <translation>Ενημέρωση σε ουρά με την επιλεγμένη λειτουργία. Το τρέχον αίτημα διατηρεί τις άδειές του.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="970"/>
+        <source>Project path unavailable</source>
+        <translation>Διαδρομή του έργου δεν διατίθεται</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3830"/>
+        <source>QGIS interface: {}</source>
+        <translation>QGIS διασύνδεση: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="4931"/>
+        <source>The QGIS interface could not be opened: {}</source>
+        <translation>Η διεπαφή QGIS δεν μπορούσε να ανοίξει: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3359"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3372"/>
+        <source>The conversation could not be archived. It has been kept open.</source>
+        <translation>Η συζήτηση δεν μπορούσε να αρχειοθετηθεί. Έχει κρατηθεί ανοιχτό.</translation>
+    </message>
+    <message>
+        <source>Custom skill; review and permissions still apply</source>
+        <translation>Προσαρμοσμένες δεξιότητες. Επισκόπηση και άδειες ισχύουν ακόμα</translation>
+    </message>
+    <message>
+        <source>External connector; permissions still apply</source>
+        <translation>Εξωτερική σύνδεση; ισχύουν ακόμα τα δικαιώματα</translation>
+    </message>
+    <message>
+        <source>Skill request queued; it will load before the next request.</source>
+        <translation>Η αίτηση δεξιοτήτων είναι σε ουρά. Θα φορτωθεί πριν από την επόμενη αίτηση.</translation>
+    </message>
+    <message>
+        <source>Skill /{} is unavailable. Type / to see the available skills.</source>
+        <translation>Η δεξιότητα /{} δεν είναι διαθέσιμη. Πληκτρολογήστε / για να δείτε τις διαθέσιμες δεξιότητες.</translation>
+    </message>
 </context>
 <context>
     <name>AgentData</name>
@@ -1948,6 +2050,22 @@ If you choose No, these data stay in memory and will be lost when the project cl
         <location filename="../ui/controllers/agent_data.py" line="70"/>
         <source>Wait for the current request to finish before saving its data.</source>
         <translation>Περιμένετε να ολοκληρωθεί το τρέχον αίτημα πριν αποθηκεύσετε τα δεδομένα του.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_data.py" line="91"/>
+        <location filename="../ui/controllers/agent_data.py" line="121"/>
+        <source>Do not offer again this session</source>
+        <translation>Μην προσφέρεις ξανά αυτή τη συνεδρίαση .</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_data.py" line="92"/>
+        <source>Hide save suggestions until QGIS restarts. You can still save from the agent menu.</source>
+        <translation>Κρύψτε τις προτάσεις μέχρι το QGIS να επανεκκινήσει. Μπορείτε ακόμα να αποθηκεύσετε από το μενού πράκτορα.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_data.py" line="93"/>
+        <source>Save suggestions are hidden for this QGIS session. The data stay in memory.</source>
+        <translation>Οι προτάσεις αποθήκευσης είναι κρυμμένες για αυτή τη συνεδρίαση QGIS. Τα δεδομένα μένουν στη μνήμη.</translation>
     </message>
 </context>
 <context>
@@ -3703,6 +3821,236 @@ If you choose No, these data stay in memory and will be lost when the project cl
         <location filename="../ui/widgets/agent_panel.py" line="727"/>
         <source>Processing model designer…</source>
         <translation>Σχεδιαστής μοντέλων επεξεργασίας…</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="3263"/>
+        <source>Detect service type</source>
+        <translation>Τύπος υπηρεσίας ανίχνευσης</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="3275"/>
+        <source>Source name (optional)</source>
+        <translation>Όνομα πηγή (προαιρετική)</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="3277"/>
+        <source>Enable after adding</source>
+        <translation>Ενεργοποίηση μετά την προσθήκη</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="3392"/>
+        <source>Source added to this form. Save these settings to keep it.</source>
+        <translation>Πηγή προστίθεται σε αυτή τη φόρμα. Κράτα αυτές τις ρυθμίσεις για να το κρατήσεις.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="3409"/>
+        <source>Unverified suggestion. Review the address and type, then test or add it yourself.</source>
+        <translation>Απαβεβαιωμένη πρόταση. Ελέγξτε τη διεύθυνση και την πληκτρολόγηση, και μετά δοκιμάστε ή προσθέστε το μόνοι σας.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="3371"/>
+        <source>Choose the service type if it cannot be detected from the address.</source>
+        <translation>Επιλέξτε τον τύπο υπηρεσίας αν δεν μπορεί να εντοπιστεί από τη διεύθυνση.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="798"/>
+        <source>Default export folder…</source>
+        <translation>Εξαγωγικός φάκελος προεπιλογής...</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="749"/>
+        <source>Push</source>
+        <translation>Push</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="742"/>
+        <source>Send now</source>
+        <translation>Στείλε τώρα .</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="746"/>
+        <source>Send the first waiting message to the running agent</source>
+        <translation>Στείλτε το πρώτο μήνυμα αναμονής στον εκτελεστικό πράκτορα</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="911"/>
+        <source>Messages sent while the agent works</source>
+        <translation>Τα μηνύματα που στέλνονται ενώ ο πράκτορας εργάζεται</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="914"/>
+        <location filename="../ui/widgets/agent_panel.py" line="2209"/>
+        <source>Push: guide the running request</source>
+        <translation>Push: καθοδηγήστε την τρέχουσα αίτηση</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="915"/>
+        <location filename="../ui/widgets/agent_panel.py" line="2210"/>
+        <source>Queue: wait for the current request to finish</source>
+        <translation>Ουρά: περιμένετε την τρέχουσα αίτηση να ολοκληρωθεί</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="2040"/>
+        <source>Queue</source>
+        <translation>Ουρά</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="2211"/>
+        <source>Messages during a run: Push or Queue. Ctrl+Shift+Enter uses the other mode.</source>
+        <translation>Τα μηνύματα κατά τη διάρκεια της διαδρομής: Push ή Queue. Ctrl+Shift+Enter χρησιμοποιεί την άλλη λειτουργία.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="2222"/>
+        <source>Enter guides the running request. Ctrl+Shift+Enter queues a follow-up.</source>
+        <translation>Εισαγωγή οδηγεί την τρέχουσα αίτηση. Ctrl+Shift+Enter Ακολουθήστε τις σειρές.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="2224"/>
+        <source>Enter queues a follow-up. Ctrl+Shift+Enter guides the running request.</source>
+        <translation>Εισάγετε ουρές. Το Ctrl+Shift+Enter καθοδηγεί το τρέχον αίτημα.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="2231"/>
+        <source>Send to the running agent (Enter)</source>
+        <translation>Στείλτε στον εκτελεστικό πράκτορα (Enter)</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="2232"/>
+        <source>Queue the request (Enter)</source>
+        <translation>Ακολουθήστε την αίτηση (Εισαγωγή)</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1038"/>
+        <source>Enter sends in the selected mode. Esc stops. Ctrl+Shift+Enter uses the other mode.</source>
+        <translation>Εισάγει στέλνει στην επιλεγμένη κατάσταση. Η ΕΑΣ σταματά. Ctrl+Shift+Enter χρησιμοποιεί την άλλη λειτουργία.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="780"/>
+        <location filename="../ui/widgets/agent_panel.py" line="781"/>
+        <location filename="../ui/widgets/agent_panel.py" line="2086"/>
+        <source>Dictate with the microphone</source>
+        <translation>Δικάστε με το μικρόφωνο</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="824"/>
+        <source>Microphone settings…</source>
+        <translation>Οι ρυθμίσεις του μικροφώνου...</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="854"/>
+        <source>Cancel dictation</source>
+        <translation>Ακύρωση δικτάσεως</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="2085"/>
+        <source>Stop recording and transcribe</source>
+        <translation>Σταματήστε την ηχογράφηση και μεταγραφείτε</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="2086"/>
+        <source>Cancel transcription</source>
+        <translation>Ακύρωση της μετάγραφής</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="800"/>
+        <source>Advanced Designer workspace</source>
+        <translation>Επανάπτυκτος χώρος εργασίας σχεδιαστή</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="803"/>
+        <source>Brainstorm a solution…</source>
+        <translation>- Μπράινσταρμ μια λύση...</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="995"/>
+        <source>Designer</source>
+        <translation>Σχεδιαστής</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="999"/>
+        <source>Ideas</source>
+        <translation>Ιδήσεις</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="999"/>
+        <source>Styles</source>
+        <translation>Στυλ</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1000"/>
+        <source>Print layout</source>
+        <translation>Εκτύπωση διάταξης</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1000"/>
+        <source>Map themes</source>
+        <translation>Θέματα χάρτης</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1005"/>
+        <source>Insert an editable request: {}</source>
+        <translation>Εισάγετε μια επεξεργαζόμενη αίτηση: {}</translation>
+    </message>
+    <message>
+        <source>Help me brainstorm and refine a solution from the current context. Propose two or three options and ask only questions that change the choice. Do not change the project yet.</source>
+        <translation>Βοήθησέ με να σκεφτώ και να βελτιώσω μια λύση από το τρέχον πλαίσιο. Προτείνετε δύο ή τρεις επιλογές και κάντε μόνο ερωτήσεις που αλλάζουν την επιλογή. Μην αλλάξεις το σχέδιο ακόμα.</translation>
+    </message>
+    <message>
+        <source>In the advanced Designer workspace, propose refined layer styles and labels for this project. Compare two directions with readable colors and hierarchy. Do not apply them yet.</source>
+        <translation>Στον προηγμένο χώρο εργασίας Designer, προτείνει βελτιωμένα στυλ στρώσεων και ετικέτες για αυτό το έργο. Συγκρίνετε δύο κατευθύνσεις με αναγνώσιμα χρώματα και ιεραρχία. Μην τα εφαρμόζεις ακόμα.</translation>
+    </message>
+    <message>
+        <source>In the advanced Designer workspace, propose a print layout: purpose, page format, map, legend, scale and typography. Refine the proposal with me before creating or changing anything.</source>
+        <translation>Στο προηγμένο χώρο εργασίας Designer, προτείνει μια εκτύπωση: σκοπός, μορφή σελίδας, χάρτη, θρύλος, κλίμακα και τυπογραφία. Να τελειοποιήσεις την πρόταση μαζί μου πριν δημιουργήσεις ή αλλάξεις κάτι.</translation>
+    </message>
+    <message>
+        <source>In the advanced Designer workspace, inspect existing QGIS map themes and propose how to organize them for different views and layouts. Do not save, replace, apply or remove a theme yet.</source>
+        <translation>Στο προηγμένο χώρο εργασίας Designer, ελέγξτε τα υπάρχοντα θέματα χαρτών QGIS και προτείνετε πώς να τα οργανώσετε για διαφορετικές προβολές και τοποθεσίες. Μην αποθηκεύετε, αντικαθιστάτε, εφαρμόζετε ή αφαιρείτε ένα θέμα ακόμα.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1121"/>
+        <source>Conversations</source>
+        <translation>Συζητήσεις</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="2220"/>
+        <source>Current request: {}. Next message: {}. It will wait for the current request.</source>
+        <translation>Συγχρονή αίτηση: {}- Δεν ξέρω . Επόμενο μήνυμα: {}- Δεν ξέρω . Θα περιμένει την τρέχουσα αίτηση.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1174"/>
+        <location filename="../ui/widgets/agent_panel.py" line="1366"/>
+        <source>Open conversation</source>
+        <translation>Ανοιχτή συζήτηση</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1236"/>
+        <source>Project path unavailable</source>
+        <translation>Διαδρομή του έργου δεν διατίθεται</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1367"/>
+        <source>Read conversation</source>
+        <translation>Διαβάστε συζήτηση</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1122"/>
+        <source>Up to 200 recent conversations on this computer. Other projects open for reading only.</source>
+        <translation>Μέχρι και 200 πρόσφατες συνομιλίες σε αυτόν τον υπολογιστή. Άλλα έργα είναι ανοικτά μόνο για ανάγνωση.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1237"/>
+        <source>current</source>
+        <translation>ρεύμα</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1241"/>
+        <source>{} conversation(s)</source>
+        <translation>{} συζήτηση (s)</translation>
+    </message>
+    <message>
+        <source>Type / for skills or @ for project layers. Enter/Tab chooses a skill; Enter sends the edited request.</source>
+        <translation>Τυπώστε / για τις δεξιότητες ή @ για τα στρώματα του έργου. Το Enter/Tab επιλέγει μια δεξιότητα.</translation>
     </message>
 </context>
 <context>
@@ -14991,6 +15339,502 @@ Folder: {6}</source>
         <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
         <source>Kept points</source>
         <translation type="obsolete">Σημεία που διατηρούνται</translation>
+    </message>
+</context>
+<context>
+    <name>AgentSpeech</name>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="279"/>
+        <source>Audio stays in memory and is discarded after transcription. The text is inserted in the draft; you review it and press Send yourself.</source>
+        <translation>Ο ήχος παραμένει στη μνήμη και διαγράφεται μετά τη μεταγραφή. Το κείμενο εισάγεται στο πρόχειρο· ελέγξτε το και πατήστε εσείς Αποστολή.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="41"/>
+        <source>Automatic, or a language code: fr, en…</source>
+        <translation>Ατομικό ή κωδικό γλώσσας: fr, en...</translation>
+    </message>
+    <message>
+        <source>Choose a transcription model (at most 200 characters).</source>
+        <translation>Επιλέξτε ένα πρότυπο μετάγραφας (περισσότερο 200 χαρακτήρες).</translation>
+    </message>
+    <message>
+        <source>Choose a transcription service.</source>
+        <translation>Επιλέξτε μια υπηρεσία μεταγραφής.</translation>
+    </message>
+    <message>
+        <source>Choose whether to send recorded audio to this transcription service.</source>
+        <translation>Επιλέξτε αν θέλετε να στείλετε ηχογραφημένο ήχο σε αυτή την υπηρεσία μεταγραφής.</translation>
+    </message>
+    <message>
+        <source>Configure the microphone service before recording.</source>
+        <translation>Προετοιμάστε τη λειτουργία του μικροφώνου πριν την ηχογράφηση.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_speech.py" line="134"/>
+        <source>Dictation added to the draft. Review it, then press Send.</source>
+        <translation>Δικογραφία προσθέθηκε στο σχέδιο. Εξετάστε το, και μετά πατήστε το Στείλτε.</translation>
+    </message>
+    <message>
+        <source>Language is an ISO code such as fr or en, or empty for automatic detection.</source>
+        <translation>Η γλώσσα είναι ένας κωδικός ISO όπως fr ή en, ή κενός για αυτόματη ανίχνευση.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_speech.py" line="94"/>
+        <source>Local service</source>
+        <translation>Τοπική υπηρεσία</translation>
+    </message>
+    <message>
+        <source>Microphone access was denied. Enable it in system privacy settings.</source>
+        <translation>Η πρόσβαση στο μικρόφωνο αρνήθηκε. Ενεργοποιήστε το στις ρυθμίσεις απορρήτου.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_speech.py" line="39"/>
+        <source>Microphone configured. Click the microphone to dictate.</source>
+        <translation>Μικροφώνημα ρυθμισμένο. Κάντε κλικ στο μικρόφωνο για να υπαγορεύσετε.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="21"/>
+        <source>Microphone settings</source>
+        <translation>Ρυθμίσεις μικροφώνου</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_speech.py" line="140"/>
+        <source>Microphone: {}</source>
+        <translation>Μικροφώνημα: {}</translation>
+    </message>
+    <message>
+        <source>No audio was recorded. Check the microphone and try again.</source>
+        <translation>Δεν καταγράφηκε ήχο. Ελέγξτε το μικρόφωνο και προσπαθήστε ξανά.</translation>
+    </message>
+    <message>
+        <source>No microphone is available. Check the device in Microphone settings.</source>
+        <translation>Δεν υπάρχει μικρόφωνο. Ελέγξτε την συσκευή στις ρυθμίσεις του μικροφώνου.</translation>
+    </message>
+    <message>
+        <source>No speech was recognized. Try recording again.</source>
+        <translation>Δεν αναγνωρίστηκαν λόγια. Δοκιμάστε πάλι την ηχογράφηση.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="51"/>
+        <source>Previously selected microphone (unavailable)</source>
+        <translation>Προηγουμένως επιλεγμένο μικρόφωνο (μη διαθέσιμο)</translation>
+    </message>
+    <message>
+        <source>Qt Multimedia is unavailable in this QGIS installation.</source>
+        <translation>Το Qt Multimedia δεν είναι διαθέσιμο στην εγκατάσταση QGIS.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_speech.py" line="95"/>
+        <source>Recording… {} · {}</source>
+        <translation>Η ηχογράφηση... {} · {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="58"/>
+        <source>Remove stored transcription key</source>
+        <translation>Αφαιρέστε το αποθηκευμένο κλειδί μεταγραφής</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_speech.py" line="75"/>
+        <location filename="../ui/widgets/agent_speech.py" line="170"/>
+        <source>Requesting microphone access…</source>
+        <translation>Ζητώ πρόσβαση στο μικρόφωνο...</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="61"/>
+        <source>Send recorded audio to this service for transcription</source>
+        <translation>Στείλτε ηχογραφημένο ήχο σε αυτή την υπηρεσία για μεταγραφή</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="281"/>
+        <source>Start your local OpenAI-compatible transcription server first. No audio leaves this computer.</source>
+        <translation>Ξεκινήστε το τοπικό σας OpenAI-compatible Πρώτα ο διακομιστής μεταγραφής. Κανένα ήχο δεν φεύγει από τον υπολογιστή.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="55"/>
+        <source>Stored key</source>
+        <translation>Αποθηκευμένο κλειδί</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="43"/>
+        <source>System default microphone</source>
+        <translation>Μικροφώνημα προεπιλεγμένο του συστήματος</translation>
+    </message>
+    <message>
+        <source>The API key contains an invalid character.</source>
+        <translation>Το κλειδί API περιέχει άκυρο χαρακτήρα.</translation>
+    </message>
+    <message>
+        <source>The chat provider has no stored key for this transcription address.</source>
+        <translation>Ο πάροχος συνομιλίας δεν έχει αποθηκευμένο κλειδί για αυτή τη διεύθυνση μεταγραφής.</translation>
+    </message>
+    <message>
+        <source>The local transcription service must run on this computer (localhost).</source>
+        <translation>Η τοπική υπηρεσία μεταγραφής πρέπει να εκτελείται σε αυτόν τον υπολογιστή (localhost).</translation>
+    </message>
+    <message>
+        <source>The microphone audio format is not supported.</source>
+        <translation>Η μορφή ήχου του μικροφώνου δεν υποστηρίζεται.</translation>
+    </message>
+    <message>
+        <source>The microphone could not be started. Check permissions and audio input settings.</source>
+        <translation>Το μικρόφωνο δεν μπορούσε να ξεκινήσει. Ελέγξτε τις άδειες και τις ρυθμίσεις εισαγωγής ήχου.</translation>
+    </message>
+    <message>
+        <source>The microphone stopped unexpectedly. Check the selected input device.</source>
+        <translation>Το μικρόφωνο σταμάτησε απροσδόκητα. Ελέγξτε την επιλεγμένη συσκευή εισόδου.</translation>
+    </message>
+    <message>
+        <source>The recorded audio is empty or exceeds the dictation limit.</source>
+        <translation>Το ηχογραφημένο ήχο είναι κενό ή υπερβαίνει το όριο υπαγωγής.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="282"/>
+        <source>The selected service receives the recorded audio and may charge for transcription. Keys are stored in the QGIS authentication database.</source>
+        <translation>Η επιλεγμένη υπηρεσία λαμβάνει το ηχογραφημένο ήχο και μπορεί να χρεώνει για την αναγραφή. Τα κλειδιά αποθηκεύονται στη βάση δεδομένων πιστοποίησης QGIS.</translation>
+    </message>
+    <message>
+        <source>The stored transcription key belongs to another service address.</source>
+        <translation>Το αποθηκευμένο κλειδί μεταγραφής ανήκει σε άλλη διεύθυνση υπηρεσίας.</translation>
+    </message>
+    <message>
+        <source>The transcript is too long for a dictation.</source>
+        <translation>Η αναγραφή είναι πολύ μεγάλη για να υπαγορεύεται.</translation>
+    </message>
+    <message>
+        <source>The transcription response is too large.</source>
+        <translation>Η ανταπόκριση είναι πολύ μεγάλη.</translation>
+    </message>
+    <message>
+        <source>The transcription service could not be reached. Check its address and connection.</source>
+        <translation>Η υπηρεσία μεταγραφής δεν μπορούσε να προσεγγιστεί. Ελέγξτε τη διεύθυνση και την σύνδεση.</translation>
+    </message>
+    <message>
+        <source>The transcription service did not return a JSON transcript.</source>
+        <translation>Η υπηρεσία μεταγραφής δεν επέστρεψε μια μεταγραφή JSON.</translation>
+    </message>
+    <message>
+        <source>The transcription service redirected the request. Check its address in Microphone settings.</source>
+        <translation>Η υπηρεσία μεταγραφής άλλαξε την αίτηση. Ελέγξτε τη διεύθυνσή του στις ρυθμίσεις του μικρόφωνα.</translation>
+    </message>
+    <message>
+        <source>The transcription service took too long to answer.</source>
+        <translation>Η υπηρεσία μεταγραφής πήρε πολύ χρόνο για να απαντήσει.</translation>
+    </message>
+    <message>
+        <source>This transcription service needs an API key.</source>
+        <translation>Αυτή η υπηρεσία μεταγραφής χρειάζεται ένα κλειδί API.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_speech.py" line="112"/>
+        <location filename="../ui/widgets/agent_speech.py" line="233"/>
+        <source>Transcribing…</source>
+        <translation>Μεταγραφές...</translation>
+    </message>
+    <message>
+        <source>Use a service address without credentials, query or fragment.</source>
+        <translation>Χρησιμοποιήστε μια διεύθυνση υπηρεσίας χωρίς διαπιστευτήρια, ερωτήσεις ή κομμάτια.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="56"/>
+        <source>Use the chat provider's key for this same address</source>
+        <translation>Χρησιμοποιήστε το κλειδί του παρόχου συνομιλίας για την ίδια διεύθυνση</translation>
+    </message>
+    <message>
+        <source>Local server (OpenAI-compatible)</source>
+        <translation>Τοπικός διακομιστής (OpenAI-compatible)</translation>
+    </message>
+    <message>
+        <source>Transcription service</source>
+        <translation>Υπηρεσία μεταγραφής</translation>
+    </message>
+    <message>
+        <source>Service address</source>
+        <translation>Διεύθυνση υπηρεσίας</translation>
+    </message>
+    <message>
+        <source>Transcription model</source>
+        <translation>Πρότυπο μεταγραφής</translation>
+    </message>
+    <message>
+        <source>Language</source>
+        <translation>Γλώσσα</translation>
+    </message>
+    <message>
+        <source>Microphone</source>
+        <translation>Μικροφώνημα</translation>
+    </message>
+    <message>
+        <source>API key</source>
+        <translation>Κλειδί API</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="68"/>
+        <location filename="../ui/widgets/agent_speech.py" line="139"/>
+        <source>Test microphone</source>
+        <translation>Δοκιμή μικροφώνου</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="70"/>
+        <source>Test transcription</source>
+        <translation>Δοκιμή μεταγραφής</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="76"/>
+        <source>Microphone level: %p%</source>
+        <translation>Επίπεδο μικροφώνου: %p%</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="77"/>
+        <source>Record up to 10 seconds, then test transcription with the settings above.</source>
+        <translation>Καταγράψτε μέχρι 10 δευτερόλεπτα, και μετά δοκιμάστε τη μετάφραση με τις ρυθμίσεις παραπάνω.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="122"/>
+        <source>Settings changed. Test transcription again.</source>
+        <translation>Οι ρυθμίσεις άλλαξαν. Δοκιμάστε ξανά την μετάλλαξη.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="154"/>
+        <source>Test cancelled.</source>
+        <translation>Το τεστ ακυρώθηκε.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="169"/>
+        <source>Stop microphone test</source>
+        <translation>Έλεγχος σταθμού μικροφώνου</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="190"/>
+        <source>Speak into the microphone… {} / 10 s</source>
+        <translation>Μίλα στο μικρόφωνο... {} / 10 δευτερόλεπτα</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="203"/>
+        <source>Recording ready. Click Test transcription to check the service.</source>
+        <translation>Έτοιμη ηχογράφηση. Κάντε κλικ στην Αντικείμενο δοκιμής για να ελέγξετε την υπηρεσία.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="232"/>
+        <source>Cancel transcription</source>
+        <translation>Ακύρωση της μετάγραφής</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_speech.py" line="246"/>
+        <source>Transcription test succeeded.</source>
+        <translation>Η εξέταση της μετάγραφής πετύχει.</translation>
+    </message>
+    <message>
+        <source>Mistral requires a two-letter language code such as fr or en, or empty for automatic detection.</source>
+        <translation>Το Mistral απαιτεί κωδικό γλώσσας δύο γραμμάτων, όπως fr ή en, ή κενό για αυτόματο ανίχνευση.</translation>
+    </message>
+</context>
+<context>
+    <name>AgentEditCommits</name>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="101"/>
+        <source>A memory layer stays in memory after saving its edits. Save project and layers to keep it after closing QGIS.</source>
+        <translation>Ένα στρώμα μνήμης παραμένει στη μνήμη μετά την αποθήκευση των επεξεργασιών του. Αποθηκεύστε το έργο και τα στρώματα για να το διατηρήσετε μετά το κλείσιμο του QGIS.</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="24"/>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="27"/>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="30"/>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="41"/>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="45"/>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="47"/>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="50"/>
+        <source>The transaction group could not be verified. Use QGIS to save these edits.</source>
+        <translation>Η ομάδα συναλλαγών δεν μπορούσε να επαληθευθεί. Χρησιμοποιήστε το QGIS για να αποθηκεύσετε αυτές τις επεξεργασίες.</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="85"/>
+        <source>Layer edits are still pending.</source>
+        <translation>Οι επεξεργασίες στρώματος εξακολουθούν να αναμένουν.</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="91"/>
+        <source>Layer edits</source>
+        <translation>Αλλαγές επιπέδων</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="91"/>
+        <source>Save the layer edits?</source>
+        <translation>Να αποθηκευτούν οι αλλαγές των επιπέδων;</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="92"/>
+        <source>Save layer edits</source>
+        <translation>Αποθήκευση αλλαγών επιπέδων</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="92"/>
+        <source>Keep pending</source>
+        <translation>Διατήρηση εκκρεμών αλλαγών</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="93"/>
+        <source>Checking and saving the layer edits…</source>
+        <translation>Ελέγχοντας και αποθηκεύοντας τις επεξεργασίες στρώματος...</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="94"/>
+        <source>Edits remain pending unless saved or discarded in QGIS. A new edit needs a new confirmation.</source>
+        <translation>Οι επεξεργασίες παραμένουν αναμενόμενες εκτός εάν αποθηκεύονται ή απορρίπτονται στο QGIS. Μια νέα επεξεργασία χρειάζεται μια νέα επιβεβαίωση.</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="96"/>
+        <source>Saved edits can no longer be undone from the agent chat.</source>
+        <translation>Οι αποθηκευμένες αλλαγές δεν μπορούν πλέον να αναιρεθούν από τη συνομιλία του βοηθού.</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="97"/>
+        <source>Save all pending changes to the data source, including any manual edits on the listed layers?</source>
+        <translation>Να αποθηκευτούν όλες οι εκκρεμείς αλλαγές στην πηγή δεδομένων, μαζί με τις χειροκίνητες αλλαγές στα αναφερόμενα επίπεδα;</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="99"/>
+        <source>These layers share a QGIS transaction. They are saved together.</source>
+        <translation>Αυτά τα στρώματα μοιράζονται μια συναλλαγή QGIS. Σώνονται μαζί.</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="130"/>
+        <source>The conversation changed or a request is running. Ask for a new confirmation.</source>
+        <translation>Η συζήτηση άλλαξε ή μια αίτηση τρέχει. Ζητήστε νέα επιβεβαίωση.</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="133"/>
+        <source>The layers changed since this confirmation. Review them and ask again.</source>
+        <translation>Τα στρώματα άλλαξαν μετά την επιβεβαίωση. Εξετάστε τα και ρωτήστε ξανά.</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="136"/>
+        <source>A listed layer is protected from the agent. Save its edits directly in QGIS.</source>
+        <translation>Ένα στρώμα προστατεύεται από τον πράκτορα. Αποθηκεύστε τις επεξεργασίες του απευθείας στο QGIS.</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="147"/>
+        <source>QGIS refused to save the edits.</source>
+        <translation>Το QGIS αρνήθηκε να αποθηκεύσει τις επεξεργασίες.</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="163"/>
+        <source>Layer edits saved: {}</source>
+        <translation>Οι αλλαγές των επιπέδων αποθηκεύτηκαν: {}</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_edit_commits.py" line="152"/>
+        <source>The layer edits were not fully saved. Review their state in QGIS.</source>
+        <translation>Οι αλλαγές των επιπέδων δεν αποθηκεύτηκαν πλήρως. Ελέγξτε την κατάστασή τους στο QGIS.</translation>
+    </message>
+</context>
+<context>
+    <name>AgentExports</name>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_exports.py" line="13"/>
+        <source>Choose the default agent export folder</source>
+        <translation>Επιλέξτε τον προεπιλεγμένο φάκελο εξαγωγής πράκτορα</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_exports.py" line="20"/>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_exports.py" line="22"/>
+        <source>Choose an existing folder outside the QGIS profiles.</source>
+        <translation>Επιλέξτε έναν υπάρχοντα φάκελο εκτός των προφίλ QGIS.</translation>
+    </message>
+    <message>
+        <location filename="../../home/simon/projects/filter_mate/ui/controllers/agent_exports.py" line="22"/>
+        <source>Export folder</source>
+        <translation>Φάκελος εξαγωγής</translation>
+    </message>
+</context>
+<context>
+    <name>AgentActivity</name>
+    <message>
+        <source>Ready for a message</source>
+        <translation>Έτοιμος για μήνυμα.</translation>
+    </message>
+    <message>
+        <source>Finished — ready for a message</source>
+        <translation>Τελείωσε  ⁇  έτοιμο για μήνυμα</translation>
+    </message>
+    <message>
+        <source>Thinking</source>
+        <translation>Σκέψη</translation>
+    </message>
+    <message>
+        <source>Reading data</source>
+        <translation>Διάβασμα δεδομένων</translation>
+    </message>
+    <message>
+        <source>Working</source>
+        <translation>Εργασία</translation>
+    </message>
+    <message>
+        <source>Fetching data</source>
+        <translation>Πληροφορίες</translation>
+    </message>
+    <message>
+        <source>Writing the response</source>
+        <translation>Γράφοντας την απάντηση</translation>
+    </message>
+    <message>
+        <source>Waiting</source>
+        <translation>Περιμένω</translation>
+    </message>
+    <message>
+        <source>Retrying</source>
+        <translation>Επαναπροσπάθεια</translation>
+    </message>
+    <message>
+        <source>Stopped or stopping</source>
+        <translation>Σταματισμός ή σταμάτηση</translation>
+    </message>
+    <message>
+        <source>You are writing a message</source>
+        <translation>Γράφεις ένα μήνυμα.</translation>
+    </message>
+    <message>
+        <source>Messages are queued</source>
+        <translation>Τα μηνύματα είναι σε ουρά</translation>
+    </message>
+    <message>
+        <source>The request needs your attention</source>
+        <translation>Το αίτημα χρειάζεται την προσοχή σας.</translation>
+    </message>
+    <message>
+        <source>Searching for data</source>
+        <translation>Αναζήτηση δεδομένων</translation>
+    </message>
+    <message>
+        <source>Processing data</source>
+        <translation>Δεδομένα επεξεργασίας</translation>
+    </message>
+    <message>
+        <source>Editing a layer</source>
+        <translation>Τροποποίηση στρώματος</translation>
+    </message>
+    <message>
+        <source>Exporting files</source>
+        <translation>Εξαγωγή αρχείων</translation>
+    </message>
+    <message>
+        <source>Designing the map</source>
+        <translation>Σχεδιασμός του χάρτη</translation>
+    </message>
+    <message>
+        <source>Navigating in QGIS</source>
+        <translation>Ναυτιλία στο QGIS</translation>
+    </message>
+    <message>
+        <source>Waiting for your confirmation</source>
+        <translation>Περιμένω την επιβεβαίωσή σας.</translation>
+    </message>
+    <message>
+        <source>Recording your voice</source>
+        <translation>Καταγράφω τη φωνή σου .</translation>
+    </message>
+    <message>
+        <source>Transcribing your recording</source>
+        <translation>Μεταγράφω την ηχογράφησή σας</translation>
     </message>
 </context>
 </TS>
