@@ -558,16 +558,19 @@ def _parameters(algorithm, given: Dict[str, Any], disk=False) -> Tuple[Dict[str,
 def _prepare_model_outputs(model, disk):
     """Give internal outputs managed paths too: TEMPORARY_OUTPUT would use QGIS' global temp folder."""
     from qgis.core import QgsProcessingModelChildParameterSource as Source
+    paths = []
     for child in _children(model).values():
         algorithm = _child_algorithm(child)
         if _is_model(algorithm):
-            _prepare_model_outputs(algorithm, disk)
+            paths.extend(_prepare_model_outputs(algorithm, disk))
         for definition in algorithm.parameterDefinitions():
             name, kind = definition.name(), definition.type()
             if kind in LAYER_DESTINATIONS:
                 # An exposed model output takes precedence over this source at execution time.
                 # Context-owned vector sinks also flush correctly between children in older QGIS versions.
                 value = 'memory:' if kind == 'sink' and not disk else _destination_path(definition, disk=disk)
+                if value != 'memory:':
+                    paths.append(value)
             elif kind in FILE_DESTINATIONS or name.upper() in COMMAND_PARAMETERS:
                 value = None
             elif name in forced_values(algorithm.id()):
@@ -576,6 +579,7 @@ def _prepare_model_outputs(model, disk):
                 continue
             child.addParameterSources(name, [Source.fromStaticValue(value)])
         model.setChildAlgorithm(child)
+    return paths
 
 
 def _disk_inputs(algorithm, values, context):
@@ -643,13 +647,20 @@ def _disk_inputs(algorithm, values, context):
 
 def _feedback_class():
     from qgis.core import QgsProcessingFeedback
+    from qgis.PyQt.QtCore import pyqtSignal
 
     class Feedback(QgsProcessingFeedback):
         """Keeps the errors and warnings of the run: they say why it failed."""
 
+        cancel_requested = pyqtSignal()
+
         def __init__(self) -> None:
             super().__init__()
             self.messages: List[str] = []
+            self.cancel_requested.connect(self.cancel)
+
+        def request_cancel(self):
+            self.cancel_requested.emit()
 
         def reportError(self, error, fatalError=False):  # noqa: N802 - Qt name
             self.messages.append(str(error))
@@ -777,26 +788,29 @@ def run_algorithm(algorithm_id: str, parameters: Optional[Dict[str, Any]] = None
         folder = os.path.dirname(store_for().disk_path('processing'))
         context.setTemporaryFolder(folder)
     values, made = _parameters(algorithm, given, disk=disk)
+    output_paths = [path for _definition, path in made]
     if _is_model(algorithm):
-        _prepare_model_outputs(algorithm, disk)
+        output_paths.extend(_prepare_model_outputs(algorithm, disk))
     if disk:
         _disk_inputs(algorithm, values, context)
     feedback = _feedback_class()()
-    ok, message = algorithm.checkParameterValues(values, context)
-    if not ok:
-        raise ValueError(f"invalid parameters: {message}")
-    _RUNNING.append(RUNNING_LABEL)
-    try:
-        with _working_folder(folder if disk else ''):
-            ok, results = _run(algorithm, values, context, feedback)
-    finally:
-        if RUNNING_LABEL in _RUNNING:
-            _RUNNING.remove(RUNNING_LABEL)
-    if feedback.isCanceled():
-        raise ValueError('stopped')
-    if not ok:
-        said = '; '.join(feedback.messages[-3:])
-        raise ValueError(f"the algorithm failed{': ' + said if said else ''}")
+    from ..agent.data_store import store_for
+    with store_for().native_outputs(output_paths, feedback):
+        ok, message = algorithm.checkParameterValues(values, context)
+        if not ok:
+            raise ValueError(f"invalid parameters: {message}")
+        _RUNNING.append(RUNNING_LABEL)
+        try:
+            with _working_folder(folder if disk else ''):
+                ok, results = _run(algorithm, values, context, feedback)
+        finally:
+            if RUNNING_LABEL in _RUNNING:
+                _RUNNING.remove(RUNNING_LABEL)
+        if feedback.isCanceled():
+            raise ValueError('stopped')
+        if not ok:
+            said = '; '.join(feedback.messages[-3:])
+            raise ValueError(f"the algorithm failed{': ' + said if said else ''}")
     names = names or {}
     layers, skipped = [], []
     single = len(made) == 1

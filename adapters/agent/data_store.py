@@ -22,6 +22,7 @@ from typing import Dict
 logger = logging.getLogger("FilterMate.AgentData")
 PREFIX = "/vsimem/filtermate-agent-"
 MAX_MEMORY_BYTES = 1024 * 1024 * 1024
+NATIVE_OUTPUT_RESERVE = 128 * 1024  # conservative allowance per output container before a native writer starts
 PERSISTENT_PROPERTY = "filtermate/agent/persistent_data"
 _STORES = {}
 
@@ -104,8 +105,78 @@ class AgentDataStore:
         used = sum(size(self.root + "/" + name) for name in (gdal.ReadDirRecursive(self.root) or ())
                    if not name.endswith("/"))
         if used + max(0, extra) > self.limit:
-            raise ValueError("the agent's memory budget is full: use a smaller area or resolution, or save the "
-                             "project and its layers to a folder you choose")
+            raise ValueError("the agent's memory budget is full: use a smaller area or resolution. "
+                             "To release data retained for Undo, save the project and its layers, then close and "
+                             "reopen the saved project. Saving alone retains these data in memory")
+
+    @contextmanager
+    def native_outputs(self, paths, feedback, interval=0.05):
+        """Guard native GDAL/OGR output files, which do not pass through ``writer``.
+
+        Cancellation is cooperative: a provider may allocate between checks or ignore cancellation.
+        Always reject an over-budget result before adding its layers. Own only fresh managed assets;
+        their files and sidecars are removed on failure, while pre-existing inputs and undo data stay.
+        A lease also keeps project-close cleanup from unlinking a live native writer's files.
+        """
+        owned = list(dict.fromkeys(path for path in paths if is_memory(path)))
+        if not owned:
+            yield
+            return
+        for path in owned:
+            if not path.startswith(self.root + '/'):
+                raise ValueError('an output belongs to another project')
+            if _gdal().ReadDirRecursive(os.path.dirname(path)):
+                raise ValueError('a native output must use a fresh managed asset')
+        stopped = threading.Event()
+        errors = []
+
+        def check():
+            with self._lock:
+                if self._closed:
+                    raise ValueError('the project was closed')
+                self.check_capacity()
+
+        def watch():
+            while not stopped.wait(interval):
+                try:
+                    check()
+                except Exception as exc:
+                    errors.append(exc)
+                    # Native feedback marshals this request to its owning GUI thread.
+                    getattr(feedback, 'request_cancel', feedback.cancel)()
+                    return
+
+        monitor = threading.Thread(target=watch, name='FilterMateNativeBudget', daemon=True)
+        success = False
+        with self._lock:
+            if self._closed:
+                raise ValueError('the project was closed')
+            self._writers += 1
+        try:
+            self.check_capacity(NATIVE_OUTPUT_RESERVE * len(owned))
+            monitor.start()
+            failure = None
+            try:
+                yield
+            except Exception as exc:
+                failure = exc
+            finally:
+                stopped.set()
+                monitor.join()
+            if errors:
+                raise ValueError(str(errors[0]))
+            if failure is not None:
+                raise failure
+            check()
+            success = True
+        finally:
+            if not success:
+                for path in owned:
+                    discard(path)
+            with self._lock:
+                self._writers -= 1
+                if self._closed and not self._writers:
+                    _gdal().RmdirRecursive(self.root)
 
     @contextmanager
     def writer(self, path: str):

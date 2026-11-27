@@ -13,7 +13,8 @@ des propositions encore à réaliser.
 | R09 — banc hors ligne | Corrigé | Les outils désactivés sont exclus et les scénarios concernés explicitement ignorés. |
 | R10 — dépendance MCP facultative | Corrigé | Le test d’API est ignoré lorsque MCP manque. |
 | Choix intelligent du SCR | Implémenté | Domaine d’utilisation vérifié, diagnostic du SCR actuel, recommandation conserver/changer, distinction affichage/analyse. |
-| R02/R08 — budget mémoire et persistance | À réaliser | Conserver la distinction entre données actives et données retenues pour annuler. |
+| R02 — budget des sorties Processing | Corrigé pour les fichiers gérés | Précontrôle, surveillance, annulation coopérative et rejet des résultats trop volumineux avant leur ajout. |
+| R08 — message trompeur après sauvegarde | Corrigé | Le message indique que l’annulation retient les données et que sauvegarder seul ne les libère pas. |
 | F01 — conversations dans l’historique | Implémenté | Onglet Conversations, reprise dans le projet d’origine, consultation des autres projets, migration des anciens échanges. |
 | A01 — lectures de sélection et flash | À réaliser | Déplacer les lectures potentiellement lentes hors du fil d’interface. |
 | Transitions animées et pilotage étendu de QGIS | À réaliser | Les correctifs de zoom ne constituent pas encore une animation commune. |
@@ -57,3 +58,23 @@ son archive et non la remplacer par celle du projet vide intermédiaire.
 
 Validation : 1 141 tests des contrôleurs et de l’historique passent ; le scénario natif passe sur QGIS 3.44 / Qt 5
 et QGIS 4.3 / Qt 6, y compris la migration et la conservation d’un projet non modifié.
+
+## Budget des résultats natifs
+
+Les écritures natives OGR/GDAL qui ne passent pas par le téléchargement contrôlé ont désormais un précontrôle
+de capacité et une surveillance du stockage virtuel toutes les 50 ms. L’annulation est demandée dans le fil
+d’interface de QGIS. Un contrôle final empêche d’ajouter un résultat dépassant le budget ; l’échec ou l’annulation
+supprime uniquement ses nouveaux fichiers et fichiers annexes. Les données antérieures et celles nécessaires
+à l’annulation restent disponibles. Une fermeture de projet attend que les écrivains natifs aient terminé avant
+de supprimer leurs fichiers virtuels.
+
+Ce budget porte sur les fichiers gérés dans `/vsimem`, pas sur toute la mémoire du processus QGIS. Un fournisseur
+peut allouer de la mémoire entre deux contrôles ou ignorer une annulation : cette protection ne constitue pas un
+plafond matériel de RAM. Les intermédiaires `memory:` de certains modèles restent également hors de ce comptage.
+La sauvegarde conserve volontairement les originaux nécessaires à l’annulation ; le message conseille une emprise
+plus petite ou la sauvegarde puis la réouverture du projet, sans promettre que sauvegarder libère immédiatement la RAM.
+
+Validation : 78 tests unitaires ; scénarios natifs de dépassement sur QGIS 3.44 / Qt 5 et QGIS 4.3 / Qt 6,
+stockage/persistance et modèles Processing sur QGIS 3.44. Le budget d’un octet bloque le lancement,
+un résultat trop grand est refusé sans ajout de couche,
+et un budget suffisant conserve le fonctionnement normal.

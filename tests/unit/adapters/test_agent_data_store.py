@@ -1,6 +1,7 @@
 """Memory budgets and project ownership are independent of QGIS/GDAL availability."""
 import importlib.util
 import io
+import threading
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -84,6 +85,67 @@ def test_closing_a_project_aborts_a_stream_without_deleting_its_live_handle(stor
     assert not filesystem.files
     with pytest.raises(ValueError, match="project was closed"):
         store.new_path("late.tif")
+
+
+def test_native_writer_is_refused_before_it_starts_when_no_container_fits(storage):
+    module, _ = storage
+    store = module.AgentDataStore(limit=1)
+    path = store.new_path('output.gpkg')
+    with pytest.raises(ValueError, match='memory budget'):
+        with store.native_outputs([path], SimpleNamespace(cancel=lambda: None)):
+            pytest.fail('native writer must not start')
+    assert store._writers == 0
+
+
+def test_native_result_over_budget_is_discarded_with_sidecars_but_not_its_inputs(storage):
+    module, filesystem = storage
+    store = module.AgentDataStore(limit=module.NATIVE_OUTPUT_RESERVE + 10)
+    source, output = store.new_path('input.geojson'), store.new_path('result.gpkg')
+    with store.writer(source) as write:
+        write(b'input')
+    with pytest.raises(ValueError, match='memory budget'):
+        with store.native_outputs([output], SimpleNamespace(cancel=lambda: None)):
+            filesystem.files[output] = io.BytesIO(b'x' * store.limit)
+            filesystem.files[output + '-journal'] = io.BytesIO(b'sidecar')
+    assert list(filesystem.files) == [source]
+    assert store._writers == 0
+
+
+def test_native_overrun_requests_cancellation_while_the_writer_is_running(storage):
+    module, filesystem = storage
+    store = module.AgentDataStore(limit=module.NATIVE_OUTPUT_RESERVE)
+    path = store.new_path('output.tif')
+    canceled = threading.Event()
+    with pytest.raises(ValueError, match='memory budget'):
+        with store.native_outputs([path], SimpleNamespace(cancel=canceled.set), interval=.001):
+            filesystem.files[path] = io.BytesIO(b'x' * (store.limit + 1))
+            assert canceled.wait(2), 'the running writer must receive cancellation'
+            raise ValueError('stopped')  # the budget error must explain this cancellation
+    assert path not in filesystem.files
+
+
+def test_project_close_keeps_native_handles_alive_until_the_writer_has_finished(storage):
+    module, filesystem = storage
+    store = module.AgentDataStore()
+    path = store.new_path('output.gpkg')
+    with pytest.raises(ValueError, match='project was closed'):
+        with store.native_outputs([path], SimpleNamespace(cancel=lambda: None)):
+            filesystem.files[path] = io.BytesIO(b'written')
+            store.close()
+            assert path in filesystem.files
+    assert not filesystem.files and store._writers == 0
+
+
+def test_native_guard_never_discards_an_existing_asset(storage):
+    module, filesystem = storage
+    store = module.AgentDataStore()
+    path = store.new_path('input.gpkg')
+    with store.writer(path) as write:
+        write(b'old data')
+    with pytest.raises(ValueError, match='fresh managed asset'):
+        with store.native_outputs([path], SimpleNamespace(cancel=lambda: None)):
+            pytest.fail('an existing asset is not a destination')
+    assert filesystem.files[path].getvalue() == b'old data'
 
 
 def test_discard_removes_only_its_asset_and_sidecars(storage):
