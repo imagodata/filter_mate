@@ -46,6 +46,8 @@ permet de les rouvrir dans leur projet d’origine ; une conversation d’un aut
 de consultation, sans changer de projet ni transmettre son contenu à la conversation active. Aucun outil passé
 n’est relancé. Les permissions sont oubliées lors d’un changement de conversation et la compatibilité du serveur,
 du compte, du modèle et du partage des valeurs reste vérifiée avant reprise du contexte.
+Si ce contexte est incompatible, le transcript reste consultable mais n’est pas transmis automatiquement sous
+forme de récapitulatif à la nouvelle destination.
 
 L’archive SQLite réside dans le profil QGIS (`filter_mate/agent-conversations.sqlite3`) et ne modifie pas le projet.
 Elle conserve les 200 conversations les plus récentes contenant une demande. Les limites existantes du transcript
@@ -117,3 +119,15 @@ Les images intermédiaires remplacent leur entrée précédente dans l’histori
 
 Validation : 526 tests API/navigation et 249 tests de configuration/exploration ; scénarios réels Qt 5 et Qt 6
 sur les images intermédiaires, l’interruption, le remplacement, la désactivation et l’historique de navigation saturé.
+
+## Vérification élargie de livraison
+
+- Suite agents, API, tâches QGIS, stockage, checkpoints, contrôleurs, historique et animation : 5 537 tests réussis,
+  11 ignorés ; le test `live_transport` est exclu de ce lancement.
+- Après le dernier correctif de confidentialité du récapitulatif : 161 tests ciblés réussis, dont trois cas de
+  changement de serveur, de compte et de partage des valeurs.
+- Banc hors ligne : 171 scénarios réussis, 4 ignorés pour outils désactivés.
+- Références de configuration et exports des skills à jour ; vérification des différences sans erreur.
+
+Les scénarios natifs utilisent QGIS 3.44 et QGIS 4.3 avec Qt 5 et Qt 6 hors écran. Ils ne constituent pas une
+validation complète de l’installation du plugin dans une session de bureau Windows.

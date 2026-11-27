@@ -728,6 +728,14 @@ class AgentChatController(QObject):
             else:
                 self.panel.add_note(item["text"])
         if not self._resume_available():
+            try:
+                saved = self._stored_session()
+            except Exception:
+                saved = 'unavailable'
+            if isinstance(saved, str) and saved:
+                # An incompatible server/account/sharing context must not be bypassed by
+                # sending a transcript recap instead of resuming the saved model messages.
+                self._recap_from = len(self._transcript)
             self.panel.add_note(_tr("Earlier conversation: the agent starts afresh from here."))
 
     def _refresh_history(self) -> None:

@@ -1418,6 +1418,23 @@ def test_reading_a_project_does_not_overwrite_its_existing_archive_identity(cont
     assert controller._transcript[0]['text'] == 'Conversation of the saved project'
 
 
+@pytest.mark.parametrize('changes', [{'send_values': False}, {'authcfg': 'another-account'},
+                                      {'base_url': 'https://another-server.example/v1'}])
+def test_an_incompatible_archive_cannot_send_its_private_context_as_a_recap(
+        ctrl_module, controller, archive, monkeypatch, changes):
+    engine, _transport = _engine(ctrl_module, controller, lambda arguments: {})
+    engine.session.add_user_text('Private history of the original destination')
+    controller._engine_identity = (SETTINGS.preset, SETTINGS.model)
+    controller._engine_context = controller._session_context(SETTINGS)
+    controller._record('user', 'Private transcript of the original destination')
+    controller._save_session()
+    wanted = types.SimpleNamespace(**(vars(SETTINGS) | changes))
+    monkeypatch.setattr(ctrl_module, 'load_settings', lambda: wanted)
+    controller._restore_transcript()
+    assert controller._transcript[0]['text'] == 'Private transcript of the original destination'
+    assert controller._recap_from == len(controller._transcript)
+
+
 # --- the context of a request taken out of the conversation is sent again ----------------------------------------
 
 ROW = {"layer_id": "c1", "name": "communes", "layer_kind": "vector", "feature_count": 10,
