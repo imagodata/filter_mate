@@ -111,16 +111,16 @@ def test_a_mark_inside_a_mark_inside_a_mark_is_plain():
 
 def test_a_list_with_blank_lines_is_numbered_on():
     shown = md.answer_html("1. **A**\n\n   texte\n\n2. **B**\n\n3. C")
-    assert shown.count("<ol") == 1 and shown.count("<li>") == 3 and "<br/>texte" in shown
+    assert shown.count("<ol") == 1 and shown.count("<li>") == 3 and ">texte</p>" in shown
 
 
 def test_a_numbered_item_alone_keeps_its_number():
     assert 'start="3"' in md.answer_html("3. x")
 
 
-def test_a_wide_table_becomes_lines_that_wrap():
+def test_four_columns_remain_a_table_when_space_is_available():
     shown = md.answer_html("| a | b | c | d |\n|---|---|---|---|\n| 1 | 2 | 3 | 4 |")
-    assert "<table" not in shown and "<li><b>a</b> 1 · <b>b</b> 2 · <b>c</b> 3 · <b>d</b> 4</li>" in shown
+    assert shown.count('<table') == 1 and shown.count('<th') == 4 and shown.count('<td') == 4
 
 
 def test_a_cell_past_the_header_is_kept():
@@ -246,3 +246,126 @@ def test_network_file_links_resolve_only_to_registered_outputs():
     file = md.FileReference('//server/share/map.pdf', 'map.pdf')
     assert md.file_reference('file://server/share/map.pdf', [file]) == file
     assert md.file_reference('file://other/share/map.pdf', [file]) is None
+
+
+def test_table_outer_pipes_are_optional_and_alignment_is_kept():
+    shown = md.answer_html('Nom | Type | Nombre\n:--- | :---: | ---:\nCommunes | vector | 42', colors=COLORS)
+    assert '<table' in shown and '<th align="center"' in shown
+    assert '<td align="right"' in shown and '>42</td>' in shown
+
+
+def test_table_rows_can_omit_delimiters_and_end_at_another_block():
+    shown = md.answer_html('| Nom | Valeur |\n|---|---|\nCommunes\n# Suite\nFin')
+    assert shown.count('<td') == 2 and '>Communes</td>' in shown and '<b>Suite</b>' in shown
+
+
+def test_tables_inside_lists_keep_their_structure():
+    shown = md.answer_html('- Nom | Valeur\n  ---|---\n  Communes | 42\n- Suite')
+    assert shown.count('<ul') == 1 and shown.count('<table') == 1 and '>42</td>' in shown
+    assert '<li>Suite</li>' in shown
+
+
+def test_table_pipes_in_code_and_escaped_pipes_are_cell_contents():
+    shown = md.answer_html('| Expression | Résultat |\n|---|---|\n| `a | b` | un \\| deux |')
+    assert shown.count('<th') == 2 and shown.count('<td') == 2
+    assert 'a | b' in shown and 'un | deux' in shown
+
+
+def test_a_mismatched_table_header_is_not_silently_reinterpreted():
+    shown = md.answer_html('Un | Deux | Trois\n--- | ---\n1 | 2 | 3')
+    assert '<table' not in shown and 'Trois' in shown
+
+
+def test_a_table_stacks_records_on_a_narrow_viewport_and_keeps_empty_fields():
+    text = '| Nom | Type | Nombre | Source |\n|---|---|---:|---|\n| A | vector | 42 | X |\n| B | raster | | Y |'
+    narrow = md.answer_html(text, width=260)
+    wide = md.answer_html(text, width=720)
+    assert narrow.count('<table') == 2 and narrow.count('<th') == 8
+    assert wide.count('<table') == 1 and wide.count('<th') == 4
+    assert '>Nombre</th>' in narrow and '>Y</td>' in narrow and '>42</td>' in narrow
+
+
+def test_table_headers_and_alternating_rows_take_the_theme_colors():
+    shown = md.answer_html('A | B\n---|---\n1|2\n3|4', colors={**COLORS, 'table_header': '#123456', 'table_alt': '#abcdef'})
+    assert 'bgcolor="#123456"' in shown and 'bgcolor="#abcdef"' in shown
+
+
+def test_table_cells_keep_output_links_when_there_are_no_project_layers():
+    file = md.FileReference('/chosen/map.pdf', 'map.pdf')
+    shown = md.answer_html('Fichier | Valeur\n---|---\nmap.pdf | 1', files=[file], width=500)
+    assert md.output_href(file.path) in shown and 'href="layer:' not in shown
+
+
+def test_table_layer_links_keep_stable_ids_and_cells_wrap_long_tokens():
+    layer = md.LayerReference('city_id', 'Communes')
+    shown = md.answer_html('Couche | Clé\n---|---\nCommunes | ' + 'abcdef' * 20, layers=[layer], width=300)
+    assert 'href="layer:id/city_id"' in shown and '\u200b' in shown
+    assert 'abcdef' * 20 in shown.replace('\u200b', '')
+
+
+def test_nested_ordered_and_unordered_lists_have_distinct_levels():
+    shown = md.answer_html('1. Préparer\n   - Routes\n     - Principales\n   - Communes\n2. Exporter')
+    assert shown.count('<ol') == 1 and shown.count('<ul') == 2 and shown.count('<li>') == 5
+    assert '-qt-list-indent: 3' in shown and '>Principales</li>' in shown
+
+
+def test_task_lists_render_as_text_without_interactive_controls():
+    shown = md.answer_html('- [x] **Prêt**\n- [ ] À faire')
+    assert '☑ <b>Prêt</b>' in shown and '☐ À faire' in shown and '<input' not in shown
+
+
+def test_blockquotes_contain_formatted_paragraphs_and_lists():
+    shown = md.answer_html('> **Attention**\n>\n> - Première\n> - Deuxième\n\nSuite')
+    assert '<blockquote' in shown and '<b>Attention</b>' in shown and '<ul' in shown
+    assert '</blockquote>' in shown and '>Suite</p>' in shown
+
+
+def test_code_fences_only_close_with_the_matching_kind_and_length():
+    shown = md.answer_html('````python\nx = "```"\n~~~\n```\n````\nFin')
+    assert '<pre' in shown and 'x = &quot;```&quot;\n~~~\n```' in shown and '>Fin</p>' in shown
+
+
+def test_unfinished_fences_remain_visible_while_the_answer_streams():
+    shown = md.answer_html('```sql\nSELECT 1\nWHERE x < 2')
+    assert 'SELECT 1\nWHERE x &lt; 2' in shown and shown.endswith('</pre>')
+
+
+def test_inline_code_accepts_backticks_inside_a_longer_delimiter():
+    shown = md.answer_html('Exemple : `` `nom` **brut** ``.')
+    assert '`nom` **brut**' in shown and '<b>' not in shown
+
+
+def test_link_labels_support_formatting_without_nested_auto_links():
+    shown = md.answer_html('[**Communes**](https://example.org)', ['Communes'])
+    assert '<b>Communes</b></a>' in shown and shown.count('<a ') == 1
+
+
+def test_link_labels_can_contain_inline_code_and_code_cannot_contain_live_links():
+    shown = md.answer_html('[`Communes`](https://example.org)', ['Communes'])
+    assert shown.count('<a ') == 1 and 'font-family: monospace' in shown and '>Communes</span></a>' in shown
+    assert '<a ' not in md.answer_html('`[page](https://example.org)`')
+
+
+def test_strikethrough_and_heading_levels_have_their_own_presentation():
+    shown = md.answer_html('# Titre\n### Détail\n~~ancien~~ **nouveau**')
+    assert '<s>ancien</s>' in shown and 'font-size: 18px' in shown and 'font-size: 14px' in shown
+
+
+def test_html_stays_escaped_in_all_new_block_types():
+    shown = md.answer_html('> <img src="http://evil/quote">\n\nA|B\n---|---\n<script>x</script>|<img src="file:///x">\n\n'
+                           '```<img\n<a href="javascript:evil">x</a>\n```')
+    assert '<img' not in shown and '<script' not in shown and '<a href="javascript' not in shown
+    assert '&lt;img' in shown and '&lt;script' in shown
+
+
+def test_deep_quote_and_list_nesting_is_bounded_without_losing_the_text():
+    shown = md.answer_html('> ' * 200 + 'Fin\n\n' + '\n'.join('  ' * index + '- item' for index in range(30)))
+    assert 'Fin' in shown and shown.count('<blockquote') <= md.MAX_BLOCK_DEPTH
+    assert shown.count('<ul') <= md.MAX_BLOCK_DEPTH
+
+
+def test_long_table_cells_and_many_empty_lines_do_not_block_rendering():
+    import time
+    start = time.perf_counter()
+    shown = md.answer_html('Nom|Valeur\n---|---\nA|' + 'x' * 150_000 + '\n' * 10_000 + 'Fin')
+    assert time.perf_counter() - start < 1.0 and 'Fin' in shown

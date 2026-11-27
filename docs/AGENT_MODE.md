@@ -150,7 +150,13 @@ Rules worth keeping:
   the engine alone (`_restart_engine`): the thread and what was allowed for the conversation stay, and the next
   request tells the model what the thread holds (the recap).
 - **Answers use escaped Markdown** (`ui/widgets/agent_markdown.py`); raw HTML and embedded images are never
-  interpreted. Underlined layer links use stable layer ids, so renaming or reordering a layer does not redirect an
+  interpreted. Headings, bold, italics, strikethrough, inline/fenced/indented code, nested lists, text checkboxes
+  and blockquotes are supported. Tables keep column alignment, header backgrounds and alternating rows; outer
+  pipes are optional, escaped pipes and pipes inside code remain cell content. Tables that fit the viewport
+  stay tabular; wider ones show each record as a wrapping field/value table. Resizing or changing the theme
+  redraws their presentation without changing the original answer. Copying removes the invisible characters
+  used to wrap long paths. Link labels can contain bold or inline code.
+  Underlined layer links use stable layer ids, so renaming or reordering a layer does not redirect an
   old answer. A click activates the layer, shows the Layers dock, expands its parent groups and scrolls to it using
   the view’s proxy indexes. Hover shows the layer’s group path; ambiguous names need an explicit id link.
 - **Outputs can be opened directly**: successful exports, charts saved from their cards and saved projects get a

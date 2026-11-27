@@ -22,7 +22,7 @@ from qgis.PyQt.QtWidgets import (
 from ...core.agent.project_notes import MAX_NOTE_CHARS
 from ...core.agent.questions import MAX_OTHER
 from .agent_markdown import (FileReference, LayerReference, anchor_html, answer_html, file_reference, layer_href,
-                             layer_of_link, layer_reference, web_url)
+                             layer_of_link, layer_reference, table_columns, web_url)
 
 BUBBLE_SHARE = 0.88  # of the width of the thread
 ANSWER_DELAY_MS = 80  # the answer being written is drawn again at most so often, whatever the number of fragments
@@ -1220,6 +1220,8 @@ class AgentThread(QScrollArea):
         if self._answer is None:
             label = QLabel(self._content)
             label.setWordWrap(True)
+            label.setSizePolicy(QSizePolicy.Policy.Ignored, QSizePolicy.Policy.Preferred)
+            label.setMinimumWidth(0)
             # Rich text whose only markup is ours (agent_markdown): every character the model wrote is escaped.
             label.setTextFormat(Qt.TextFormat.RichText)
             label.setOpenExternalLinks(False)
@@ -1262,14 +1264,18 @@ class AgentThread(QScrollArea):
     def _render_answer(self, item: _Item) -> None:
         """An answer drawn from its Markdown: bold, lists, code, tables, the names of the layers as links."""
         palette = self._palette_of()
-        colors = {"accent": palette["fm_accent"], "code_bg": palette["fm_group"], "rule": palette["fm_group_border"]}
+        colors = {"accent": palette["fm_accent"], "code_bg": palette["fm_group"], "rule": palette["fm_group_border"],
+                  "muted": palette['fm_text_muted'], "table_header": palette['fm_group'], "table_alt": palette['fm_group']}
+        margins = self._layout.contentsMargins()
+        width = max(120, self.viewport().width() - margins.left() - margins.right())
         try:
             try:
                 shown = answer_html(item.plain.strip("\n"), getattr(item, "names", ()), colors, breakable,
-                                    layers=getattr(item, 'layers', ()), files=getattr(item, 'files', ()))
+                                    layers=getattr(item, 'layers', ()), files=getattr(item, 'files', ()), width=width)
             except RecursionError:  # never expected (MAX_DEPTH): the answer is shown whole, as plain text
                 shown = f'<p style="white-space: pre-wrap;">{html.escape(breakable(item.plain))}</p>'
             item.widget.setText(shown)
+            item.markdown_columns = table_columns(width)
         except RuntimeError:  # cleared meanwhile
             pass
 
@@ -1445,6 +1451,11 @@ class AgentThread(QScrollArea):
         layout = self._content.layout()
         layout.invalidate()
         width = self.viewport().width()
+        margins = self._layout.contentsMargins()
+        columns = table_columns(max(120, width - margins.left() - margins.right()))
+        for item in self._items:
+            if item.kind == 'text' and '|' in item.plain and getattr(item, 'markdown_columns', None) != columns:
+                self._render_answer(item)
         self._content.setMinimumHeight(layout.heightForWidth(width) if layout.hasHeightForWidth() else 0)
         if at_end:
             self._follow_end()
