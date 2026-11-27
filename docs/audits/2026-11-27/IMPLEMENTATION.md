@@ -19,6 +19,8 @@ des propositions encore à réaliser.
 | A01 — lectures de sélection et flash | Implémenté | Lectures sur snapshots en arrière-plan, attente annulable et résultat invalidé par une sélection manuelle. |
 | Transitions de zoom | Implémenté | Transition commune de 220 ms pour l’agent, le filtrage et le chemin principal d’exploration ; annulation par navigation manuelle. |
 | Pilotage des fenêtres QGIS et panneaux de plugins | Implémenté dans le chat | Capacités disponibles, tables, propriétés natives, panneaux enregistrés, outils cartographiques et historique de vue. |
+| Propositions de sauvegarde | Implémenté | Masquage jusqu’au redémarrage de QGIS ; sauvegarde manuelle toujours disponible. |
+| Curseurs du plugin | Implémenté | Intentions cohérentes selon le contrôle, attentes locales et restauration sans toucher aux outils de carte. |
 
 ## Vérification du choix du SCR
 
@@ -171,3 +173,23 @@ La préférence est une propriété en mémoire de l’application Qt : aucun r�
 manuelle d’enregistrement reste disponible. Les données transitoires conservent leurs protections existantes.
 Validation : contrôles natifs Qt 5 et Qt 6, recréation du contrôleur, sauvegarde manuelle après masquage et tests
 de stockage/persistance QGIS 3.44 inchangés.
+
+## Curseurs cohérents et attentes locales
+
+Une politique commune couvre les contrôles existants et créés ensuite, les sections détachées et les fenêtres
+propres au plugin : main sur les boutons et listes de choix, curseur de texte dans les champs de saisie, flèche
+sur les contrôles désactivés. Les champs de texte des listes éditables restent des zones de saisie. Les curseurs
+natifs de déplacement, redimensionnement, histogrammes et outils cartographiques sont conservés.
+
+Les traitements, lectures de couverture, publications de favoris et chargements d’expressions utilisent des
+attentes attachées aux widgets concernés. FilterMate ne pousse ni ne dépile plus de curseur global de l’application.
+Plusieurs opérations peuvent se terminer dans un ordre différent de leur lancement ; seule la dernière attente
+encore active est affichée. La fin, l’erreur, l’annulation et le déchargement restaurent le curseur normal, en tenant
+compte d’une désactivation ou d’un changement de thème intervenu pendant l’opération. Un changement explicite
+effectué par un autre propriétaire est respecté ; une fin tardive après destruction du widget reste sans effet.
+
+Validation : 1 208 tests des curseurs, contrôleurs, styles, gestionnaires et gel de carte ; 351 tests supplémentaires
+des connexions du panneau et du partage de favoris. Scénario natif réussi sur QGIS 3.44 / Qt 5 et QGIS 4.3 / Qt 6 :
+changement d’outil de carte pendant une attente, opérations imbriquées, curseur global d’un autre propriétaire,
+contrôles dynamiques, restauration des éditeurs et destruction d’un widget avant la fin de son opération.
+Ces vérifications hors écran ne remplacent pas une validation visuelle sur le bureau Windows.

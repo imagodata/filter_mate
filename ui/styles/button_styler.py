@@ -14,7 +14,6 @@ import re
 
 from qgis.PyQt.QtWidgets import QPushButton, QToolButton, QAbstractButton, QSizePolicy
 from qgis.PyQt.QtCore import Qt, QSize
-from qgis.PyQt.QtGui import QCursor
 
 from .base_styler import StylerBase
 
@@ -212,6 +211,8 @@ class ButtonStyler(StylerBase):
             if hasattr(self.dockwidget, name):
                 key_containers.append(getattr(self.dockwidget, name))
 
+        from ..cursors import set_cursor_intent
+
         # Find all QPushButtons
         for button in self.dockwidget.findChildren(QPushButton):
             # Skip key sidebar buttons - their sizing is managed by DimensionsManager
@@ -221,7 +222,7 @@ class ButtonStyler(StylerBase):
                 continue  # the chips of the rails of sections size themselves (ui/widgets/section_rail.py)
 
             # Set cursor to pointing hand
-            button.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
+            set_cursor_intent(button, Qt.CursorShape.PointingHandCursor)
 
             # Set size policy: expand horizontally, fixed vertically
             button.setSizePolicy(
@@ -237,7 +238,7 @@ class ButtonStyler(StylerBase):
 
         # Configure QToolButtons similarly
         for button in self.dockwidget.findChildren(QToolButton):
-            button.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
+            set_cursor_intent(button, Qt.CursorShape.PointingHandCursor)
             if button.objectName() == 'collapseButton' or type(button).__name__ == 'QgsGroupBoxCollapseButton':
                 continue  # group arrows: sized with the title band (ui/layout/mockup_layout.py)
             button.setMinimumHeight(self._get_height('tool'))

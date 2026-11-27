@@ -677,6 +677,7 @@ class ConfigurationManager(QObject):
         from qgis.PyQt.QtCore import Qt, QSize
         from qgis.PyQt import QtGui
         from qgis.PyQt.QtWidgets import QSizePolicy
+        from ..cursors import set_cursor_intent
         import os
 
         # v4.0.2 FIX: Use IconManager instead of get_themed_icon
@@ -719,7 +720,7 @@ class ConfigurationManager(QObject):
                             widget_obj.setIcon(QtGui.QIcon(icon_path))
                             widget_data["ICON"] = icon_path
 
-                widget_obj.setCursor(Qt.CursorShape.PointingHandCursor)
+                set_cursor_intent(widget_obj, Qt.CursorShape.PointingHandCursor)
                 if widget_group == "EXPLORING" and widget_name in exploring_tooltips:
                     widget_obj.setToolTip(exploring_tooltips[widget_name])
 
@@ -742,6 +743,7 @@ class ConfigurationManager(QObject):
     def configure_other_widgets(self, font):
         """v4.0 Sprint 16: Configure non-button widgets (migrated from dockwidget)."""
         from qgis.PyQt.QtCore import Qt
+        from ..cursors import set_cursor_intent
 
         for widget_group in self.dockwidget.widgets:
             for widget_name in self.dockwidget.widgets[widget_group]:
@@ -754,17 +756,17 @@ class ConfigurationManager(QObject):
 
                 # Configure comboboxes and field widgets
                 if any(keyword in widget_type for keyword in ["ComboBox", "QgsFieldExpressionWidget", "QgsProjectionSelectionWidget"]):
-                    widget_obj.setCursor(Qt.CursorShape.PointingHandCursor)
+                    set_cursor_intent(widget_obj, Qt.CursorShape.PointingHandCursor)
                     widget_obj.setFont(font)
 
                 # Configure text inputs
                 elif "LineEdit" in widget_type or "QgsDoubleSpinBox" in widget_type:
-                    widget_obj.setCursor(Qt.CursorShape.IBeamCursor)
+                    set_cursor_intent(widget_obj, Qt.CursorShape.IBeamCursor)
                     widget_obj.setFont(font)
 
                 # Configure property override buttons
                 elif "PropertyOverrideButton" in widget_type:
-                    widget_obj.setCursor(Qt.CursorShape.PointingHandCursor)
+                    set_cursor_intent(widget_obj, Qt.CursorShape.PointingHandCursor)
                     widget_obj.setFont(font)
 
     def configure_key_widgets_sizes(self, icons_sizes):
@@ -877,6 +879,7 @@ class ConfigurationManager(QObject):
         """v4.0 Sprint 16: Configure widgets for Filtering tab (migrated from dockwidget)."""
         import os
         from qgis.PyQt import QtGui, QtCore, QtWidgets
+        from ..cursors import set_cursor_intent
 
         # FIX 2026-01-21: Import from correct location (gui in QGIS 3.30+, core in older versions)
         try:
@@ -925,7 +928,7 @@ class ConfigurationManager(QObject):
         if hasattr(d, 'checkBox_filtering_use_centroids_distant_layers'):
             d.checkBox_filtering_use_centroids_distant_layers.setText("")
             d.checkBox_filtering_use_centroids_distant_layers.setToolTip(d.tr("Use centroids instead of full geometries for distant layers"))
-            d.checkBox_filtering_use_centroids_distant_layers.setCursor(QtGui.QCursor(QtCore.Qt.CursorShape.PointingHandCursor))
+            set_cursor_intent(d.checkBox_filtering_use_centroids_distant_layers, QtCore.Qt.CursorShape.PointingHandCursor)
             if os.path.exists(icon_path):
                 icon = QtGui.QIcon(icon_path)
                 d.checkBox_filtering_use_centroids_distant_layers.setIcon(icon)

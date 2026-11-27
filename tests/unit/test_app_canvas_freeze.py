@@ -126,53 +126,58 @@ class TestCanvasFreezeDuringTask:
 
 
 def _app_with_cursor():
-    """Same stand-in, with QApplication/Qt in the namespace (UX 2026-09-14 busy cursor)."""
+    """Same stand-in, with owned widget cursor leases instead of the global application stack."""
     fake_iface = MagicMock()
     canvas = fake_iface.mapCanvas.return_value
     canvas.isFrozen.return_value = False
     canvas.freeze.side_effect = lambda flag: setattr(canvas.isFrozen, "return_value", flag)
-    qapp = MagicMock()
+    leases = []
+    def create(widgets):
+        lease = MagicMock()
+        leases.append(lease)
+        return lease
+    cursors = types.SimpleNamespace(create=MagicMock(side_effect=create), leases=leases)
     namespace = _extract(
         ["_freeze_canvas_for_task", "_unfreeze_canvas_after_task", "_set_task_button_down"],
         {"iface": fake_iface, "QTimer": MagicMock(), "logger": MagicMock(), "weakref": weakref,
-         "CANVAS_FREEZE_WATCHDOG_MS": 600000, "QApplication": qapp, "Qt": MagicMock()},
+         "CANVAS_FREEZE_WATCHDOG_MS": 600000, 'CursorLease': cursors.create},
     )
     app = _App()
     for name in ("_freeze_canvas_for_task", "_unfreeze_canvas_after_task", "_set_task_button_down"):
         setattr(app, name, types.MethodType(namespace[name], app))
-    return app, qapp
+    return app, cursors
 
 
 @pytest.mark.unit
 class TestBusyCursorDuringTask:
 
     def test_cursor_set_on_freeze_and_restored_once_on_thaw(self):
-        app, qapp = _app_with_cursor()
+        app, cursors = _app_with_cursor()
         token = app._freeze_canvas_for_task("filter")
-        qapp.setOverrideCursor.assert_called_once()
+        cursors.create.assert_called_once()
 
         app._unfreeze_canvas_after_task(token)
         app._unfreeze_canvas_after_task(token)
-        qapp.restoreOverrideCursor.assert_called_once()
+        cursors.leases[0].close.assert_called_once()
 
     def test_superseding_task_restores_the_previous_cursor_first(self):
-        app, qapp = _app_with_cursor()
+        app, cursors = _app_with_cursor()
         app._freeze_canvas_for_task("filter")
         second = app._freeze_canvas_for_task("unfilter")
         # one restore for the superseded freeze, two sets in total, never a stacked override
-        assert qapp.setOverrideCursor.call_count == 2
-        assert qapp.restoreOverrideCursor.call_count == 1
+        assert cursors.create.call_count == 2
+        cursors.leases[0].close.assert_called_once()
+        cursors.leases[1].close.assert_not_called()
 
         app._unfreeze_canvas_after_task(second)
-        assert qapp.restoreOverrideCursor.call_count == 2
+        cursors.leases[1].close.assert_called_once()
 
     def test_stale_token_does_not_restore_the_cursor(self):
-        app, qapp = _app_with_cursor()
+        app, cursors = _app_with_cursor()
         first = app._freeze_canvas_for_task("filter")
         app._freeze_canvas_for_task("filter")
-        restores = qapp.restoreOverrideCursor.call_count
         app._unfreeze_canvas_after_task(first)
-        assert qapp.restoreOverrideCursor.call_count == restores
+        cursors.leases[1].close.assert_not_called()
 
 
 @pytest.mark.unit

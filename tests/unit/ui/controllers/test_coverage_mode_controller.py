@@ -112,6 +112,7 @@ def ctrl_module(monkeypatch):
     base = types.ModuleType(f"{_PKG}.ui.controllers.base_controller")
     base.BaseController = FakeBaseController
     monkeypatch.setitem(sys.modules, base.__name__, base)
+    _load_real('ui.cursors', 'ui/cursors.py')
     layer_kind = _load_real("core.domain.layer_kind", "core/domain/layer_kind.py")
     _load_real("core.domain.cross_filter", "core/domain/cross_filter.py")
     source_capability = _load_real("core.domain.source_capability", "core/domain/source_capability.py")

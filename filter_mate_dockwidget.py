@@ -626,6 +626,8 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         # No need to reset palette here anymore - dockwidget now inherits QGIS default palette.
 
         self.setupUiCustom()
+        from .ui.cursors import install_cursor_policy
+        self._cursor_policy = install_cursor_policy(self)
         self.manage_ui_style()
         try:
             self.manage_interactions()
@@ -2083,7 +2085,8 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
             return
         self._expression_loading = loading
         try:
-            cursor, widgets = (Qt.CursorShape.WaitCursor if loading else Qt.CursorShape.PointingHandCursor), []
+            from .ui.cursors import set_widget_busy
+            widgets = []
             if groupbox in ("single_selection", None): widgets.extend([self.mFieldExpressionWidget_exploring_single_selection, self.mFeaturePickerWidget_exploring_single_selection])
             if groupbox in ("multiple_selection", None):
                 widgets.extend([
@@ -2092,7 +2095,7 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
                 ])
             if groupbox in ("custom_selection", None): widgets.append(self.mFieldExpressionWidget_exploring_custom_selection)
             for w in widgets:
-                if w and hasattr(w, 'setCursor'): w.setCursor(cursor)
+                if w and hasattr(w, 'setCursor'): set_widget_busy(w, loading)
         except Exception:  # nosec B110 - Cursor change is cosmetic - non-critical
             pass
 
@@ -7219,6 +7222,9 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         timers could still fire, and the module kept it as the active dock.
         """
         self._released = True  # shown again while the sections come back (showEvent): not the active dock any more
+        policy = getattr(self, '_cursor_policy', None)
+        if policy is not None:
+            policy.close()
         for timer_name in ('_feature_picker_debounce_timer', '_expression_debounce_timer'):
             timer = getattr(self, timer_name, None)
             if timer is not None:

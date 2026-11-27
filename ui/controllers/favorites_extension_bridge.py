@@ -268,8 +268,7 @@ class FavoritesExtensionBridge:
             return
 
         try:
-            from qgis.PyQt.QtWidgets import QApplication, QMessageBox
-            from qgis.PyQt.QtCore import Qt
+            from qgis.PyQt.QtWidgets import QMessageBox
         except ImportError:
             return
 
@@ -326,11 +325,9 @@ class FavoritesExtensionBridge:
 
         commit_author = repo.commit_author(metadata.get('author') or '')
 
-        QApplication.setOverrideCursor(Qt.CursorShape.WaitCursor)
-        try:
+        from ..cursors import CursorLease
+        with CursorLease([ctrl.dockwidget]):
             sync = mgr.publish_to_remote(repo, _write_bundle, commit_author=commit_author)
-        finally:
-            QApplication.restoreOverrideCursor()
 
         if not sync.success:
             ctrl._show_warning(ctrl.tr(

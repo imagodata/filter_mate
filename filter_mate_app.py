@@ -13,7 +13,8 @@ FilterMate Application Orchestrator
 """
 
 from qgis.PyQt.QtCore import Qt, QTimer, QCoreApplication
-from qgis.PyQt.QtWidgets import QMessageBox, QApplication
+from qgis.PyQt.QtWidgets import QMessageBox
+from .ui.cursors import CursorLease
 import sys
 import weakref
 try:
@@ -1752,10 +1753,12 @@ class FilterMateApp:
             # busy cursor (arrow + spinner: the panel stays usable) until the
             # same thaw that refreshes the canvas.
             try:
-                if getattr(self, '_busy_cursor_token', None) is not None:
-                    # a superseded task never thaws: restore its cursor first
-                    QApplication.restoreOverrideCursor()
-                QApplication.setOverrideCursor(Qt.CursorShape.BusyCursor)
+                previous = getattr(self, '_busy_cursor_lease', None)
+                if previous is not None:
+                    previous.close()
+                button_name = self.TASK_BUTTONS.get(task_name, '')
+                button = getattr(self.dockwidget, button_name, None) if button_name and self.dockwidget else None
+                self._busy_cursor_lease = CursorLease([self.dockwidget, button])
                 self._busy_cursor_token = token
             except Exception as exc:
                 logger.debug(f"Busy cursor skipped for {task_name}: {exc}")
@@ -1798,7 +1801,10 @@ class FilterMateApp:
         if getattr(self, '_busy_cursor_token', None) == token:
             self._busy_cursor_token = None
             try:
-                QApplication.restoreOverrideCursor()
+                lease = getattr(self, '_busy_cursor_lease', None)
+                if lease is not None:
+                    lease.close()
+                    self._busy_cursor_lease = None
             except Exception as exc:
                 logger.debug(f"Busy cursor restore failed: {exc}")
         self._set_task_button_down(getattr(self, '_busy_task_name', None), False)

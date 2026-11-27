@@ -93,19 +93,11 @@ def _same_layer(first: Any, second: Any) -> bool:
 
 
 @contextmanager
-def _wait_cursor():
-    """The busy cursor while a read runs on the main thread (none without a Qt application)."""
-    try:
-        from qgis.PyQt.QtCore import Qt
-        from qgis.PyQt.QtWidgets import QApplication
-        QApplication.setOverrideCursor(Qt.CursorShape.WaitCursor)
-    except Exception:
-        QApplication = None
-    try:
+def _wait_cursor(widget=None):
+    """A local busy state while a synchronous read runs; never replace the QGIS map-tool cursor."""
+    from ..cursors import CursorLease
+    with CursorLease([widget]):
         yield
-    finally:
-        if QApplication is not None:
-            QApplication.restoreOverrideCursor()
 
 
 def _detects_objects(selection: Any) -> bool:
@@ -1866,23 +1858,15 @@ class CoverageModeController(BaseController):
             return None
         from ...adapters.qgis.coverage_layers.raster_adapter import layer_object_geometry
         try:
-            from qgis.PyQt.QtCore import Qt
-            from qgis.PyQt.QtWidgets import QApplication
-            QApplication.setOverrideCursor(Qt.CursorShape.WaitCursor)
-        except Exception:
-            QApplication = None
-        try:
             # Validated polygons read nothing: a service needs no local sample to show them again.
-            result = layer_object_geometry(layer if selection.segments else self._base_raster(layer), selection)
+            with _wait_cursor(self._dockwidget):
+                result = layer_object_geometry(layer if selection.segments else self._base_raster(layer), selection)
         except RuntimeError as exc:
             logger.debug(f"[FM5] objects not detected, layer deleted: {exc}")
             return None
         except Exception as exc:
             logger.warning(f"[FM5] object detection failed: {exc}", exc_info=True)
             return None  # not kept: the same selection is read again at its next change
-        finally:
-            if QApplication is not None:
-                QApplication.restoreOverrideCursor()
         self._detected = (key, result)
         return result
 
@@ -2662,7 +2646,7 @@ class CoverageModeController(BaseController):
         from ...adapters.qgis.point_cloud_layer_adapter import class_at
         x, y, radius = self._layer_click(layer, canvas, point)
         try:
-            with _wait_cursor():
+            with _wait_cursor(self._dockwidget):
                 reader, on_map = self._object_reader(layer)
                 code = class_at(layer, canvas, point) if on_map else class_under(reader, x, y, radius)
         except RuntimeError as exc:
@@ -2672,7 +2656,7 @@ class CoverageModeController(BaseController):
         if extend and any(item['code'] == code and self._contains(item['wkt'], x, y) for item in panel.object_items()):
             return '', False  # a second click on the same building
         try:
-            with _wait_cursor():
+            with _wait_cursor(self._dockwidget):
                 found = object_footprint(reader, x, y, code, seed_radius=radius)
         except RuntimeError as exc:
             logger.debug(f"[FM5] point cloud object not read, layer deleted: {exc}")
@@ -2816,7 +2800,7 @@ class CoverageModeController(BaseController):
                 clicked.setdefault(item['code'], []).append((item, shape))
         geometries, boxes, truncated = [], [], False
         try:
-            with _wait_cursor():
+            with _wait_cursor(self._dockwidget):
                 for code in sorted(clicked):
                     footprint = self._class_footprint(layer, code, base)
                     references = self._reference_objects(layer, code, clicked[code], footprint)
