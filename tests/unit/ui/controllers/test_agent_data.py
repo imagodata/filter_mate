@@ -157,3 +157,14 @@ def test_suppression_skips_native_save_questions_but_keeps_transient_data_marked
     question.assert_not_called()
     assert ui._unsaved
     store.persist.assert_not_called()
+
+
+def test_suppressing_project_save_suggestions_does_not_suppress_layer_edit_confirmations(data_ui, monkeypatch):
+    module, ui, host, store = data_ui
+    factory = MagicMock()
+    _module(monkeypatch, '.ui.controllers.agent_edit_commits', LayerEditCommits=factory)
+    module.suppress_save_offers()
+    ui.offer_edits((('roads', 2),))
+    factory.return_value.offer.assert_called_once_with((('roads', 2),))
+    ui._reset()
+    factory.return_value.close.assert_called_once()

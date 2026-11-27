@@ -28,7 +28,7 @@ SUMMARIES = {
     "sample_features": "A few features with their attributes",
     "identify_at": "What lies at a point: features, raster values",
     "map_context": "Extent, scale, CRS, active layer, selections",
-    'qgis_capabilities': 'QGIS actions and live plugin panels',
+    'qgis_capabilities': 'QGIS actions and panels',
     'control_qgis': 'QGIS tables, properties, panels, tools, views',
     "view_map": "See the map as an image",
     # filtering

@@ -21,6 +21,7 @@ des propositions encore à réaliser.
 | Pilotage des fenêtres QGIS et panneaux de plugins | Implémenté dans le chat | Capacités disponibles, tables, propriétés natives, panneaux enregistrés, outils cartographiques et historique de vue. |
 | Propositions de sauvegarde | Implémenté | Masquage jusqu’au redémarrage de QGIS ; sauvegarde manuelle toujours disponible. |
 | Curseurs du plugin | Implémenté | Intentions cohérentes selon le contrôle, attentes locales et restauration sans toucher aux outils de carte. |
+| Éditions de couche par l’agent | Implémenté | Confirmation explicite après la demande avant l’enregistrement dans la source, par couche ou groupe de transaction. |
 
 ## Vérification du choix du SCR
 
@@ -193,3 +194,31 @@ des connexions du panneau et du partage de favoris. Scénario natif réussi sur 
 changement d’outil de carte pendant une attente, opérations imbriquées, curseur global d’un autre propriétaire,
 contrôles dynamiques, restauration des éditeurs et destruction d’un widget avant la fin de son opération.
 Ces vérifications hors écran ne remplacent pas une validation visuelle sur le bureau Windows.
+
+## Enregistrer les éditions de couche après confirmation
+
+Après une demande du chat ou une recette ayant effectivement modifié le tampon d’édition, une carte propose
+« Enregistrer les modifications » ou « Garder en attente ». Aucun appel d’enregistrement n’est exposé au modèle.
+Il faut un clic explicite pour chaque proposition : l’autonomie de l’agent et le masquage des propositions de
+sauvegarde du projet ne valent pas autorisation d’écrire dans la source. Sans ce clic, les modifications restent
+dans QGIS et leur annulation conserve le fonctionnement existant.
+
+La confirmation indique qu’elle enregistre toutes les éditions en attente des couches listées, y compris les
+éditions manuelles, et qu’elles ne seront plus annulables depuis le chat après enregistrement. Les groupes de
+transaction sont résolus avant l’affichage puis vérifiés à nouveau au clic. Les groupes de tampons QGIS sont
+enregistrés ensemble par l’API native du projet ; les compagnons du groupe sont tous présentés à l’utilisateur.
+Pour une couche mémoire, la carte précise que cet enregistrement ne crée pas de fichier : il faut conserver
+le projet et ses couches pour retrouver ces données après fermeture de QGIS.
+
+Une nouvelle édition, une sauvegarde manuelle, un changement de source ou la suppression d’une couche ferme la
+proposition devenue périmée. Le clic vérifie aussi l’identité des couches, le groupe, leur état, la conversation,
+les tâches en cours et les protections du projet. Une erreur du fournisseur affiche ses détails sans annulation
+automatique : certaines étapes d’une écriture peuvent déjà avoir été appliquées. Un retour tardif après fermeture
+du projet ne dépose pas de message dans le projet suivant.
+
+Validation : 174 tests ciblés des confirmations, du cycle des demandes et des checkpoints. Scénarios natifs réussis
+sur QGIS 3.44 / Qt 5 et QGIS 4.3 / Qt 6, avec la carte en français et des GeoPackage lus séparément sur disque :
+aucune écriture avant confirmation, refus et annulation, enregistrement par clic, expiration d’une proposition après
+nouvelle édition et enregistrement simultané d’un groupe de tampons avec éditions manuelles. La résolution des
+groupes automatiques de fournisseurs est couverte unitairement ; aucune transaction sur une base distante n’a été
+effectuée pour cette vérification.

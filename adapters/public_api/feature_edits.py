@@ -26,7 +26,8 @@ MAX_CHANGED = 100_000
 MAX_ADDED = 100
 COMMAND_PREFIX = 'FilterMate agent: '
 IN_BUFFER = ('The changes are in the edit buffer of the layer, not saved: the user saves them (Save Layer Edits) '
-             'or discards them.')
+             'or discards them. In the FilterMate chat, a separate user confirmation offers to save the layer edits '
+             'after the request. Never claim they are saved before that confirmation succeeds.')
 
 
 def _editable_layer(reference: str, capability: str):

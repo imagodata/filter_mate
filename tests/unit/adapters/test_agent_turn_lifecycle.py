@@ -123,6 +123,22 @@ def test_a_turn_discarded_with_its_project_is_never_recorded(checkpoint_module):
     assert not history.can_undo(checkpoint_module.HISTORY_KEY)
 
 
+def test_only_the_last_recorded_turns_real_buffer_edits_are_offered_for_commit(checkpoint_module):
+    module = checkpoint_module
+    module._test_holder.project = Project([Layer('roads')])
+    checkpoint = module.TurnCheckpoint()
+    assert checkpoint.pending_edit_commits() == ()
+    checkpoint.begin(types.SimpleNamespace(name='update_features', arguments={'layer': 'roads'}))
+    checkpoint._effects.finish = lambda: (('edits', 'roads', 0, 2, 'roads', True),)
+    checkpoint.commit()
+    assert checkpoint.pending_edit_commits() == (('roads', 2),)
+    # A user Undo, a different history entry or a turn with no changes cannot revive an old save offer.
+    module._test_service.history.undo(module.HISTORY_KEY)
+    assert checkpoint.pending_edit_commits() == ()
+    checkpoint.discard()
+    assert checkpoint.pending_edit_commits() == ()
+
+
 def test_a_required_capture_failure_refuses_the_call_but_a_step_capture_can_degrade(monkeypatch, checkpoint_module):
     """A required effect must be recoverable; a failed optional per-step capture keeps whole-turn undo."""
     class Failing(Effects):

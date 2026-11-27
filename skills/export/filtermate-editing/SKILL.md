@@ -20,8 +20,11 @@ Only edit data when the user asks to change, delete or add features. To show few
    exact values. For specific features the user points at, select them (select_features) and use selected_only.
 2. update_features changes attribute values, delete_features deletes features, add_features adds features from WKT
    and attributes. Each works in the edit buffer of the layer: nothing is saved.
-3. Say what changed and how many features, and that the changes are not saved: the user reviews and saves the layer
-   edits. Undoing the turn takes the changes out of the buffer.
+3. Say what changed and how many features, and that the changes are pending. In the chat, after the request the
+   interface offers a separate Save layer edits confirmation. Only the user's click saves them, including any
+   manual edits on the listed layer or transaction group. Until saved, undoing the turn takes the changes out of
+   the buffer. After saving, those data edits can no longer be undone from the chat. Outside the chat, the user
+   reviews and saves the edits in QGIS.
 
 ## What never to do
 

@@ -15397,4 +15397,79 @@ Si vous choisissez Non, ces données resteront en mémoire et seront perdues à 
         <translation>Mistral demande un code de langue à deux lettres comme fr ou en ; laissez vide pour la détection automatique.</translation>
     </message>
 </context>
+<context>
+    <name>AgentEditCommits</name>
+    <message>
+        <source>A memory layer stays in memory after saving its edits. Save project and layers to keep it after closing QGIS.</source>
+        <translation>Une couche mémoire reste en mémoire après l’enregistrement de ses éditions. Enregistrez le projet et ses couches pour la conserver après la fermeture de QGIS.</translation>
+    </message>
+    <message>
+        <source>The transaction group could not be verified. Use QGIS to save these edits.</source>
+        <translation>Le groupe de transaction n’a pas pu être vérifié. Utilisez QGIS pour enregistrer ces éditions.</translation>
+    </message>
+    <message>
+        <source>Layer edits are still pending.</source>
+        <translation>Les modifications des couches sont toujours en attente.</translation>
+    </message>
+    <message>
+        <source>Layer edits</source>
+        <translation>Éditions de couche</translation>
+    </message>
+    <message>
+        <source>Save the layer edits?</source>
+        <translation>Enregistrer les modifications de la couche ?</translation>
+    </message>
+    <message>
+        <source>Save layer edits</source>
+        <translation>Enregistrer les modifications</translation>
+    </message>
+    <message>
+        <source>Keep pending</source>
+        <translation>Garder en attente</translation>
+    </message>
+    <message>
+        <source>Checking and saving the layer edits…</source>
+        <translation>Vérification et enregistrement des modifications…</translation>
+    </message>
+    <message>
+        <source>Edits remain pending unless saved or discarded in QGIS. A new edit needs a new confirmation.</source>
+        <translation>Les modifications restent en attente, sauf si elles sont enregistrées ou annulées dans QGIS. Une nouvelle édition nécessite une nouvelle confirmation.</translation>
+    </message>
+    <message>
+        <source>Saved edits can no longer be undone from the agent chat.</source>
+        <translation>Les modifications enregistrées ne pourront plus être annulées depuis le chat de l’agent.</translation>
+    </message>
+    <message>
+        <source>Save all pending changes to the data source, including any manual edits on the listed layers?</source>
+        <translation>Enregistrer toutes les modifications en attente dans la source de données, y compris les éventuelles éditions manuelles des couches listées ?</translation>
+    </message>
+    <message>
+        <source>These layers share a QGIS transaction. They are saved together.</source>
+        <translation>Ces couches partagent une transaction QGIS. Elles seront enregistrées ensemble.</translation>
+    </message>
+    <message>
+        <source>The conversation changed or a request is running. Ask for a new confirmation.</source>
+        <translation>La conversation a changé ou une demande est en cours. Demandez une nouvelle confirmation.</translation>
+    </message>
+    <message>
+        <source>The layers changed since this confirmation. Review them and ask again.</source>
+        <translation>Les couches ont changé depuis cette confirmation. Vérifiez-les et demandez à nouveau.</translation>
+    </message>
+    <message>
+        <source>A listed layer is protected from the agent. Save its edits directly in QGIS.</source>
+        <translation>Une couche listée est protégée contre les modifications de l’agent. Enregistrez ses éditions directement dans QGIS.</translation>
+    </message>
+    <message>
+        <source>QGIS refused to save the edits.</source>
+        <translation>QGIS a refusé d’enregistrer les modifications.</translation>
+    </message>
+    <message>
+        <source>Layer edits saved: {}</source>
+        <translation>Modifications de couche enregistrées : {}</translation>
+    </message>
+    <message>
+        <source>The layer edits were not fully saved. Review their state in QGIS.</source>
+        <translation>Les modifications de couche n’ont pas toutes été enregistrées. Vérifiez leur état dans QGIS.</translation>
+    </message>
+</context>
 </TS>

@@ -80,6 +80,9 @@ class QObject:
 class FakeCheckpoint:
     """The undo point of a turn: what was committed, and whether it was discarded."""
 
+    def pending_edit_commits(self):
+        return ()
+
     def __init__(self):
         self.label, self.describe, self.on_open, self.recorded = "", None, None, None
         self.open, self.committed, self.discarded = False, 0, 0
@@ -357,6 +360,19 @@ def test_interface_handoffs_wait_for_commit_and_disappear_on_stop_or_project_cha
     else:
         FakeQgsProject.project.cleared.emit()
         assert not seen and not controller._interface_handoffs
+
+
+def test_edit_save_confirmation_is_offered_after_the_engine_records_the_turn(ctrl_module, controller):
+    engine, transport = _engine(ctrl_module, controller, lambda arguments: {})
+    def edits():
+        assert not controller._checkpoint.open and controller._checkpoint.committed
+        return (('roads', 2),)
+    controller._checkpoint.pending_edit_commits = edits
+    controller._on_send('edit this layer')
+    transport.starts[-1](_tool_turn(ctrl_module))
+    controller._data.offer_edits.assert_not_called()
+    transport.starts[-1](_end_turn(ctrl_module))
+    controller._data.offer_edits.assert_called_once_with((('roads', 2),))
 
 
 def test_push_steers_the_same_engine_and_keeps_its_permissions(ctrl_module, controller):

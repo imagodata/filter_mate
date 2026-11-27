@@ -268,6 +268,15 @@ class TurnCheckpoint:
                 names.append(effect[4])
         return names
 
+    def pending_edit_commits(self) -> Tuple[Tuple[str, int], ...]:
+        """Layer IDs and edit-stack positions actually changed by the last recorded turn."""
+        if self.recorded is None:
+            return ()
+        operation = _api_service().history.peek_undo(HISTORY_KEY)
+        if operation is None or operation.op_id != self.recorded[0]:
+            return ()
+        return tuple((effect[1], effect[3]) for effect in operation.effects if effect[0] == 'edits')
+
     @staticmethod
     def turns() -> List[Dict[str, Any]]:
         """Every turn still known, oldest first: time, request, layers it changed, applied or undone."""

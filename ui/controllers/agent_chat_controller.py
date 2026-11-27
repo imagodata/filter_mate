@@ -2684,6 +2684,7 @@ class AgentChatController(QObject):
             self.panel.set_working(False)
             self.panel.clear_steps()
             if not abandoned:  # its project closed meanwhile: nothing of it goes in the thread of the next one
+                self._data.offer_edits(self._checkpoint.pending_edit_commits())
                 note = stop or _tr("Recipe done: {} steps, without the model. Undo takes it back as one turn.").format(
                     done)
                 if stop and done:
@@ -4729,6 +4730,7 @@ class AgentChatController(QObject):
         if not dropped:
             self._remember_project()
         self._data.offer()
+        self._data.offer_edits(self._checkpoint.pending_edit_commits())
         kept = outcome.kept_steps
         if outcome.status == OUTCOME_FAILED and outcome.error is not None:
             self._leave_memory_cards(self._memory_request)

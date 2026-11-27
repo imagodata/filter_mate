@@ -41,6 +41,7 @@ class AgentDataController:
         self._unsaved = False
         self._generation = 0
         self._connections = []
+        self._edit_commits = None
         for name, slot in (("writeProject", self._before_write), ("projectSaved", self._after_write),
                            ("cleared", self._reset)):
             signal = getattr(self.project, name, None)
@@ -49,6 +50,8 @@ class AgentDataController:
                 self._connections.append((signal, slot))
 
     def close(self):
+        if self._edit_commits is not None:
+            self._edit_commits.close()
         for signal, slot in self._connections:
             try:
                 signal.disconnect(slot)
@@ -58,9 +61,20 @@ class AgentDataController:
         # The panel unloading must not remove data still read by the open project.
 
     def _reset(self, *_):
+        if self._edit_commits is not None:
+            self._edit_commits.close()
         self._generation += 1
         self._offered.clear()
         self._unsaved = False
+
+    def offer_edits(self, edits):
+        """Source writes require a separate, one-time user confirmation, even when save offers are muted."""
+        if not edits:
+            return
+        if self._edit_commits is None:
+            from .agent_edit_commits import LayerEditCommits
+            self._edit_commits = LayerEditCommits(self.host, self.project, self._busy)
+        self._edit_commits.offer(edits)
 
     def offer(self):
         if save_offers_suppressed():
