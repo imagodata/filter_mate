@@ -237,6 +237,18 @@ class AgentSession:
         self._restored = False
         self._turns = 0
 
+    def add_followup_text(self, text: str) -> None:
+        """A user correction within the active request, after every tool call has its result.
+
+        Keep the request's undo boundary, history budget and turn limit: this continues the same exchange.
+        """
+        self._messages.append(Message(ROLE_USER, (TextPart(text),)))
+
+    def keep_partial_answer(self, text: str) -> None:
+        """Keep the text already shown before a user correction interrupts the provider stream."""
+        if text:
+            self._messages.append(Message(ROLE_ASSISTANT, (TextPart(text),)))
+
     def offer(self, tools: Sequence[ToolSpec]) -> None:
         """More tools from the next request on (a family of tools, once its skill is loaded), after those offered:
         the start of the list stays the same for the prompt cache."""
@@ -300,6 +312,10 @@ class AgentSession:
             if _holds_results(self._messages[index]):
                 end = index + 1
                 break
+        # Corrections delivered after the last tool result remain known when the changes are kept. Dropping
+        # them here would let a later "continue" resume a plan the user had already corrected.
+        followups = [message for message in self._messages[end:]
+                     if message.role == ROLE_USER and not _holds_results(message)]
         del self._messages[end:]
         changes = self._changes_done()
         if forget or not changes:
@@ -308,6 +324,7 @@ class AgentSession:
         # The note of the turns left, if any, is no longer true.
         results = tuple(part for part in self._messages[-1].parts if not isinstance(part, TextPart))
         self._messages[-1] = Message(ROLE_USER, results + (TextPart(INTERRUPTED_NOTE.format(_CAUSES[cause])),))
+        self._messages.extend(followups)
         return changes
 
     def _changes_done(self) -> int:

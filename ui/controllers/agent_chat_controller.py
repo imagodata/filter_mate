@@ -283,6 +283,7 @@ class AgentChatController(QObject):
         self.panel.refresh_examples()  # drawn for an unknown state in the panel: now for the project
         self.panel.send_requested.connect(self._on_send)
         self.panel.queued_send_requested.connect(self._on_queued_send)
+        self.panel.queued_push_requested.connect(self._on_queued_push)
         self._mode = read_mode()  # Ask, Plan or Act, kept from one session to the next (core/agent/modes.py)
         self._request_mode = self._mode
         # One posture under the line sets the mode and the level together (core/agent/postures.py): Answer reads,
@@ -292,6 +293,7 @@ class AgentChatController(QObject):
         self.panel.mode_changed.connect(self._on_mode_changed)
         self.panel.posture_changed.connect(self._on_posture_changed)
         self.panel.effort_changed.connect(self._on_effort_changed)
+        self.panel.push_requested.connect(self._on_push)
         self.panel.stop_requested.connect(self._on_stop)
         self.panel.undo_requested.connect(self._on_undo)
         self.panel.redo_requested.connect(self._on_redo)
@@ -3182,6 +3184,32 @@ class AgentChatController(QObject):
         if not self._on_send(text, posture, queued=True) and generation == self._memory_generation:
             self.panel.restore_queued(text, posture)
 
+    def _on_queued_push(self, text: str, posture: str) -> None:
+        generation = self._memory_generation
+        sent = (self._on_push(text, queued=True) if self._engine is not None and self._engine.busy
+                else self._on_send(text, posture, queued=True))
+        if not sent and generation == self._memory_generation:
+            self.panel.restore_queued(text, posture)
+
+    def _on_push(self, text: str, queued: bool = False) -> bool:
+        """Add instructions to this exchange, keeping its permissions and undo point."""
+        if self._abandoned or self._replaying or self._building:
+            return False
+        engine = self._engine
+        if engine is None or not engine.busy:
+            return self._on_send(text)
+        if not engine.push(text):
+            return False
+        self._flush_answer()
+        self.panel.add_user(text)
+        self._record("user", text)
+        self._last_request += "\n\n" + text
+        self._checkpoint.label = self._last_request
+        if not queued and self.panel.input.text().strip() == text.strip():
+            self.panel.clear_input()
+        self.panel.set_status(_tr("Message sent to the running agent; applied at its next step."))
+        return True
+
     def _on_send(self, text: str, mode: str = "", queued: bool = False) -> bool:
         """Send ``text`` in the mode picked under the line, or in ``mode`` (the Go of a plan runs in Act)."""
         if self.chat_busy():
@@ -4483,6 +4511,11 @@ class AgentChatController(QObject):
             self._flush_journal()
             self._refresh_history()
             return
+        if not dropped:
+            # The failed/stopped exchange may have ended before it could send these corrections. Keep them
+            # visible and paused; a dropped exchange gives back the combined request below instead.
+            for text in reversed(outcome.pending_messages):
+                self.panel.restore_queued(text, self._request_posture)
         steps = recipe_steps(self._request_calls, self._tools)
         if steps:  # what "Save the last request as a recipe" keeps
             self._last_steps, self._last_steps_request = steps, self._last_request

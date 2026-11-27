@@ -40,6 +40,7 @@ NO_RETRY_ABOVE = 120.0  # a Retry-After beyond this is not a busy moment: the fa
 # reads them for diagnose_performance). 2026-11-23: a freeze of 15 s in a cross filter of the agent showed only in
 # the timing of set_subset; a slow tool elsewhere left nothing.
 SLOW_TOOL_MS = 250
+PUSH_NOT_RUN = "Not run: a new user message arrived. Reconsider this call using the latest instructions."
 
 
 def worth_retrying(error: ProviderError) -> bool:
@@ -69,6 +70,8 @@ class ChatOutcome:
     # A request that broke off (failed, stopped, refused): the steps it had done, kept in the conversation. They stay
     # in QGIS and the model knows them, so the request is not to be sent again whole.
     kept_steps: int = 0
+    # Accepted while working, but not yet included in a request to the model. Return them if the request stops.
+    pending_messages: Tuple[str, ...] = ()
 
 
 class StreamHandle(Protocol):
@@ -140,6 +143,8 @@ class ChatEngine:
         self._handle: Optional[StreamHandle] = None
         self._tries = 0  # new tries of the current model turn
         self._streamed = False  # text of the current model turn was shown
+        self._pushed: list[str] = []
+        self._partial_answer: list[str] = []
 
     @property
     def busy(self) -> bool:
@@ -206,6 +211,27 @@ class ChatEngine:
             handle.abort()
         self._interrupt(OUTCOME_CANCELLED, CAUSE_STOPPED)  # a new try that waited is stale once it is over
 
+    def push(self, text: str) -> bool:
+        """Steer the running request at its next model turn, after any tool already executing finishes.
+
+        Calls not started yet are answered as not run so the model can reconsider them with the new message.
+        A provider still streaming its old answer is aborted and asked again with the text already shown and the
+        correction. The undo point stays open; no second exchange is started alongside this one.
+        """
+        if not self._busy or self._cancelled or not text.strip():
+            return False
+        self._pushed.append(text.strip())
+        if self._handle is not None and not self._running_tools:
+            handle, self._handle = self._handle, None
+            self._generation += 1  # abort may emit a final event: it belongs to the old answer
+            generation = self._generation
+            self._tries = 0
+            self._session.keep_partial_answer("".join(self._partial_answer))
+            self._partial_answer = []
+            handle.abort()
+            self._defer(lambda: self._request_model(generation))
+        return True
+
     def _notify(self, callback: Callable[..., None], *args: Any) -> None:
         """What the interface does with an event must not stop the request."""
         try:
@@ -216,7 +242,11 @@ class ChatEngine:
     def _request_model(self, generation: int) -> None:
         if not self._busy or generation != self._generation:  # stopped while this step waited for the event loop
             return
+        pushed, self._pushed = self._pushed, []
+        for text in pushed:
+            self._session.add_followup_text(text)
         self._streamed = False
+        self._partial_answer = []
         try:
             handle = self._transport.start(self._session.next_request(), self._session.new_parser(),
                                            lambda event: self._on_event(generation, event))
@@ -233,6 +263,7 @@ class ChatEngine:
             return
         if isinstance(event, TextDelta):
             self._streamed = True
+            self._partial_answer.append(event.text)
             self._notify(self._listener.on_text, event.text)
         elif isinstance(event, StreamFailure):
             self._handle = None
@@ -266,7 +297,10 @@ class ChatEngine:
         if decision.status == STATUS_RUN_TOOLS:
             self._defer(lambda: self._run_tools(generation, decision.calls))
         elif decision.status == STATUS_DONE:
-            self._finish(ChatOutcome(OUTCOME_DONE))
+            if self._pushed:
+                self._defer(lambda: self._request_model(generation))
+            else:
+                self._finish(ChatOutcome(OUTCOME_DONE))
         else:
             self._finish(ChatOutcome(OUTCOME_STOPPED, reason=decision.reason, kept_steps=decision.kept))
 
@@ -276,19 +310,20 @@ class ChatEngine:
         self._running_tools = True
         answers = []
         try:
-            answered = self._confirm_together(calls)
+            answered = {} if self._pushed else self._confirm_together(calls)
             for position, call in enumerate(calls):
                 if self._cancelled:
                     break
-                answers.append(self._run_one(call, answered.get(position)))
+                answers.append(ToolResultPart(call.call_id, PUSH_NOT_RUN, is_error=True) if self._pushed
+                               else self._run_one(call, answered.get(position)))
         finally:
             self._running_tools = False
         if self._cancelled:  # the calls that ran stay, with their results; the others are answered as not run
             self._interrupt(OUTCOME_CANCELLED, CAUSE_STOPPED, answers)
             return
-        if self._auto_offer is not None:
+        if self._auto_offer is not None and not self._pushed:
             for position, call in enumerate(calls):
-                if self._cancelled:
+                if self._cancelled or self._pushed:
                     break
                 if answers[position].is_error and self._executor.is_held(call.name) and self._auto_offer(call.name):
                     # Offered now: run at once, once per call (a call still held afterwards keeps its failure).
@@ -343,6 +378,8 @@ class ChatEngine:
             return self._executor.declined(call, self._policy)
         if self._cancelled or generation != self._generation:
             return ToolResultPart(call.call_id, NOT_RUN, is_error=True)
+        if self._pushed:
+            return ToolResultPart(call.call_id, PUSH_NOT_RUN, is_error=True)
         verdict_now = self._executor.verdict(call, self._policy)
         if verdict_now in (REFUSE, PROTECTED, TURNED_OFF):
             return self._executor.refused(call, self._policy)
@@ -357,6 +394,8 @@ class ChatEngine:
         self._notify(self._listener.on_tool_start, call)
         if self._cancelled or generation != self._generation:
             return ToolResultPart(call.call_id, NOT_RUN, is_error=True)
+        if self._pushed:
+            return ToolResultPart(call.call_id, PUSH_NOT_RUN, is_error=True)
         started = time.monotonic()
         result = self._executor.execute(call)
         spent = (time.monotonic() - started) * 1000
@@ -392,6 +431,7 @@ class ChatEngine:
         self._finish(ChatOutcome(status, error=error, kept_steps=kept))
 
     def _finish(self, outcome: ChatOutcome) -> None:
+        pending, self._pushed = tuple(self._pushed), []
         self._busy = False
         self._handle = None
         self._generation += 1
@@ -400,4 +440,4 @@ class ChatEngine:
         except Exception:
             logger.exception("Agent undo point could not be closed")
             changed = ()
-        self._notify(self._listener.on_finished, replace(outcome, changed_layers=changed))
+        self._notify(self._listener.on_finished, replace(outcome, changed_layers=changed, pending_messages=pending))

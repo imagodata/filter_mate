@@ -281,6 +281,112 @@ def _end_turn(ctrl_module):
                                  messages.STOP_END)
 
 
+def test_push_steers_the_same_engine_and_keeps_its_permissions(ctrl_module, controller):
+    engine, transport = _engine(ctrl_module, controller, lambda arguments: {})
+    controller.panel.input.text.return_value = ""
+    controller._on_send("original request")
+    controller._posture = "respond"  # the picker applies to future exchanges
+    level = controller._policy.level
+    controller.panel.input.text.return_value = "use blue instead"
+    assert controller._on_push("use blue instead")
+    assert controller._engine is engine and engine.busy and len(transport.starts) == 2
+    assert controller._policy.level == level
+    assert controller._last_request == "original request\n\nuse blue instead"
+    controller.panel.clear_input.assert_called_once()
+    controller.panel.add_user.assert_called_with("use blue instead")
+    assert len(transport.starts) == 2 and engine.session.messages[-1].text == "use blue instead"
+    transport.starts[-1](_end_turn(ctrl_module))
+
+
+def test_push_preserves_a_different_draft(ctrl_module, controller):
+    _engine(ctrl_module, controller, lambda arguments: {})
+    controller.panel.input.text.return_value = "unfinished draft"
+    controller._on_send("original request")
+    assert controller._on_push("correction")
+    controller.panel.clear_input.assert_not_called()
+
+
+def test_push_while_idle_starts_a_regular_exchange(ctrl_module, controller):
+    engine, transport = _engine(ctrl_module, controller, lambda arguments: {})
+    controller.panel.input.text.return_value = ""
+    assert controller._on_push("new request")
+    assert engine.busy and len(transport.starts) == 1
+    assert engine.session.messages[0].parts[0].text == "new request"
+
+
+def test_push_during_recipe_is_refused_without_consuming_draft(ctrl_module, controller):
+    engine, _transport = _engine(ctrl_module, controller, lambda arguments: {})
+    controller._replaying = True
+    assert not controller._on_push("correction")
+    controller.panel.clear_input.assert_not_called()
+    assert not engine.busy
+
+
+def test_stop_before_delivery_returns_the_original_request_and_push_together(ctrl_module, controller):
+    _engine(ctrl_module, controller, lambda arguments: {})
+    controller.panel.input.text.return_value = ""
+    controller._on_send("original request")
+    controller._on_push("correction")
+    controller._on_stop()
+    controller.panel.input.setText.assert_called_with("original request\n\ncorrection")
+    controller.panel.restore_queued.assert_not_called()
+
+
+def test_provider_failure_gives_back_the_combined_request(ctrl_module, controller):
+    engine, transport = _engine(ctrl_module, controller, lambda arguments: {})
+    controller.panel.input.text.return_value = ""
+    controller._on_send("original request")
+    controller._on_push("correction")
+    messages = sys.modules[f"{_PKG}.core.agent.messages"]
+    transport.starts[-1](messages.StreamFailure(messages.ProviderError("auth", "refused")))
+    controller.panel.input.setText.assert_called_with("original request\n\ncorrection")
+    controller.panel.restore_queued.assert_not_called()
+    assert not engine.busy
+
+
+def test_stop_after_changes_returns_undelivered_push_to_the_paused_queue(ctrl_module, controller):
+    engine, transport = _engine(ctrl_module, controller, lambda arguments: {})
+    controller.panel.input.text.return_value = ""
+    controller._on_send("original request")
+    # Stop while a provider response is in flight, after the first write completed.
+    transport.starts[-1](_tool_turn(ctrl_module))
+    engine._defer = lambda step: None  # stop before the new provider request can consume the corrections
+    controller._on_push("first correction")
+    controller._on_push("second correction")
+    controller._on_stop()
+    assert [call.args for call in controller.panel.restore_queued.call_args_list] == [
+        ("second correction", controller._request_posture), ("first correction", controller._request_posture)]
+    assert not engine.busy
+
+
+def test_queued_push_preserves_even_an_identical_draft(ctrl_module, controller):
+    engine, transport = _engine(ctrl_module, controller, lambda arguments: {})
+    controller.panel.input.text.return_value = "correction"
+    controller._on_send("original request")
+    controller._on_queued_push("correction", "respond")
+    assert engine.busy and len(transport.starts) == 2
+    assert engine.session.messages[-1].text == "correction"
+    controller.panel.clear_input.assert_not_called()
+    controller.panel.restore_queued.assert_not_called()
+
+
+def test_queued_push_while_idle_uses_the_saved_posture(ctrl_module, controller):
+    engine, transport = _engine(ctrl_module, controller, lambda arguments: {})
+    controller.panel.input.text.return_value = "draft"
+    controller._on_queued_push("waiting request", "respond")
+    assert engine.busy and len(transport.starts) == 1
+    assert controller._request_posture == "respond"
+    controller.panel.clear_input.assert_not_called()
+
+
+def test_rejected_queued_push_is_restored_with_its_posture(ctrl_module, controller):
+    _engine(ctrl_module, controller, lambda arguments: {})
+    controller._on_send("original request")
+    controller._replaying = True
+    controller._on_queued_push("waiting request", "respond")
+    controller.panel.restore_queued.assert_called_once_with("waiting request", "respond")
+
+
 # --- 4: a conversation is let go of only once really over -----------------------------------------------------
 
 

@@ -256,6 +256,139 @@ def test_effort_cannot_change_during_a_running_request():
     assert panel.effort_button.isEnabled()
 
 
+def test_push_mode_sends_to_the_active_request_without_touching_the_queue():
+    panel = _ready_panel()
+    panel.set_followup_mode("queue")
+    pushed = []
+    panel.push_requested.connect(pushed.append)
+    panel.set_working(True)
+    assert panel.followup_button.isEnabled()
+    panel.input.setText("waiting")
+    panel._on_send()
+    panel.set_followup_mode("push")
+    panel.input.setText("correction")
+    panel.send_button.click()
+    assert pushed == ["correction"] and panel.queued == "waiting"
+    assert panel.input.text() == "correction"  # a rejected send must leave the draft intact
+    panel.set_working(False)
+    assert panel.followup_button.isEnabled()
+
+
+def test_push_is_the_default_and_the_user_can_keep_queue_as_the_default(monkeypatch):
+    settings = {}
+    monkeypatch.setattr(panel_module, "QSettings", lambda: types.SimpleNamespace(
+        value=lambda key, default="": settings.get(key, default), setValue=settings.__setitem__))
+    panel = _ready_panel()
+    assert panel._followup_mode == "push" and panel._followup_actions["push"].isChecked()
+    panel._followup_actions["queue"].trigger()
+    assert panel._followup_mode == "queue" and panel._followup_actions["queue"].isChecked()
+    assert not panel._followup_actions["push"].isChecked()
+    restored = _ready_panel()
+    assert restored._followup_mode == "queue"
+
+
+def test_ctrl_shift_enter_inverts_the_followup_mode():
+    panel = _ready_panel()
+    pushed = []
+    panel.push_requested.connect(pushed.append)
+    qt_test = importlib.import_module(QtWidgets.__package__ + ".QtTest")
+    qt = QtCore.Qt
+    modifiers = qt.KeyboardModifier.ControlModifier | qt.KeyboardModifier.ShiftModifier
+    panel.set_followup_mode("push")
+    panel.set_working(True)
+    panel.input.setText("wait until later")
+    qt_test.QTest.keyClick(panel.input, qt.Key.Key_Return, modifiers)
+    assert not pushed and panel.queued == "wait until later" and panel.input.text() == ""
+    panel.set_followup_mode("queue")
+    panel.input.setText("correct the active request")
+    qt_test.QTest.keyClick(panel.input, qt.Key.Key_Return, modifiers)
+    assert pushed == ["correct the active request"] and panel.queued == "wait until later"
+
+
+def test_enter_and_send_button_push_with_a_draft_and_stop_without_one():
+    panel = _ready_panel()
+    pushed, stopped = [], []
+    panel.push_requested.connect(pushed.append)
+    panel.stop_requested.connect(lambda: stopped.append(True))
+    qt_test = importlib.import_module(QtWidgets.__package__ + ".QtTest")
+    panel.set_followup_mode("push")
+    panel.set_working(True)
+    assert panel._send_stops
+    panel.input.setText("correction")
+    assert not panel._send_stops and panel.send_button.toolTip() == "Send to the running agent (Enter)"
+    qt_test.QTest.keyClick(panel.input, QtCore.Qt.Key.Key_Return)
+    panel.send_button.click()
+    assert pushed == ["correction", "correction"] and not stopped and not panel.queued
+    panel.input.clear()
+    panel.send_button.click()
+    assert stopped == [True] and panel._send_stops
+
+
+def test_send_now_promotes_a_queued_message_without_changing_the_draft():
+    panel = _ready_panel()
+    promoted = []
+    panel.queued_push_requested.connect(lambda text, posture: promoted.append((text, posture)))
+    panel.set_followup_mode("queue")
+    panel.set_working(True)
+    panel.input.setText("first")
+    panel._on_send()
+    panel.input.setText("second")
+    panel._on_send()
+    panel.input.setText("unfinished draft")
+    panel.queue_push.click()
+    assert promoted == [("first", "act")] and panel.queued == "second"
+    assert panel.input.text() == "unfinished draft"
+
+
+def test_ctrl_enter_pushes_while_enter_queues_and_shift_enter_adds_a_line():
+    panel = _ready_panel()
+    panel.set_followup_mode("queue")
+    pushed, sent = [], []
+    panel.push_requested.connect(pushed.append)
+    panel.send_requested.connect(sent.append)
+    qt_test = importlib.import_module(QtWidgets.__package__ + ".QtTest")
+    qt = QtCore.Qt
+    panel.set_working(True)
+    panel.input.setText("correction")
+    qt_test.QTest.keyClick(panel.input, qt.Key.Key_Return, qt.KeyboardModifier.ControlModifier)
+    assert pushed == ["correction"] and not panel.queued and not sent
+    qt_test.QTest.keyClick(panel.input, qt.Key.Key_Return)
+    assert panel.queued == "correction" and panel.input.text() == ""
+    qt_test.QTest.keyClick(panel.input, qt.Key.Key_Return, qt.KeyboardModifier.ShiftModifier)
+    assert panel.input.text() == "\n" and pushed == ["correction"]
+    panel.pause_queued()
+    panel.set_working(False)
+    panel.input.setText("new request")
+    qt_test.QTest.keyClick(panel.input, qt.Key.Key_Return, qt.KeyboardModifier.ControlModifier)
+    assert sent == ["new request"]
+
+
+def test_push_respects_dictation_review():
+    panel = _ready_panel()
+    pushed = []
+    panel.push_requested.connect(pushed.append)
+    panel.set_working(True)
+    panel.set_speech_state("transcribing")
+    panel.input.setText("unreviewed")
+    panel.send_button.click()
+    assert not pushed and panel.input.text() == "unreviewed"
+    panel.set_speech_state("idle")
+    panel._on_push()
+    assert pushed == ["unreviewed"]
+
+
+def test_push_fits_a_narrow_panel_while_working():
+    panel = _ready_panel()
+    panel.set_working(True)
+    panel.resize(280, 480)
+    panel.show()
+    _APP.processEvents()
+    assert panel.width() == 280
+    for widget in (panel.input, panel.followup_button, panel.send_button, panel.more_button):
+        assert panel.rect().contains(widget.geometry())
+    panel.close()
+
+
 def test_effort_control_keeps_a_narrow_panel_usable():
     panel = _ready_panel()
     panel.set_effort_options(('low', 'medium', 'high'), 'high')

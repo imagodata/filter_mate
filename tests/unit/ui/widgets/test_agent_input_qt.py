@@ -63,6 +63,7 @@ def _run(ms=50):
 
 def _panel():
     panel = panel_module.AgentPanel()
+    panel.set_followup_mode("queue")  # these cases exercise explicit follow-up queuing
     panel.set_ready(True, "Claude")
     panel.resize(380, 600)
     panel.show()

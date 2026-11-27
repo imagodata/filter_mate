@@ -99,6 +99,7 @@ MAX_RECIPE_STEPS_SHOWN = 12  # steps listed in the menu of a recipe
 FEEDBACK_ENTRIES = (("usage", "Give your opinion"), ("feature", "Suggest a feature"),
                     ("testers", "Test the experimental features"), ("services", "Training and services"))
 _LAST_EXAMPLES = "filter_mate/agent/last_examples"  # the keys of the requests seen last on the welcome
+_FOLLOWUP_MODE = "filter_mate/agent/followup_mode"
 EXAMPLES_SEEN_MS = 1500  # on screen this long, a set of requests counts as seen
 FACTS_SETTLE_MS = 300  # a burst of changes of the project (layers loading) is read once, after it
 
@@ -293,7 +294,8 @@ class ExampleButton(QPushButton):
 
 class AgentInput(QPlainTextEdit):
     """The line to ask (2026-11-24: several lines). It grows with what is typed, up to MAX_LINES; Enter sends,
-    Shift+Enter goes to the line; the arrows give the previous requests from its first and last line; Escape stops;
+    Ctrl+Enter pushes into a running request, Shift+Enter goes to the line; the arrows give the previous requests
+    from its first and last line; Escape stops;
     "@" offers the layers of the project and writes the name chosen.
 
     The API of the QLineEdit it replaced is kept (``text``, ``setText``, ``insert``, ``returnPressed``): the panel,
@@ -302,6 +304,8 @@ class AgentInput(QPlainTextEdit):
 
     escape_pressed = pyqtSignal()
     returnPressed = pyqtSignal()  # noqa: N815 - the name of the QLineEdit signal it replaces
+    push_pressed = pyqtSignal()
+    alternate_send_pressed = pyqtSignal()
     MAX_LINES = 5
 
     def __init__(self, parent=None) -> None:
@@ -377,8 +381,13 @@ class AgentInput(QPlainTextEdit):
             event.ignore()  # the completer takes them: the name chosen, or the list closed
             return
         if key in (Qt.Key.Key_Return, Qt.Key.Key_Enter):
-            if event.modifiers() & Qt.KeyboardModifier.ShiftModifier:
+            if (event.modifiers() & Qt.KeyboardModifier.ControlModifier
+                    and event.modifiers() & Qt.KeyboardModifier.ShiftModifier):
+                self.alternate_send_pressed.emit()
+            elif event.modifiers() & Qt.KeyboardModifier.ShiftModifier:
                 self.insertPlainText("\n")
+            elif event.modifiers() & Qt.KeyboardModifier.ControlModifier:
+                self.push_pressed.emit()
             else:
                 self.returnPressed.emit()
             return
@@ -585,7 +594,9 @@ class AgentPanel(QFrame):
     """Widgets only: the controller decides what happens."""
 
     send_requested = pyqtSignal(str)
+    push_requested = pyqtSignal(str)
     queued_send_requested = pyqtSignal(str, str)
+    queued_push_requested = pyqtSignal(str, str)
     mode_changed = pyqtSignal(str)  # Ask, Plan or Act, picked under the line (core/agent/modes.py)
     posture_changed = pyqtSignal(str)  # respond, propose or act (core/agent/postures.py)
     effort_changed = pyqtSignal(str)  # empty: provider default, otherwise a supported reasoning level
@@ -625,6 +636,8 @@ class AgentPanel(QFrame):
         super().__init__(parent)
         self.setObjectName(PANEL_NAME)
         self._working = False
+        self._followup_mode = str(QSettings().value(_FOLLOWUP_MODE, "push"))
+        self._send_stops = False
         self._speech_state = 'idle'
         self._can_compare = False  # the dock has Compare and the history of the project
         self._in_answer = False
@@ -716,6 +729,12 @@ class AgentPanel(QFrame):
         queue_layout.setSpacing(6)
         self.queue_label = ElidedLabel("", self.queue_row)
         self.queue_label.setObjectName("label_agent_queued")
+        self.queue_push = QPushButton(_tr("Send now"), self.queue_row)
+        self.queue_push.setObjectName("pushButton_agent_queued_push")
+        self.queue_push.setFlat(True)
+        self.queue_push.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.queue_push.setToolTip(_tr("Send the first waiting message to the running agent"))
+        self.queue_push.clicked.connect(self._push_queued)
         self.queue_cancel = QPushButton("\u2715", self.queue_row)
         self.queue_cancel.setObjectName("pushButton_agent_queued_cancel")
         self.queue_cancel.setFlat(True)
@@ -723,6 +742,7 @@ class AgentPanel(QFrame):
         self.queue_cancel.setToolTip(_tr("Do not send it"))
         self.queue_cancel.clicked.connect(self.cancel_queued)
         queue_layout.addWidget(self.queue_label, 1)
+        queue_layout.addWidget(self.queue_push)
         queue_layout.addWidget(self.queue_cancel)
         self.queue_row.setVisible(False)
 
@@ -730,6 +750,8 @@ class AgentPanel(QFrame):
         self.input.setObjectName("lineEdit_agent_input")
         self.input.setPlaceholderText(_tr("Ask for a filter…"))
         self.input.returnPressed.connect(self._on_send)
+        self.input.push_pressed.connect(self._on_push)
+        self.input.alternate_send_pressed.connect(lambda: self._on_send(alternate=True))
         self.input.layer_rows = lambda: self._layer_rows()  # (id, name, qualifier): the controller sets the layers
         self.mention_source: Callable[[], Sequence] = lambda: ()  # the controller sets it: the layers "@" offers
         self.input.escape_pressed.connect(self._on_escape)
@@ -859,11 +881,28 @@ class AgentPanel(QFrame):
         self._effort_levels, self._effort, self._effort_actions = (), "", {}
         self.set_effort_options((), "")
 
+        self.followup_button = QToolButton(self)
+        self.followup_button.setObjectName("toolButton_agent_followup")
+        self.followup_button.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.followup_button.setPopupMode(QToolButton.ToolButtonPopupMode.InstantPopup)
+        self.followup_button.setToolButtonStyle(Qt.ToolButtonStyle.ToolButtonTextOnly)
+        self.followup_button.setAccessibleName(_tr("Messages sent while the agent works"))
+        followup_menu = QMenu(self.followup_button)
+        self._followup_actions = {}
+        for mode, title in (("push", _tr("Push: guide the running request")),
+                            ("queue", _tr("Queue: wait for the current request to finish"))):
+            action = followup_menu.addAction(title)
+            action.setCheckable(True)
+            action.triggered.connect(lambda _checked=False, chosen=mode: self.set_followup_mode(chosen, persist=True))
+            self._followup_actions[mode] = action
+        self.followup_button.setMenu(followup_menu)
+
         under = QHBoxLayout()
         under.setContentsMargins(0, 0, 0, 0)
         under.setSpacing(6)
         under.addWidget(self.mode_button, 0, Qt.AlignmentFlag.AlignLeft)  # at the left also when the label is hidden
         under.addWidget(self.effort_button)
+        under.addWidget(self.followup_button)
         under.addWidget(self.destination, 1)
         # A new conversation in one click once something was asked (2026-11-24: it was in the menu "⋯" only).
         self.new_button = QPushButton(_tr("New conversation"), self)
@@ -929,8 +968,10 @@ class AgentPanel(QFrame):
         layout.addWidget(self.speech_row)
         layout.addLayout(under)
         self.set_ready(False)
+        self.set_followup_mode(self._followup_mode)
         self.set_working(False)
         self._setup_accessibility()
+        self.input.textChanged.connect(self._refresh_send_action)
         self._refresh_look()
 
     def _setup_accessibility(self) -> None:
@@ -938,7 +979,7 @@ class AgentPanel(QFrame):
         self.input.setAccessibleName(_tr("Request to the agent"))
         self.input.setAccessibleDescription(self.input.placeholderText())
         self.send_button.setAccessibleName(_tr("Send the request"))
-        self.send_button.setAccessibleDescription(_tr("Send (Enter). While the agent works, stops it (Esc)."))
+        self.send_button.setAccessibleDescription(_tr("Enter sends in the selected mode. Esc stops. Ctrl+Shift+Enter uses the other mode."))
         self.more_button.setAccessibleName(_tr("More actions"))
         self.mode_button.setAccessibleName(_tr("What the agent may do"))
         self.history_button.setAccessibleName(_tr("Show the history"))
@@ -952,12 +993,14 @@ class AgentPanel(QFrame):
         self.setTabOrder(self.send_button, self.more_button)
         self.setTabOrder(self.more_button, self.mode_button)
         self.setTabOrder(self.mode_button, self.effort_button)
-        self.setTabOrder(self.effort_button, self.history_button)
+        self.setTabOrder(self.effort_button, self.followup_button)
+        self.setTabOrder(self.followup_button, self.history_button)
         self.setTabOrder(self.history_button, self.recipes_button)
         self.setTabOrder(self.recipes_button, self.new_button)
         self.setTabOrder(self.new_button, self.undo_button)
         self.setTabOrder(self.undo_button, self.redo_button)
-        self.setTabOrder(self.redo_button, self.queue_cancel)
+        self.setTabOrder(self.redo_button, self.queue_push)
+        self.setTabOrder(self.queue_push, self.queue_cancel)
 
     def _layer_rows(self) -> list:
         """(id, name, group) of the layers "@" offers: the group tells layers of the same name apart."""
@@ -1348,7 +1391,8 @@ class AgentPanel(QFrame):
             self.widgets_strip.refresh_look()
         muted = palette["fm_text_muted"]
         self.destination.setStyleSheet(f"color: {muted};")
-        send_color = palette["fm_danger"] if self._working else palette["fm_accent"]
+        stopping = self._working and not self.input.text().strip()
+        send_color = palette["fm_danger"] if stopping else palette["fm_accent"]
         mic_color = palette['fm_danger'] if self._speech_state != 'idle' else palette['fm_text']
         sheet = (
             # The dock pads every frame by 6 px: the panel and its pages sit on the edges of the section headers.
@@ -1368,6 +1412,10 @@ class AgentPanel(QFrame):
             f"QLabel#label_agent_queued {{ font-size: 12px; color: {muted}; background: transparent; border: none; }}"
             f"QPushButton#pushButton_agent_queued_cancel {{ border: none; background: transparent; color: {muted};"
             " padding: 0 4px; min-height: 0; min-width: 0; }"
+            f"QPushButton#pushButton_agent_queued_push {{ border: none; background: transparent;"
+            f" color: {palette['fm_accent']}; padding: 0 4px; min-height: 0; min-width: 0; }}"
+            f"QToolButton#toolButton_agent_followup {{ min-width: 0; max-width: 80px; min-height: 20px;"
+            f" max-height: 20px; padding: 0 4px; border: none; background: transparent; color: {muted}; }}"
             f"QToolButton#toolButton_agent_send {{ min-width: {INPUT_HEIGHT}px; max-width: {INPUT_HEIGHT}px;"
             f" min-height: {INPUT_HEIGHT}px; max-height: {INPUT_HEIGHT}px; border: none; border-radius: 6px;"
             f" background: {send_color}; }}"
@@ -1457,7 +1505,7 @@ class AgentPanel(QFrame):
             finally:
                 self._styling = False
         self.thread.refresh_look()
-        send = render_icon("agent_stop" if self._working else "agent_send", dark, palette["fm_accent_text"])
+        send = render_icon("agent_stop" if stopping else "agent_send", dark, palette["fm_accent_text"])
         if send is not None:
             self.send_button.setIcon(send)
         microphone = render_icon('agent_microphone' if self._speech_state == 'idle' else 'agent_stop', dark, mic_color)
@@ -1951,11 +1999,9 @@ class AgentPanel(QFrame):
             self.recipes_button.setEnabled(not working)
         self._on_turn_selected()
         self.thread.set_compare_possible(self._can_compare and not working)  # the map changes under the comparison
-        self.send_button.setToolTip(_tr("Stop (Esc)") if working else _tr("Send (Enter)"))
-        self.send_button.setAccessibleName(_tr("Stop the agent") if working else _tr("Send the request"))
+        self._refresh_send_action()
         self.send_button.setEnabled((self._ready or working) and (self._speech_state == 'idle' or working))
-        self.thread.set_hint(_tr("You can already type the next request: Enter keeps it for when this one ends.")
-                             if working else "")
+        self._refresh_followup_hint()
         if not working and self._queue and not getattr(self, "_queue_paused", False):
             QTimer.singleShot(0, self._send_queued)  # once the engine let go of the request that ended
         self._refresh_new_button()
@@ -1984,18 +2030,63 @@ class AgentPanel(QFrame):
         self.status.setVisible(bool(text))
         self.fix_button.setVisible(offer_settings)
 
-    def _on_send(self) -> None:
+    def set_followup_mode(self, mode: str, persist: bool = False) -> None:
+        """Choose whether Enter steers the running exchange or queues the next one."""
+        self._followup_mode = mode if mode in ("push", "queue") else "push"
+        if persist:
+            QSettings().setValue(_FOLLOWUP_MODE, self._followup_mode)
+        for chosen, action in self._followup_actions.items():
+            action.setChecked(chosen == self._followup_mode)
+        self.followup_button.setText(_tr("Push") if self._followup_mode == "push" else _tr("Queue"))
+        self.followup_button.setToolTip(_tr("Messages during a run: Push or Queue. Ctrl+Shift+Enter uses the other mode."))
+        self._refresh_followup_hint()
+        self._refresh_send_action()
+
+    def _refresh_followup_hint(self) -> None:
+        text = (_tr("Enter guides the running request. Ctrl+Shift+Enter queues a follow-up.")
+                if self._followup_mode == "push" else
+                _tr("Enter queues a follow-up. Ctrl+Shift+Enter guides the running request."))
+        self.thread.set_hint(text if self._working else "")
+
+    def _refresh_send_action(self) -> None:
+        stopping = self._working and not self.input.text().strip()
+        tooltip = (_tr("Stop (Esc)") if stopping else
+                   _tr("Send to the running agent (Enter)") if self._working and self._followup_mode == "push" else
+                   _tr("Queue the request (Enter)") if self._working else _tr("Send (Enter)"))
+        self.send_button.setToolTip(tooltip)
+        self.send_button.setAccessibleName(_tr("Stop the agent") if stopping else _tr("Send the request"))
+        if stopping != self._send_stops:
+            self._send_stops = stopping
+            self._refresh_look()
+
+    def _on_send(self, alternate: bool = False) -> None:
         if self._speech_state != 'idle':
             return  # dictation is always reviewed in the draft before it can be sent
         text = self.input.text().strip()
         if not text:
             return
-        if self._working:  # each one waits its turn, in sight, in order (S5: a real pile, not one joined text)
+        if self._working:
+            pushing = self._followup_mode == "push"
+            if pushing != alternate:
+                self.push_requested.emit(text)
+                return
             self._queue.append((text, self._posture))
             self.input.clear()
             self._refresh_queue_row()
             return
         self.send_requested.emit(text)
+
+    def _on_push(self) -> None:
+        """Ctrl+Enter sends normally when idle, and steers the active request while working."""
+        if self._speech_state != 'idle':
+            return
+        text = self.input.text().strip()
+        if not text:
+            return
+        if self._working:
+            self.push_requested.emit(text)  # the controller clears the draft only once accepted
+        else:
+            self._on_send()
 
     @property
     def queued(self) -> str:
@@ -2047,13 +2138,21 @@ class AgentPanel(QFrame):
         self._refresh_queue_row()
         self.queued_send_requested.emit(text, posture)
 
+    def _push_queued(self) -> None:
+        """Promote the first waiting message without replacing the draft typed meanwhile."""
+        if not self._queue:
+            return
+        text, posture = self._queue.pop(0)
+        self._refresh_queue_row()
+        self.queued_push_requested.emit(text, posture)
+
     def restore_queued(self, text: str, posture: str) -> None:
         self._queue.insert(0, (text, posture))
         self.pause_queued()
         self._refresh_queue_row()
 
     def _on_send_or_stop(self) -> None:
-        if self._working:
+        if self._working and not self.input.text().strip():
             self.pause_queued()
             self.stop_requested.emit()
         else:

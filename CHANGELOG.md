@@ -4,6 +4,11 @@ All notable changes to FilterMate will be documented in this file.
 
 ## [Unreleased]
 
+- Agent: messages sent during a run use **Push** by default to guide the active request. A **Push / Queue** picker
+  remembers the preferred behavior; **Ctrl+Shift+Enter** uses the other mode for one message. Push redirects a
+  streaming answer immediately, preserves completed actions and lets an active tool finish before reconsidering
+  pending actions. Queued messages offer **Send now**, preserving the draft and the remaining queue. The send
+  button follows the selected mode and becomes Stop when the input is empty; Esc always stops the run.
 - Agent save proposals suggest the current project location or a relevant working/data folder, remember successful
   choices and show the shared destination. Saved agent layers and their sidecars now sit directly beside the
   project, with numeric suffixes for conflicting filenames and rollback that preserves existing files.

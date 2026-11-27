@@ -787,6 +787,11 @@ Le service est lu en arrière-plan : la copie peut être annulée. Êtes-vous d'
         <translation>Réflexion…</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="3202"/>
+        <source>Message sent to the running agent; applied at its next step.</source>
+        <translation>Message transmis à l’agent en cours ; pris en compte à sa prochaine étape.</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="1"/>
         <source>Forget the requests of every project kept on this computer? The turns of the open project stay.</source>
         <translation>Oublier les requêtes de tous les projets gardées sur cet ordinateur ? Les tours du projet ouvert restent.</translation>
@@ -2495,6 +2500,71 @@ Do you agree to all of them? No runs none of them.</source>
         <location filename="../ui/widgets/agent_panel.py" line="588"/>
         <source>Send (Enter)</source>
         <translation>Envoyer (Entrée)</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="749"/>
+        <source>Push</source>
+        <translation>Push</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="732"/>
+        <source>Send now</source>
+        <translation>Envoyer maintenant</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="736"/>
+        <source>Send the first waiting message to the running agent</source>
+        <translation>Transmettre le premier message en attente à l’agent en cours</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="889"/>
+        <source>Messages sent while the agent works</source>
+        <translation>Envoi des messages pendant le travail de l’agent</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="892"/>
+        <source>Push: guide the running request</source>
+        <translation>Push : orienter la demande en cours</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="893"/>
+        <source>Queue: wait for the current request to finish</source>
+        <translation>En attente : attendre la fin de la demande en cours</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="2040"/>
+        <source>Queue</source>
+        <translation>En attente</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="2041"/>
+        <source>Messages during a run: Push or Queue. Ctrl+Shift+Enter uses the other mode.</source>
+        <translation>Messages pendant le travail : Push ou En attente. Ctrl+Maj+Entrée utilise l’autre mode.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="2046"/>
+        <source>Enter guides the running request. Ctrl+Shift+Enter queues a follow-up.</source>
+        <translation>Entrée oriente la demande en cours. Ctrl+Maj+Entrée met la demande en attente.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="2048"/>
+        <source>Enter queues a follow-up. Ctrl+Shift+Enter guides the running request.</source>
+        <translation>Entrée met la demande en attente. Ctrl+Maj+Entrée oriente la demande en cours.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="2054"/>
+        <source>Send to the running agent (Enter)</source>
+        <translation>Transmettre à l’agent en cours (Entrée)</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="2055"/>
+        <source>Queue the request (Enter)</source>
+        <translation>Mettre la demande en attente (Entrée)</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="982"/>
+        <source>Enter sends in the selected mode. Esc stops. Ctrl+Shift+Enter uses the other mode.</source>
+        <translation>Entrée envoie dans le mode choisi. Échap arrête. Ctrl+Maj+Entrée utilise l’autre mode.</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="62"/>

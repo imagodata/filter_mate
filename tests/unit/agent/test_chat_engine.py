@@ -6,7 +6,7 @@ import math
 
 import pytest
 
-from core.agent.chat_engine import MAX_RETRY_WAIT, NO_RETRY_ABOVE, ChatEngine
+from core.agent.chat_engine import MAX_RETRY_WAIT, NO_RETRY_ABOVE, PUSH_NOT_RUN, ChatEngine
 from core.agent.messages import (
     ROLE_ASSISTANT, ROLE_USER, STOP_END, STOP_MAX_TOKENS, STOP_REFUSAL, STOP_TOOL_USE, Message, ProviderError,
     StreamFailure, TextDelta, TextPart, ToolCallPart, TurnComplete,
@@ -129,6 +129,118 @@ def test_one_request_at_a_time(setup):
     assert engine.send("a")
     assert engine.send("b") is False
     assert len(transport.starts) == 1
+
+
+def test_push_during_streaming_continues_the_exchange_in_order(setup):
+    engine, session, transport, listener, checkpoint, _ = setup
+    deferred = []
+    engine._defer = deferred.append
+    assert not engine.push("idle")
+    engine.send("go")
+    transport.emit(TextDelta("starting"))
+    assert not engine.push("  ")
+    assert engine.push("first correction") and engine.push("second correction")
+    assert len(transport.starts) == 1 and transport.starts[0][2].aborted
+    transport.emit(turn(STOP_END, TextPart("old answer")))
+    assert engine.busy and not listener.outcomes and checkpoint.commits == 0
+    deferred.pop(0)()
+    assert [message.text for message in session.messages][-2:] == ["first correction", "second correction"]
+    assert session.messages[1].text == "starting"
+    assert len(transport.starts) == 2
+    transport.emit(turn(STOP_END, TextPart("updated answer")))
+    assert not engine.busy and checkpoint.commits == 1 and listener.outcomes[0].status == "done"
+
+
+def test_push_discards_tool_calls_from_the_aborted_provider_response(setup):
+    engine, session, transport, _, checkpoint, seen = setup
+    engine.send("go")
+    engine.push("do not change the project")
+    transport.emit(turn(STOP_TOOL_USE, call("write", "1"), call("write", "2")), index=0)
+    assert seen == [] and checkpoint.begins == 0
+    assert [message.text for message in session.messages] == ["go", "do not change the project"]
+    assert len(transport.starts) == 2
+
+
+def test_push_between_the_tool_turn_and_its_deferred_execution(setup):
+    engine, session, transport, _, checkpoint, seen = setup
+    deferred = []
+    engine._defer = deferred.append
+    engine.send("go")
+    transport.emit(turn(STOP_TOOL_USE, call("write")))
+    assert engine.push("leave the layer alone")
+    deferred.pop(0)()
+    assert not seen and checkpoint.begins == 0
+    deferred.pop(0)()
+    assert session.messages[-1].text == "leave the layer alone" and len(transport.starts) == 2
+
+
+def test_push_from_a_running_tool_keeps_its_result_and_skips_the_rest(setup):
+    engine, session, transport, listener, checkpoint, seen = setup
+    engine._executor._handlers["write"] = lambda args: seen.append("write") or engine.push("leave the rest alone")
+    engine.send("go")
+    transport.emit(turn(STOP_TOOL_USE, call("write", "1"), call("write", "2")))
+    assert seen == ["write"] and checkpoint.begins == 1
+    results = session.messages[2].parts
+    assert not results[0].is_error and results[1].content == PUSH_NOT_RUN
+    assert session.messages[3].text == "leave the rest alone" and not listener.outcomes
+    transport.emit(turn(STOP_END, TextPart("done")))
+    assert checkpoint.commits == 1 and listener.outcomes[0].changed_layers == ("layer",)
+
+
+def test_push_during_permission_question_prevents_the_call(setup):
+    engine, session, transport, listener, checkpoint, seen = setup
+    listener.confirm = lambda c: engine.push("cancel that export")
+    engine.send("export")
+    transport.emit(turn(STOP_TOOL_USE, call("export")))
+    assert seen == [] and checkpoint.begins == 0
+    assert session.messages[2].parts[0].content == PUSH_NOT_RUN
+    assert session.messages[3].text == "cancel that export"
+
+
+def test_stop_returns_undelivered_push_and_clears_it_for_next_exchange(setup):
+    engine, session, transport, listener, _, _ = setup
+    deferred = []
+    engine._defer = deferred.append
+    engine.send("go")
+    engine.push("correction")
+    engine.cancel()
+    assert listener.outcomes[0].pending_messages == ("correction",)
+    assert not session.messages
+    engine.send("another request")
+    deferred.pop(0)()  # the aborted request cannot consume the correction in the next exchange
+    assert [message.text for message in session.messages] == ["another request"]
+
+
+def test_failure_of_an_aborted_response_cannot_end_the_steered_request(setup):
+    engine, session, transport, listener, _, _ = setup
+    engine.send("go")
+    engine.push("correction")
+    transport.emit(StreamFailure(ProviderError("auth", "refused")), index=0)
+    assert engine.busy and not listener.outcomes and session.messages[-1].text == "correction"
+    transport.emit(turn(STOP_END, TextPart("updated answer")))
+    assert listener.outcomes[0].status == "done"
+
+
+def test_stop_keeps_delivered_corrections_after_completed_changes(setup):
+    engine, session, transport, listener, _, _ = setup
+    engine.send("go")
+    transport.emit(turn(STOP_TOOL_USE, call("write")))
+    engine.push("keep the current style")
+    engine.cancel()
+    assert listener.outcomes[0].kept_steps == 1
+    assert session.messages[-1].text == "keep the current style"
+    assert session.messages[-2].parts[0].call_id == "c1"
+
+
+def test_push_does_not_reset_the_model_turn_limit(setup):
+    from core.agent.session import AgentLimits
+    engine, session, transport, listener, _, seen = setup
+    session._limits = AgentLimits(max_model_turns=2)
+    engine.send("go")
+    transport.emit(turn(STOP_TOOL_USE, call("write", "1")))
+    engine.push("correction")
+    transport.emit(turn(STOP_TOOL_USE, call("write", "2")))
+    assert seen == ["write"] and listener.outcomes[0].reason == "turn_limit"
 
 
 def test_tools_then_answer_and_undo_point_before_the_first_write(setup):
