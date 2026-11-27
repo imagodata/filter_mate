@@ -304,15 +304,48 @@ def submit_query(owner, attribute, layer, description, compute, deliver, loading
     return task
 
 
+def navigation_stamp(canvas):
+    """Revision and view of a canvas, including a manual move away and back during an async read."""
+    revision = getattr(canvas, '_filtermate_navigation_revision', None)
+    if not isinstance(revision, list):
+        revision = [0]
+        try:
+            def changed():
+                revision[0] += 1
+            watch = _watcher(changed)
+            watch.setParent(canvas)
+            canvas.extentsChanged.connect(watch.changed)
+            rotation = getattr(canvas, 'rotationChanged', None)
+            if rotation is not None:
+                rotation.connect(watch.changed)
+            canvas._filtermate_navigation_revision = revision
+            canvas._filtermate_navigation_watcher = watch
+        except (AttributeError, RuntimeError, TypeError):
+            pass
+    box = canvas.extent()
+    return revision[0], (box.xMinimum(), box.yMinimum(), box.xMaximum(), box.yMaximum())
+
+
 def queue_union_zoom(layers, canvas, expected_token=None, grow_by=0):
     """Compute a filtered union in canvas CRS without GUI-thread provider reads."""
     from qgis.core import QgsCoordinateTransform, QgsFeatureRequest, QgsProject, QgsRectangle
     from ..auto_zoom import current_subset_change_token
     layers = list(layers)
+    view_before = navigation_stamp(canvas)
     context = QgsProject.instance().transformContext()
     target_crs = canvas.mapSettings().destinationCrs()
-    snapshots = []
+    vectors = [layer for layer in layers if hasattr(layer, 'getFeatures')]
+    fingerprints = [(layer.id(), layer.source(), getattr(layer, 'subsetString', lambda: '')()) for layer in layers]
+    fixed = []
     for layer in layers:
+        if layer not in vectors:
+            extent = QgsRectangle(layer.extent())
+            if not extent.isNull():
+                if grow_by > 0:
+                    extent.grow(grow_by)
+                fixed.append(QgsCoordinateTransform(layer.crs(), target_crs, context).transformBoundingBox(extent))
+    snapshots = []
+    for layer in vectors:
         snapshots.append((QgsVectorLayerFeatureSource(layer),
                           QgsCoordinateTransform(layer.crs(), target_crs, context),
                           (layer.id(), layer.source(), layer.subsetString())))
@@ -320,6 +353,11 @@ def queue_union_zoom(layers, canvas, expected_token=None, grow_by=0):
 
     def compute(task):
         union = None
+        for extent in fixed:
+            if union is None:
+                union = QgsRectangle(extent)
+            else:
+                union.combineExtentWith(extent)
         for source, transform, fingerprint in snapshots:
             if task.isCanceled():
                 return None
@@ -342,12 +380,14 @@ def queue_union_zoom(layers, canvas, expected_token=None, grow_by=0):
         return union
 
     def deliver(extent):
+        if navigation_stamp(canvas) != view_before:
+            return
         if expected_token is not None and current_subset_change_token() > expected_token:
             return
         if canvas.mapSettings().destinationCrs() != target_crs:
             return
-        for layer, (_, _, fingerprint) in zip(layers, snapshots):
-            if fingerprint != (layer.id(), layer.source(), layer.subsetString()):
+        for layer, fingerprint in zip(layers, fingerprints):
+            if fingerprint != (layer.id(), layer.source(), getattr(layer, 'subsetString', lambda: '')()):
                 return
         if extent is not None:
             if extent.isEmpty():
@@ -359,7 +399,7 @@ def queue_union_zoom(layers, canvas, expected_token=None, grow_by=0):
         canvas.refresh()
 
     from qgis.PyQt.QtCore import QCoreApplication
-    task = submit_query(canvas, '_filtermate_union_zoom', layers[0],
+    task = submit_query(canvas, '_filtermate_union_zoom', vectors[0],
                         QCoreApplication.translate('FilterMate', 'Loading filtered extent…'), compute, deliver, dependencies=layers)
     # Extra layers are snapshotted too; validate their fingerprints at delivery.
     return task

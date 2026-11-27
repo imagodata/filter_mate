@@ -104,9 +104,15 @@ def zoom_to(layer: Optional[str] = None, extent_wkt: Optional[str] = None, crs: 
             if layer_kind(found) is not LayerKind.VECTOR or not found.selectedFeatureCount():
                 raise ValueError(f"'{found.name()}' has no selected feature")
             rect = found.boundingBoxOfSelected()
+            if found.selectedFeatureCount() == 1:
+                # QGIS expands a selection consisting of POINT(0 0) to [-1, 1].
+                # Keep the real geometry and let the shared pixel margin handle points.
+                feature = next(found.getSelectedFeatures(), None)
+                if feature is not None and feature.hasGeometry():
+                    rect = feature.geometry().boundingBox()
         else:
             rect = found.extent()
-        if rect.isNull() or rect.isEmpty() and not rect.width() and not rect.height() and not rect.xMinimum():
+        if rect.isNull() and not selected_only:
             raise ValueError(f"'{found.name()}' has nothing to zoom to")
         try:
             rect = QgsCoordinateTransform(found.crs(), target, project).transformBoundingBox(rect)
@@ -115,10 +121,12 @@ def zoom_to(layer: Optional[str] = None, extent_wkt: Optional[str] = None, crs: 
     else:
         canvas.zoomToFullExtent()
         return {'extent_wkt': canvas.extent().asWktPolygon(), 'scale': canvas.scale()}
-    if max(abs(rect.xMinimum()), abs(rect.xMaximum()), abs(rect.yMinimum()), abs(rect.yMaximum())) > MAX_COORDINATE:
+    coordinates = (rect.xMinimum(), rect.xMaximum(), rect.yMinimum(), rect.yMaximum())
+    if not all(math.isfinite(value) and abs(value) <= MAX_COORDINATE for value in coordinates):
         raise ValueError("this area is out of range")
     if rect.isEmpty():
-        rect.grow(10)
+        from ..auto_zoom import _grow_degenerate
+        rect = _grow_degenerate(rect, canvas)
     canvas.setExtent(rect)
     canvas.refresh()
     return {'extent_wkt': canvas.extent().asWktPolygon(), 'scale': canvas.scale()}

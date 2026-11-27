@@ -257,7 +257,7 @@ def auto_zoom_to_filtered(
     vectors = [layer for layer in chosen if hasattr(layer, 'getFeatures')]
     if any(not counts_cheaply(layer) for layer in vectors):
         from .qgis.async_query import queue_union_zoom
-        queue_union_zoom(vectors, canvas, expected_token, grow_by)
+        queue_union_zoom(chosen, canvas, expected_token, grow_by)
         return True  # The cancellable zoom was scheduled.
 
     try:
