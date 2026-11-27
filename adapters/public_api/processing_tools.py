@@ -609,7 +609,7 @@ def _disk_inputs(algorithm, values, context):
             options.driverName = 'GPKG'
             options.onlySelectedFeatures = bool(selected)
             error = QgsVectorFileWriter.writeAsVectorFormatV3(layer, path, context.transformContext(), options)
-            if error[0] != QgsVectorFileWriter.NoError:
+            if error[0] != QgsVectorFileWriter.WriterError.NoError:
                 raise ValueError(f"the input '{layer.name()}' could not be copied for this provider: {error[1]}")
             snapshot = QgsVectorLayer(path, layer.name(), 'ogr')
         elif kind is LayerKind.RASTER:

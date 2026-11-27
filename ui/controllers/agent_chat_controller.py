@@ -9,6 +9,7 @@ import time
 from contextlib import contextmanager
 from dataclasses import asdict, replace
 from typing import Dict, List, Optional, Sequence, Tuple
+from urllib.parse import urlsplit
 
 from qgis.core import QgsProject
 from qgis.PyQt.QtCore import QCoreApplication, QEventLoop, QObject, QTimer
@@ -1306,6 +1307,7 @@ class AgentChatController(QObject):
                 url = search_url(arguments.get('query'))
             except SourceSearchError:
                 raise ToolFailure(str(exc)) from None
+
             def open_search():
                 from qgis.PyQt.QtCore import QUrl
                 from qgis.PyQt.QtGui import QDesktopServices
@@ -1637,7 +1639,6 @@ class AgentChatController(QObject):
     def _turn_on_question(self, change) -> str:
         """What turning on means, for the user to decide: each source with its group, where a connector sends what
         the agent asks, what the MCP server lets other applications do, where another provider receives the data."""
-        from urllib.parse import urlsplit
         from ...core.agent.sources import source_group
         values = load_settings()
         sources = {source.id: source for source in self._options_sources(values)}
