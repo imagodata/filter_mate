@@ -845,6 +845,9 @@ class AgentPanel(QFrame):
         self.destination.setObjectName("label_agent_destination")
         self.destination.setTextFormat(Qt.TextFormat.PlainText)
         self.destination.setSizePolicy(QSizePolicy.Policy.Ignored, QSizePolicy.Policy.Preferred)
+        destination_policy = self.destination.sizePolicy()
+        destination_policy.setRetainSizeWhenHidden(True)  # keep the groups apart without a provider
+        self.destination.setSizePolicy(destination_policy)
         self.destination.setVisible(False)
 
         # The mode of the agent (2026-11-22): Ask answers and changes nothing, Plan writes the steps and waits for Go,
@@ -899,13 +902,12 @@ class AgentPanel(QFrame):
             self._followup_actions[mode] = action
         self.followup_button.setMenu(followup_menu)
 
-        under = QHBoxLayout()
-        under.setContentsMargins(0, 0, 0, 0)
-        under.setSpacing(6)
-        under.addWidget(self.mode_button, 0, Qt.AlignmentFlag.AlignLeft)  # at the left also when the label is hidden
-        under.addWidget(self.effort_button)
-        under.addWidget(self.followup_button)
-        under.addWidget(self.destination, 1)
+        settings_buttons = QHBoxLayout()
+        settings_buttons.setContentsMargins(0, 0, 0, 0)
+        settings_buttons.setSpacing(6)
+        settings_buttons.addWidget(self.mode_button)
+        settings_buttons.addWidget(self.effort_button)
+        settings_buttons.addWidget(self.followup_button)
         # A new conversation in one click once something was asked (2026-11-24: it was in the menu "⋯" only).
         self.new_button = QPushButton(_tr("New conversation"), self)
         self.new_button.setObjectName("pushButton_agent_new")
@@ -928,9 +930,20 @@ class AgentPanel(QFrame):
         self.recipes_button.setCursor(Qt.CursorShape.PointingHandCursor)
         self.recipes_button.setToolTip(_tr("Run again the changes of a request, without the model"))
         self.recipes_button.clicked.connect(self._popup_recipes)
-        under.addWidget(self.history_button, 0, Qt.AlignmentFlag.AlignRight)
-        under.addWidget(self.recipes_button, 0, Qt.AlignmentFlag.AlignRight)
-        under.addWidget(self.new_button, 0, Qt.AlignmentFlag.AlignRight)
+        navigation_buttons = QHBoxLayout()
+        navigation_buttons.setContentsMargins(0, 0, 0, 0)
+        navigation_buttons.setSpacing(6)
+        navigation_buttons.addWidget(self.history_button)
+        navigation_buttons.addWidget(self.recipes_button)
+        navigation_buttons.addWidget(self.new_button)
+
+        # Three settings on the left, three actions on the right, with equal gaps inside each group.
+        under = QHBoxLayout()
+        under.setContentsMargins(0, 0, 0, 0)
+        under.setSpacing(6)
+        under.addLayout(settings_buttons)
+        under.addWidget(self.destination, 1)
+        under.addLayout(navigation_buttons)
 
         # Icon-only actions keep the input usable in a narrow dock. Their labels
         # stay in tooltips and accessible names, with the same actions in the menu.
